@@ -606,6 +606,20 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 66.7 as Millimeter
 	},
 	{
+		id: 'Trianglelab|CHC XP1',
+		manufacturer: 'Trianglelab',
+		name: 'CHC XP1',
+		ecosystem: 'X1C',
+		mountingPattern: 'X1C',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 300 as Celsius }
+		],
+		meltZoneLength: 35 as Millimeter
+	},
+	{
 		id: 'Unknown|Lattice hotend',
 		manufacturer: 'Unknown',
 		name: 'Lattice hotend',
