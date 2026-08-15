@@ -407,7 +407,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
-		nonstructuralHeatbreak: false,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],

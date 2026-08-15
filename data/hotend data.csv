@@ -33,7 +33,7 @@ Groove,V6,E3D,V6,V6,Y,Y,Al/Cu,300/500,N,17.5,,8
 Groove,V6,E3D,Supervolcano,V6 Supervolcano,N,Y,Al/Cu,300/500,N,57.5,,30
 Groove,V6,E3D,V6 Volcano,V6 Volcano,N,Y,Al/Cu,300/500,N,26,,12
 Groove,V6,Metaform,Pico Hotend,V6,Y,Y,Al/Cu,300/500,N,20.55,,100
-Dragon,Vzbot,Mellow,Goliath,V6,Y,Y,Cu,500,N,51.15,,120
+Dragon,Vzbot,Mellow,Goliath,V6,Y,Y,Cu,500,Y,51.15,,120
 X1C,X1C,Bambulab,X1C OEM Hotend,Integrated,N,N,Al,300,N,24.2,,20
 X1C,X1C,Generic,TZ Hotends,TZ,Y,Y,Cu,350,Y,24.2,,12
 X1C,X1C,Lukes Lab,Pika,Fin,N,Y,Cu,350,Y,33,,125
