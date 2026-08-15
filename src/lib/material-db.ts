@@ -220,7 +220,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 	{
 		id: 'pvb',
 		name: 'PVB',
-		family: 'Vinyl',
+		family: 'Vinylic',
 		density: 1.1 as GramsPerCubicCentimeter,
 		specificHeatCapacity: 1.6 as JoulesPerGramKelvin,
 		heatOfFusion: 0 as JoulesPerGram,
@@ -298,7 +298,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 	{
 		id: 'pva',
 		name: 'PVA',
-		family: 'Vinyl',
+		family: 'Vinylic',
 		density: 1.23 as GramsPerCubicCentimeter,
 		specificHeatCapacity: 1.7 as JoulesPerGramKelvin,
 		heatOfFusion: 0 as JoulesPerGram,
@@ -337,7 +337,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 	{
 		id: 'pmma-acrylic',
 		name: 'PMMA (acrylic)',
-		family: 'Vinyl',
+		family: 'Vinylic',
 		density: 1.185 as GramsPerCubicCentimeter,
 		specificHeatCapacity: 1.47 as JoulesPerGramKelvin,
 		heatOfFusion: 0 as JoulesPerGram,
@@ -467,7 +467,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 	{
 		id: 'bvoh',
 		name: 'BVOH',
-		family: 'Vinyl',
+		family: 'Vinylic',
 		density: 1.25 as GramsPerCubicCentimeter,
 		specificHeatCapacity: 1.7 as JoulesPerGramKelvin,
 		heatOfFusion: 0 as JoulesPerGram,

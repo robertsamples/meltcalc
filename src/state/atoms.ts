@@ -2,7 +2,8 @@ import { atom, type PrimitiveAtom, type WritableAtom } from 'jotai';
 import {
 	DEFAULT_DEBUG,
 	DEFAULT_ENERGY_PER_MATERIAL_START,
-	DEFAULT_ENERGY_PER_SECOND,DEFAULT_HOTEND_IDS,
+	DEFAULT_ENERGY_PER_SECOND,DEFAULT_HIDDEN_FAMILIES,
+	DEFAULT_HOTEND_IDS,
 	DEFAULT_MATERIAL_FLOW_AS_SPEED,
 	DEFAULT_MATERIAL_FLOW_HOTEND,
 	DEFAULT_MATERIAL_SETTINGS,
@@ -16,7 +17,7 @@ import {
 	type ViewMode 
 } from '@/lib/configuration';
 import { HOTEND_DB, type HotendDefinition, type HotendOptions, resolveHotends } from '@/lib/hotend';
-import { defaultMaterial, findMaterial, type MaterialDefinition } from '@/lib/material';
+import { defaultMaterial, findMaterial, MATERIAL_DB, type MaterialDefinition } from '@/lib/material';
 import {
 	type EnergyBreakdown,
 	energyPerVolume,
@@ -119,6 +120,7 @@ const materialFlowAsSpeedAtom = atomWithLocalStorage<boolean>(
 	'materialFlowAsSpeed',
 	DEFAULT_MATERIAL_FLOW_AS_SPEED
 );
+const hiddenFamiliesAtom = atomWithLocalStorage<string[]>('hiddenFamilies', DEFAULT_HIDDEN_FAMILIES);
 const debugAtom = atomWithLocalStorage<boolean>('debug', DEFAULT_DEBUG);
 
 const tempPrintSettingsAtom = atom<PrintSettings | null>(null);
@@ -131,6 +133,7 @@ const tempEnergyPerSecondAtom = atom<boolean | null>(null);
 const tempEnergyPerMaterialStartAtom = atom<boolean | null>(null);
 const tempMaterialFlowHotendAtom = atom<string | null>(null);
 const tempMaterialFlowAsSpeedAtom = atom<boolean | null>(null);
+const tempHiddenFamiliesAtom = atom<string[] | null>(null);
 const tempDebugAtom = atom<boolean | null>(null);
 
 export const currentPrintSettingsAtom = overridableAtom(printSettingsAtom, tempPrintSettingsAtom);
@@ -149,7 +152,15 @@ export const currentMaterialFlowAsSpeedAtom = overridableAtom(
 	materialFlowAsSpeedAtom,
 	tempMaterialFlowAsSpeedAtom
 );
+export const currentHiddenFamiliesAtom = overridableAtom(hiddenFamiliesAtom, tempHiddenFamiliesAtom);
 export const currentDebugAtom = overridableAtom(debugAtom, tempDebugAtom);
+
+/** The materials the comparisons should show: everything whose family is not switched off */
+export const visibleMaterialsAtom = atom<MaterialDefinition[]>((get) => {
+	const hidden = get(currentHiddenFamiliesAtom);
+
+	return MATERIAL_DB.filter((material) => !hidden.includes(material.family));
+});
 
 // Derived layer: the whole analysis, recomputed from the settings above. Components read these
 // rather than calling into `@/lib/thermal` themselves, so every view agrees on the numbers
@@ -255,6 +266,7 @@ export const currentConfigurationAtom = atom<ShareableConfiguration>((get) => ({
 	energyPerMaterialStart: get(currentEnergyPerMaterialStartAtom),
 	materialFlowHotend: get(currentMaterialFlowHotendAtom),
 	materialFlowAsSpeed: get(currentMaterialFlowAsSpeedAtom),
+	hiddenFamilies: get(currentHiddenFamiliesAtom),
 	debug: get(currentDebugAtom)
 }));
 
@@ -269,6 +281,7 @@ export const loadImportedConfigurationAtom = atom(null, (_get, set, config: Shar
 	set(tempEnergyPerMaterialStartAtom, config.energyPerMaterialStart);
 	set(tempMaterialFlowHotendAtom, config.materialFlowHotend);
 	set(tempMaterialFlowAsSpeedAtom, config.materialFlowAsSpeed);
+	set(tempHiddenFamiliesAtom, config.hiddenFamilies);
 	set(tempDebugAtom, config.debug);
 
 	set(isImportedConfigAtom, true);
@@ -287,6 +300,7 @@ export const saveImportedConfigurationAtom = atom(null, (get, set) => {
 	const energyPerMaterialStart = get(tempEnergyPerMaterialStartAtom);
 	const materialFlowHotend = get(tempMaterialFlowHotendAtom);
 	const materialFlowAsSpeed = get(tempMaterialFlowAsSpeedAtom);
+	const hiddenFamilies = get(tempHiddenFamiliesAtom);
 	const debug = get(tempDebugAtom);
 
 	if (printSettings) set(printSettingsAtom, printSettings);
@@ -299,6 +313,7 @@ export const saveImportedConfigurationAtom = atom(null, (get, set) => {
 	if (energyPerMaterialStart !== null) set(energyPerMaterialStartAtom, energyPerMaterialStart);
 	if (materialFlowHotend !== null) set(materialFlowHotendAtom, materialFlowHotend);
 	if (materialFlowAsSpeed !== null) set(materialFlowAsSpeedAtom, materialFlowAsSpeed);
+	if (hiddenFamilies !== null) set(hiddenFamiliesAtom, hiddenFamilies);
 	if (debug !== null) set(debugAtom, debug);
 
 	set(discardImportedConfigurationAtom);
@@ -316,6 +331,7 @@ export const discardImportedConfigurationAtom = atom(null, (_get, set) => {
 	set(tempEnergyPerMaterialStartAtom, null);
 	set(tempMaterialFlowHotendAtom, null);
 	set(tempMaterialFlowAsSpeedAtom, null);
+	set(tempHiddenFamiliesAtom, null);
 	set(tempDebugAtom, null);
 
 	set(isImportedConfigAtom, false);

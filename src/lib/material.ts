@@ -83,7 +83,7 @@ export const MATERIAL_FAMILIES = [
 	'Polyurethane',
 	'Engineering',
 	'Superpolymer',
-	'Vinyl'
+	'Vinylic'
 ] as const;
 
 export type MaterialFamily = (typeof MATERIAL_FAMILIES)[number];

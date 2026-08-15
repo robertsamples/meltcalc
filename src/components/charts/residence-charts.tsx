@@ -93,8 +93,8 @@ export function ResidenceByHotendChart() {
 			<CardHeader>
 				<CardTitle className="text-base">Residence time at {formatFlow(flowRate)}</CardTitle>
 				<CardDescription>
-					<Term term="residence time">How long</Term> a piece of {FILAMENT_DIAMETER} mm filament stays
-					inside the <Term term="melt zone" />: its volume divided by flow. Below the{' '}
+					How long a piece of {FILAMENT_DIAMETER} mm filament stays inside the{' '}
+					<Term term="melt zone" />: its volume divided by flow. Below the{' '}
 					{formatSeconds(minimumResidenceTime)} floor the middle of the filament is unlikely to reach
 					temperature before it is extruded.
 				</CardDescription>

@@ -4,6 +4,7 @@ import {
 	DEFAULT_DEBUG,
 	DEFAULT_ENERGY_PER_MATERIAL_START,
 	DEFAULT_ENERGY_PER_SECOND,
+	DEFAULT_HIDDEN_FAMILIES,
 	DEFAULT_MATERIAL_FLOW_AS_SPEED,
 	DEFAULT_MATERIAL_FLOW_HOTEND,
 	DEFAULT_MATERIAL_SETTINGS,
@@ -109,6 +110,7 @@ const LegacyConfigurationSchema = z.object({
 	energyPerMaterialStart: z.boolean().default(DEFAULT_ENERGY_PER_MATERIAL_START),
 	materialFlowHotend: z.string().default(DEFAULT_MATERIAL_FLOW_HOTEND),
 	materialFlowAsSpeed: z.boolean().default(DEFAULT_MATERIAL_FLOW_AS_SPEED),
+	hiddenFamilies: z.array(z.string()).default(DEFAULT_HIDDEN_FAMILIES),
 	debug: z.boolean().default(DEFAULT_DEBUG)
 });
 
@@ -156,6 +158,8 @@ const CompactSchema = z.object({
 	d: z.string().optional(),
 	/** materialFlowHotend, as a short code */
 	k: z.string().optional(),
+	/** hiddenFamilies, by name — there are only eight, and a name cannot drift the way an index can */
+	q: z.array(z.string()).optional(),
 	/** energyPerSecond, energyPerMaterialStart, materialFlowAsSpeed, debug */
 	x: Flag.optional(),
 	y: Flag.optional(),
@@ -225,6 +229,7 @@ function compact(config: ShareableConfiguration): Compact {
 		o: options.length > 0 ? (Object.fromEntries(options) as Compact['o']) : undefined,
 		d: changed(VIEW_MODE_CODES[config.viewMode], VIEW_MODE_CODES[DEFAULT_VIEW_MODE]),
 		k: config.materialFlowHotend ? hotendCode(config.materialFlowHotend) : undefined,
+		q: config.hiddenFamilies.length > 0 ? config.hiddenFamilies : undefined,
 		x: flag(config.energyPerSecond, DEFAULT_ENERGY_PER_SECOND),
 		y: flag(config.energyPerMaterialStart, DEFAULT_ENERGY_PER_MATERIAL_START),
 		v: flag(config.materialFlowAsSpeed, DEFAULT_MATERIAL_FLOW_AS_SPEED),
@@ -272,6 +277,7 @@ function expand(payload: Compact): ShareableConfiguration {
 		hotendOptions,
 		viewMode: (payload.d && VIEW_MODE_BY_CODE[payload.d]) || DEFAULT_VIEW_MODE,
 		materialFlowHotend: payload.k ? hotendFromCode(payload.k) : DEFAULT_MATERIAL_FLOW_HOTEND,
+		hiddenFamilies: payload.q ?? DEFAULT_HIDDEN_FAMILIES,
 		energyPerSecond: payload.x === undefined ? DEFAULT_ENERGY_PER_SECOND : payload.x === 1,
 		energyPerMaterialStart: payload.y === undefined ? DEFAULT_ENERGY_PER_MATERIAL_START : payload.y === 1,
 		materialFlowAsSpeed: payload.v === undefined ? DEFAULT_MATERIAL_FLOW_AS_SPEED : payload.v === 1,

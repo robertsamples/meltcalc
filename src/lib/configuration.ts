@@ -155,6 +155,9 @@ export const DEFAULT_MATERIAL_FLOW_HOTEND = '';
 /** Whether that view reads in mm/s at the current layer height and line width, or in mm³/s */
 export const DEFAULT_MATERIAL_FLOW_AS_SPEED = false;
 
+/** Polymer families switched off in the material views, by name. Empty shows everything */
+export const DEFAULT_HIDDEN_FAMILIES: string[] = [];
+
 export const DEFAULT_DEBUG = false;
 
 /** Everything a share link carries. Keep it serialisable: it round-trips through JSON */
@@ -171,6 +174,8 @@ export type ShareableConfiguration = {
 	/** Hotend id the per-material flow view is pinned to; `''` follows the comparison */
 	materialFlowHotend: string;
 	materialFlowAsSpeed: boolean;
+	/** Polymer families hidden from the material comparisons */
+	hiddenFamilies: string[];
 	debug: boolean;
 };
 
@@ -185,5 +190,6 @@ export const DEFAULT_CONFIGURATION: ShareableConfiguration = {
 	energyPerMaterialStart: DEFAULT_ENERGY_PER_MATERIAL_START,
 	materialFlowHotend: DEFAULT_MATERIAL_FLOW_HOTEND,
 	materialFlowAsSpeed: DEFAULT_MATERIAL_FLOW_AS_SPEED,
+	hiddenFamilies: DEFAULT_HIDDEN_FAMILIES,
 	debug: DEFAULT_DEBUG
 };

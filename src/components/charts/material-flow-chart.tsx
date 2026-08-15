@@ -2,6 +2,8 @@ import { useAtom, useAtomValue } from 'jotai';
 import { useId } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, ReferenceLine, XAxis, YAxis } from 'recharts';
 import { pointTooltip } from '@/components/charts/chart-tooltip';
+import { FamilyLegend } from '@/components/charts/family-legend';
+import { AXIS_WIDTH, PolymerTick } from '@/components/charts/polymer-tick';
 import { Term } from '@/components/term';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
@@ -10,9 +12,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { HF_NOZZLE_FOOTNOTE, performanceLabel } from '@/lib/chart-labels';
 import { formatNumber } from '@/lib/format';
-import { POLYMER_NAMES } from '@/lib/glossary';
 import { blockMaterialFactor, hotendLabel } from '@/lib/hotend';
-import { familyIndex, MATERIAL_DB, PRESENT_FAMILIES } from '@/lib/material';
+import { familyIndex } from '@/lib/material';
 import { AXIS_LINE, STATUS_COLORS, seriesColor, THRESHOLD_LINE } from '@/lib/series';
 import { energyPerVolume, extrusionCrossSection, meltZoneLimitedFlow } from '@/lib/thermal';
 import type { WattsPerMillimeter } from '@/lib/units';
@@ -24,7 +25,8 @@ import {
 	flowRateAtom,
 	performanceAtom,
 	specificPowerLimitAtom,
-	startTemperatureAtom
+	startTemperatureAtom,
+	visibleMaterialsAtom
 } from '@/state/atoms';
 
 /**
@@ -49,6 +51,7 @@ const HEADROOM_OPACITY = 0.28;
 
 /** Painted between the segments so the pair reads as two blocks, not one fading bar */
 const SEGMENT_GAP = { stroke: '#09090b', strokeWidth: 1 } as const;
+
 
 type Row = {
 	id: string;
@@ -86,19 +89,12 @@ function MaterialTick({
 	const row = rows.find((entry) => entry.label === label);
 
 	return (
-		<text
+		<PolymerTick
+			label={label}
 			x={x}
 			y={y}
-			dy={4}
-			textAnchor="end"
-			fontSize={11}
-			// Inline style rather than a class: the chart container sets `fill` on tick text through
-			// a CSS rule, and any rule beats a presentation attribute
-			style={{ fill: row?.compatible ? seriesColor(familyIndex(row.family)) : '#52525b' }}
-		>
-			{POLYMER_NAMES[label] ? <title>{POLYMER_NAMES[label]}</title> : null}
-			{label}
-		</text>
+			fill={row?.compatible ? seriesColor(familyIndex(row.family)) : '#52525b'}
+		/>
 	);
 }
 
@@ -111,6 +107,7 @@ export function MaterialFlowChart() {
 	const print = useAtomValue(currentPrintSettingsAtom);
 	const [chosen, setChosen] = useAtom(currentMaterialFlowHotendAtom);
 	const [asSpeed, setAsSpeed] = useAtom(currentMaterialFlowAsSpeedAtom);
+	const materials = useAtomValue(visibleMaterialsAtom);
 	const speedId = useId();
 
 	// Falling back to the first keeps the view working when the pinned hotend is deselected, and
@@ -144,7 +141,7 @@ export function MaterialFlowChart() {
 
 	// Every material is held at its own default setpoint here, so the superheat factor is 1 by
 	// construction and does not appear: this view compares materials, not temperature choices
-	const rows: Row[] = MATERIAL_DB.map((material) => {
+	const rows: Row[] = materials.map((material) => {
 		const startTemperature = perMaterialStart ? material.startTemperature : configuredStart;
 		const energy = energyPerVolume(material, startTemperature, material.printTemperature);
 		const compatible = material.printTemperature <= entry.block.maxTemperature;
@@ -209,7 +206,12 @@ export function MaterialFlowChart() {
 					</Label>
 				</div>
 
-				<ChartContainer config={CHART_CONFIG} className="w-full" style={{ height: rows.length * 26 + 56 }}>
+				{rows.length === 0 ? (
+					<p className="text-sm text-muted-foreground">
+						Every polymer family is hidden. Switch one back on below.
+					</p>
+				) : (
+					<ChartContainer config={CHART_CONFIG} className="w-full" style={{ height: rows.length * 26 + 56 }}>
 					{/* Room at the top for the target line's label, and at the right for the longest
 					    "not compatible" message */}
 					<BarChart data={rows} layout="vertical" margin={{ left: 4, right: 190, top: 20, bottom: 4 }}>
@@ -226,7 +228,7 @@ export function MaterialFlowChart() {
 						<YAxis
 							type="category"
 							dataKey="label"
-							width={120}
+							width={AXIS_WIDTH}
 							tickLine={false}
 							axisLine={false}
 							interval={0}
@@ -306,8 +308,9 @@ export function MaterialFlowChart() {
 								}}
 							/>
 						</Bar>
-					</BarChart>
-				</ChartContainer>
+						</BarChart>
+					</ChartContainer>
+				)}
 
 				{blocked > 0 ? (
 					<p className="text-[11px] text-muted-foreground">
@@ -325,14 +328,7 @@ export function MaterialFlowChart() {
 					judgement calls, and live in <code>data/materials.csv</code>.
 				</p>
 
-				<div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t pt-2 text-[11px] text-muted-foreground">
-					<span className="opacity-70">Bars and names are coloured by polymer family:</span>
-					{PRESENT_FAMILIES.map((family) => (
-						<span key={family} style={{ color: seriesColor(familyIndex(family)) }}>
-							{family}
-						</span>
-					))}
-				</div>
+				<FamilyLegend />
 			</CardContent>
 		</Card>
 	);

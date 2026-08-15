@@ -2,14 +2,15 @@ import { useAtom, useAtomValue } from 'jotai';
 import { useMemo } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
 import { pointTooltip } from '@/components/charts/chart-tooltip';
+import { FamilyLegend } from '@/components/charts/family-legend';
+import { AXIS_WIDTH, PolymerTick } from '@/components/charts/polymer-tick';
 import { Term } from '@/components/term';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { formatFlow, formatNumber } from '@/lib/format';
-import { POLYMER_NAMES } from '@/lib/glossary';
-import { familyIndex, MATERIAL_DB, PRESENT_FAMILIES } from '@/lib/material';
+import { familyIndex, MATERIAL_DB } from '@/lib/material';
 import { AXIS_LINE, seriesColor } from '@/lib/series';
 import { energyPerVolume } from '@/lib/thermal';
 import {
@@ -18,7 +19,8 @@ import {
 	currentMaterialSettingsAtom,
 	flowRateAtom,
 	materialAtom,
-	startTemperatureAtom
+	startTemperatureAtom,
+	visibleMaterialsAtom
 } from '@/state/atoms';
 
 /**
@@ -56,6 +58,7 @@ const CHART_CONFIG = {
 /** Faded fill for the materials that are not the one selected, so the current one reads first */
 const UNSELECTED_OPACITY = 0.45;
 
+
 /**
  * Material names are tinted by chemical family, which is a second grouping laid over the same
  * axis: the superpolymers land together at the top, the polyolefins by their fusion block. The
@@ -75,21 +78,7 @@ function FamilyTick({
 	const label = payload?.value ?? '';
 
 	return (
-		<text
-			x={x}
-			y={y}
-			dy={4}
-			textAnchor="end"
-			fontSize={11}
-			// Inline style, not a `fill` attribute: the chart container sets `fill` on tick text
-			// through a class, and a CSS rule of any specificity beats a presentation attribute
-			style={{ fill: seriesColor(familyIndex(families.get(label) ?? '')) }}
-		>
-			{/* Native SVG tooltip rather than the Radix one: 36 rows of portalled tooltips is a lot
-			    of machinery for a label that only ever needs to spell out an abbreviation */}
-			{POLYMER_NAMES[label] ? <title>{POLYMER_NAMES[label]}</title> : null}
-			{label}
-		</text>
+		<PolymerTick label={label} x={x} y={y} fill={seriesColor(familyIndex(families.get(label) ?? ''))} />
 	);
 }
 
@@ -114,6 +103,7 @@ export function EnergyChart() {
 	const [perSecond, setPerSecond] = useAtom(currentEnergyPerSecondAtom);
 	const [perMaterialStart, setPerMaterialStart] = useAtom(currentEnergyPerMaterialStartAtom);
 	const [materialSettings, setMaterialSettings] = useAtom(currentMaterialSettingsAtom);
+	const materials = useAtomValue(visibleMaterialsAtom);
 
 	const scale = perSecond ? flowRate : 1;
 	const unit = perSecond ? 'W' : 'J/mm³';
@@ -124,7 +114,7 @@ export function EnergyChart() {
 		[]
 	);
 
-	const rows: Row[] = MATERIAL_DB.map((material) => {
+	const rows: Row[] = materials.map((material) => {
 		const startTemperature = perMaterialStart ? material.startTemperature : configuredStart;
 		const energy = energyPerVolume(material, startTemperature, material.printTemperature);
 
@@ -174,7 +164,12 @@ export function EnergyChart() {
 					</div>
 				</div>
 
-				<ChartContainer config={CHART_CONFIG} className="w-full" style={{ height: rows.length * 26 + 48 }}>
+				{rows.length === 0 ? (
+					<p className="text-sm text-muted-foreground">
+						Every polymer family is hidden. Switch one back on below.
+					</p>
+				) : (
+					<ChartContainer config={CHART_CONFIG} className="w-full" style={{ height: rows.length * 26 + 48 }}>
 					<BarChart data={rows} layout="vertical" margin={{ left: 4, right: 48, top: 4, bottom: 4 }}>
 						<CartesianGrid horizontal={false} strokeOpacity={0.5} />
 						<XAxis
@@ -188,11 +183,11 @@ export function EnergyChart() {
 						<YAxis
 							type="category"
 							dataKey="label"
-							width={120}
+							width={AXIS_WIDTH}
 							tickLine={false}
 							axisLine={false}
 							// Every material gets its name: recharts thins category ticks by default, and
-							// a chart of 22 bars with 11 labels is worse than a crowded one
+							// a chart of 36 bars with 18 labels is worse than a crowded one
 							interval={0}
 							tick={<FamilyTick families={familyByLabel} />}
 						/>
@@ -283,7 +278,8 @@ export function EnergyChart() {
 							))}
 						</Bar>
 					</BarChart>
-				</ChartContainer>
+					</ChartContainer>
+				)}
 
 				<div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
 					<span className="flex items-center gap-1.5">
@@ -301,14 +297,7 @@ export function EnergyChart() {
 					<span className="opacity-70">{selectedMaterial.name} is shown solid; click a bar to switch to it</span>
 				</div>
 
-				<div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t pt-2 text-[11px] text-muted-foreground">
-					<span className="opacity-70">Names on the left are tinted by polymer family:</span>
-					{PRESENT_FAMILIES.map((family) => (
-						<span key={family} style={{ color: seriesColor(familyIndex(family)) }}>
-							{family}
-						</span>
-					))}
-				</div>
+				<FamilyLegend />
 			</CardContent>
 		</Card>
 	);

@@ -96,6 +96,10 @@ export function buildOgModel(configParam: string | null | undefined): OgModel {
 	const material = findMaterial(materialSettings.materialId);
 	if (!material) return GENERIC_MODEL;
 
+	// The material views can have whole polymer families switched off, and the card has to agree
+	// with what the person sharing it was looking at
+	const materials = MATERIAL_DB.filter((entry) => !imported.config.hiddenFamilies.includes(entry.family));
+
 	const startTemperature = materialSettings.startTemperature ?? material.startTemperature;
 	const printTemperature = materialSettings.printTemperature ?? material.printTemperature;
 	const energy = energyPerVolume(material, startTemperature, printTemperature);
@@ -108,7 +112,7 @@ export function buildOgModel(configParam: string | null | undefined): OgModel {
 	if (!Number.isFinite(flowRate)) return GENERIC_MODEL;
 
 	if (viewMode === 'energy') {
-		return buildEnergyModel(material.id, startTemperature, imported.config.energyPerMaterialStart);
+		return buildEnergyModel(material.id, startTemperature, imported.config.energyPerMaterialStart, materials);
 	}
 
 	// The calibration with the chosen setpoint's superheat already folded in, exactly as the app does
@@ -150,7 +154,8 @@ export function buildOgModel(configParam: string | null | undefined): OgModel {
 			configuredStart: startTemperature,
 			scale: asSpeed ? 1 / crossSection : 1,
 			unit: asSpeed ? 'mm/s' : 'mm³/s',
-			decimals: asSpeed ? 0 : 1
+			decimals: asSpeed ? 0 : 1,
+			materials
 		});
 	}
 
@@ -306,7 +311,8 @@ function buildMaterialFlowModel(
 		configuredStart,
 		scale,
 		unit,
-		decimals
+		decimals,
+		materials
 	}: {
 		referenceFlow: CubicMillimetersPerSecondPerMillimeter;
 		perMaterialStart: boolean;
@@ -314,6 +320,7 @@ function buildMaterialFlowModel(
 		scale: number;
 		unit: string;
 		decimals: number;
+		materials: typeof MATERIAL_DB;
 	}
 ): OgModel {
 	if (!entry) return GENERIC_MODEL;
@@ -321,7 +328,7 @@ function buildMaterialFlowModel(
 	const blockLimit = (specificPowerLimit(referenceFlow) *
 		blockMaterialFactor(entry.block.material)) as WattsPerMillimeter;
 
-	const rows = MATERIAL_DB.map((material) => {
+	const rows = materials.map((material) => {
 		const start = perMaterialStart ? material.startTemperature : configuredStart;
 		const energy = energyPerVolume(material, start, material.printTemperature);
 		const compatible = material.printTemperature <= entry.block.maxTemperature;
@@ -351,7 +358,7 @@ function buildMaterialFlowModel(
 	const subtitle = [
 		`${formatNumber(entry.meltZoneLength, 1)} mm effective melt zone`,
 		`${entry.block.material} block to ${formatNumber(entry.block.maxTemperature, 0)} °C`,
-		`${MATERIAL_DB.length - blocked} of ${MATERIAL_DB.length} materials in range`
+		`${materials.length - blocked} of ${materials.length} materials in range`
 	].join(' · ');
 
 	return {
@@ -364,7 +371,7 @@ function buildMaterialFlowModel(
 			{ label: 'Hotend', value: truncate(name, 22) },
 			{ label: 'Effective melt zone', value: `${formatNumber(entry.meltZoneLength, 1)} mm` },
 			{ label: 'Block limit', value: `${formatNumber(entry.block.maxTemperature, 0)} °C` },
-			{ label: 'Out of range', value: `${blocked}/${MATERIAL_DB.length}` }
+			{ label: 'Out of range', value: `${blocked}/${materials.length}` }
 		],
 		series,
 		target:
@@ -378,8 +385,15 @@ function buildMaterialFlowModel(
 }
 
 /** The energy tab compares materials rather than hotends, so the card does too */
-function buildEnergyModel(selectedId: string, configuredStart: number, perMaterialStart: boolean): OgModel {
-	const rows = MATERIAL_DB.map((entry) => {
+function buildEnergyModel(
+	selectedId: string,
+	configuredStart: number,
+	perMaterialStart: boolean,
+	materials: typeof MATERIAL_DB
+): OgModel {
+	if (materials.length === 0) return GENERIC_MODEL;
+
+	const rows = materials.map((entry) => {
 		const start = perMaterialStart ? entry.startTemperature : configuredStart;
 		const breakdown = energyPerVolume(entry, start as never, entry.printTemperature);
 

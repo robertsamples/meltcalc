@@ -77,7 +77,8 @@ check('material flow, pinned hotend', {
 	...DEFAULT_CONFIGURATION,
 	viewMode: 'materialFlow',
 	materialFlowHotend: 'Phaetus|Rapido UHF',
-	materialFlowAsSpeed: true
+	materialFlowAsSpeed: true,
+	hiddenFamilies: ['Superpolymer', 'Vinylic']
 });
 
 const legacy = Buffer.from(
