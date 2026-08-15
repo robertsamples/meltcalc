@@ -171,9 +171,14 @@ function renderBars(model: OgModel): string {
  * Log x, because prices span two and a half orders of magnitude and a linear axis would pile three
  * quarters of the database against the left edge.
  */
-const SCATTER_LABEL_SIZE = 15;
+/**
+ * Small enough that names actually fit. At unfurl size a label is either legible or it is not, and
+ * 13px clears that bar on a 1200px card while leaving room for roughly twice as many of them as 15
+ * did — which matters more, because a card that names four of forty hotends is not naming anything.
+ */
+const SCATTER_LABEL_SIZE = 13;
 /** Room at the edges so a marker or its name never touches the border */
-const SCATTER_INSET = { left: 96, right: 40, top: 150, bottom: 60 };
+const SCATTER_INSET = { left: 20, right: 24, top: 150, bottom: 48 };
 
 function renderScatter(scatter: NonNullable<OgModel['scatter']>, model: OgModel, siteName: string): string {
 	const points = scatter.points.filter((point) => point.x > 0 && Number.isFinite(point.y));

@@ -169,7 +169,9 @@ export function buildOgModel(configParam: string | null | undefined): OgModel {
 	if (viewMode === 'cost') {
 		const everything = HOTEND_DB.map((hotend) => hotendPerformance(hotend, performanceInput));
 
-		return buildCostModel(performance, common, everything, imported.config.costBandMode);
+		// Every selected hotend, not the eight the bar cards cap at: a marker costs nothing on a
+		// scatter, and dropping the rest to anonymous grey loses the whole point of the picture
+		return buildCostModel(performance, common, everything, imported.config.costBandMode, hotends.map((hotend) => hotend.id));
 	}
 	if (viewMode === 'heater') return buildHeaterModel(performance, common);
 	if (viewMode === 'materialFlow') {
@@ -257,14 +259,16 @@ function buildCostModel(
 	performance: Performance[],
 	common: CommonInput,
 	all: Performance[],
-	mode: CostBandMode
+	mode: CostBandMode,
+	order: string[]
 ): OgModel {
-	const priced = performance.filter((entry) => entry.hotend.price !== null && entry.costPerFlow !== null);
+	// Everything the reader selected, not the eight the bars would have shown: the headline on a
+	// scatter card describes the whole picture, so counting only a slice of it would be wrong
+	const chosen = all.filter((entry) => order.includes(entry.hotend.id));
+	const priced = chosen.filter((entry) => entry.hotend.price !== null && entry.costPerFlow !== null);
 
 	if (priced.length === 0) return buildFlowModel(performance, common);
 
-	// Selection order decides colour and shape in the app, so the card has to preserve it
-	const order = performance.map((entry) => entry.hotend.id);
 	const cloud = all.filter((entry) => entry.hotend.price !== null && Number.isFinite(entry.maxFlow));
 	const trend = fitAgainstLogX(cloud.map((entry) => ({ x: entry.hotend.price as number, y: entry.maxFlow })));
 
@@ -305,7 +309,7 @@ function buildCostModel(
 	const subtitle = [
 		common.materialName,
 		`${formatNumber(common.flowRate, 1)} mm³/s target`,
-		`${priced.length} of ${performance.length} priced`
+		`${priced.length} of ${chosen.length} priced`
 	].join(' · ');
 
 	return {
