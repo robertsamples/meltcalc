@@ -151,6 +151,7 @@ async function generateHotends() {
 			nozzle: optional(row, 'Nozzle'),
 			mzeCompatible: required(row, 'MZE compatible', context).toUpperCase() === 'Y',
 			hfNozzleCompatible: required(row, 'HF nozzle compatible', context).toUpperCase() === 'Y',
+			nonstructuralHeatbreak: required(row, 'Nonstructural heatbreak', context).toUpperCase() === 'Y',
 			blockOptions: parseBlockOptions(row, context),
 			meltZoneLength: requiredNumber(row, 'Melt zone', context),
 			price: optionalNumber(row, 'Price (USD)', context)
@@ -177,6 +178,7 @@ async function generateHotends() {
 				`\t\tnozzle: ${literal(hotend.nozzle)},\n` +
 				`\t\tmzeCompatible: ${hotend.mzeCompatible},\n` +
 				`\t\thfNozzleCompatible: ${hotend.hfNozzleCompatible},\n` +
+				`\t\tnonstructuralHeatbreak: ${hotend.nonstructuralHeatbreak},\n` +
 				`\t\tblockOptions: [\n` +
 				hotend.blockOptions
 					.map(

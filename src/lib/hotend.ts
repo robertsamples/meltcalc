@@ -71,6 +71,15 @@ export const HotendDefinition = z.object({
 	mzeCompatible: z.boolean(),
 	/** Whether a high-flow (CHT-style) nozzle is available for it */
 	hfNozzleCompatible: z.boolean(),
+	/**
+	 * Whether the heatbreak carries no clamping load between block and heatsink.
+	 *
+	 * It changes nothing in the flow model, but it is the difference between a heatbreak that has to
+	 * be thick enough to hold the hotend together and one free to be as thin-walled as it likes — so
+	 * it is what decides how well the cold side stays cold at the temperatures the rest of this app
+	 * is about.
+	 */
+	nonstructuralHeatbreak: z.boolean(),
 	/** Block variants it ships in, stock option first */
 	blockOptions: z.array(BlockOption).min(1),
 	meltZoneLength: Millimeter,

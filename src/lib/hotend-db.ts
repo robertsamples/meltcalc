@@ -13,6 +13,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
@@ -28,6 +29,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
@@ -35,14 +37,31 @@ export const HOTEND_DB: HotendDefinition[] = [
 		price: 210 as Dollars
 	},
 	{
+		id: 'Bambulab|A1 Hotend',
+		manufacturer: 'Bambulab',
+		name: 'A1 Hotend',
+		ecosystem: 'A1',
+		mountingPattern: 'A1',
+		nozzle: 'Integrated',
+		mzeCompatible: false,
+		hfNozzleCompatible: false,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Al', maxTemperature: 300 as Celsius }
+		],
+		meltZoneLength: 27.2 as Millimeter,
+		price: 10 as Dollars
+	},
+	{
 		id: 'Bambulab|X1C OEM hotend',
 		manufacturer: 'Bambulab',
 		name: 'X1C OEM hotend',
 		ecosystem: 'X1C',
 		mountingPattern: 'X1C',
-		nozzle: 'TZ',
+		nozzle: 'Integrated',
 		mzeCompatible: false,
 		hfNozzleCompatible: false,
+		nonstructuralHeatbreak: false,
 		blockOptions: [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
@@ -55,9 +74,10 @@ export const HOTEND_DB: HotendDefinition[] = [
 		name: 'INDX',
 		ecosystem: 'INDX',
 		mountingPattern: 'INDX',
-		nozzle: 'Proprietary',
+		nozzle: 'Integrated',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
 		blockOptions: [
 			{ material: 'St', maxTemperature: 300 as Celsius }
 		],
@@ -73,6 +93,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
@@ -88,11 +109,44 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 50 as Millimeter,
 		price: null
+	},
+	{
+		id: 'Causality Manufacturing|Vesivius',
+		manufacturer: 'Causality Manufacturing',
+		name: 'Vesivius',
+		ecosystem: null,
+		mountingPattern: null,
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'St', maxTemperature: 500 as Celsius }
+		],
+		meltZoneLength: 92 as Millimeter,
+		price: null
+	},
+	{
+		id: 'Dyze|Typhoon',
+		manufacturer: 'Dyze',
+		name: 'Typhoon',
+		ecosystem: null,
+		mountingPattern: 'Dyze',
+		nozzle: 'Proprietary',
+		mzeCompatible: false,
+		hfNozzleCompatible: false,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 500 as Celsius }
+		],
+		meltZoneLength: 114 as Millimeter,
+		price: 2700 as Dollars
 	},
 	{
 		id: 'E3D|Revo',
@@ -103,6 +157,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'Revo',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
 		blockOptions: [
 			{ material: 'Br', maxTemperature: 300 as Celsius }
 		],
@@ -118,6 +173,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6 Supervolcano',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
 		blockOptions: [
 			{ material: 'Al', maxTemperature: 300 as Celsius },
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
@@ -134,6 +190,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
 		blockOptions: [
 			{ material: 'Al', maxTemperature: 300 as Celsius },
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
@@ -150,6 +207,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6 Volcano',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
 		blockOptions: [
 			{ material: 'Al', maxTemperature: 300 as Celsius },
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
@@ -166,6 +224,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'Proprietary',
 		mzeCompatible: false,
 		hfNozzleCompatible: false,
+		nonstructuralHeatbreak: false,
 		blockOptions: [
 			{ material: 'Br', maxTemperature: 350 as Celsius }
 		],
@@ -181,6 +240,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
@@ -196,6 +256,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'TZ',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
@@ -211,6 +272,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'TZ',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
@@ -226,6 +288,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
@@ -241,6 +304,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
@@ -256,6 +320,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
@@ -271,6 +336,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
@@ -286,6 +352,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'Fin',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
@@ -301,6 +368,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
@@ -316,6 +384,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius },
 			{ material: 'Al', maxTemperature: 300 as Celsius }
@@ -332,6 +401,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius },
 			{ material: 'Al', maxTemperature: 300 as Celsius }
@@ -348,6 +418,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6 Volcano',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius },
 			{ material: 'Al', maxTemperature: 300 as Celsius }
@@ -364,6 +435,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6 Volcano',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius },
 			{ material: 'Al', maxTemperature: 300 as Celsius }
@@ -380,6 +452,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
 		blockOptions: [
 			{ material: 'Al', maxTemperature: 300 as Celsius },
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
@@ -396,6 +469,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'Proprietary',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 300 as Celsius }
 		],
@@ -411,6 +485,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6 Volcano',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
@@ -426,6 +501,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6 Volcano',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
@@ -441,6 +517,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6 Volcano',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
@@ -456,6 +533,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius },
 			{ material: 'Al', maxTemperature: 300 as Celsius }
@@ -472,6 +550,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius },
 			{ material: 'Al', maxTemperature: 300 as Celsius }
@@ -488,6 +567,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6 Volcano',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius },
 			{ material: 'Al', maxTemperature: 300 as Celsius }
@@ -504,6 +584,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6 Volcano',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius },
 			{ material: 'Al', maxTemperature: 300 as Celsius }
@@ -520,12 +601,29 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6 Volcano',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius },
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 43 as Millimeter,
 		price: 75 as Dollars
+	},
+	{
+		id: 'Phaetus|Dragonfly BMS',
+		manufacturer: 'Phaetus',
+		name: 'Dragonfly BMS',
+		ecosystem: null,
+		mountingPattern: 'MK8',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 500 as Celsius }
+		],
+		meltZoneLength: 35 as Millimeter,
+		price: 37.6 as Dollars
 	},
 	{
 		id: 'Phaetus|Rapido UHF',
@@ -536,11 +634,44 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6 Volcano',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 34 as Millimeter,
 		price: 90 as Dollars
+	},
+	{
+		id: 'Plasmics|INo Trident',
+		manufacturer: 'Plasmics',
+		name: 'INo Trident',
+		ecosystem: null,
+		mountingPattern: null,
+		nozzle: 'V6',
+		mzeCompatible: false,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 500 as Celsius }
+		],
+		meltZoneLength: 17.5 as Millimeter,
+		price: 450 as Dollars
+	},
+	{
+		id: 'Qidi|Xmax 3',
+		manufacturer: 'Qidi',
+		name: 'Xmax 3',
+		ecosystem: 'Qidi',
+		mountingPattern: 'X1C',
+		nozzle: 'Proprietary',
+		mzeCompatible: false,
+		hfNozzleCompatible: false,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 300 as Celsius }
+		],
+		meltZoneLength: 23.7 as Millimeter,
+		price: 35 as Dollars
 	},
 	{
 		id: 'Slice Engineering|mosquito',
@@ -551,6 +682,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
@@ -566,6 +698,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
@@ -581,6 +714,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
@@ -596,6 +730,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
@@ -611,11 +746,28 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 66.7 as Millimeter,
 		price: 1577 as Dollars
+	},
+	{
+		id: 'Trianglelab|CHC XL',
+		manufacturer: 'Trianglelab',
+		name: 'CHC XL',
+		ecosystem: null,
+		mountingPattern: 'Dragon',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Al', maxTemperature: 330 as Celsius }
+		],
+		meltZoneLength: 51.5 as Millimeter,
+		price: 67 as Dollars
 	},
 	{
 		id: 'Trianglelab|CHC XP1',
@@ -626,6 +778,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 300 as Celsius }
 		],
@@ -641,6 +794,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
@@ -656,11 +810,28 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 44.7 as Millimeter,
 		price: 85 as Dollars
+	},
+	{
+		id: 'Trianglelab|STD6-LC',
+		manufacturer: 'Trianglelab',
+		name: 'STD6-LC',
+		ecosystem: null,
+		mountingPattern: 'Dragon',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Al', maxTemperature: 300 as Celsius }
+		],
+		meltZoneLength: 51.5 as Millimeter,
+		price: 116.5 as Dollars
 	},
 	{
 		id: 'Unknown|Lattice hotend',
@@ -671,6 +842,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
@@ -686,6 +858,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'MK8',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
 		blockOptions: [
 			{ material: 'Al', maxTemperature: 500 as Celsius },
 			{ material: 'Cu', maxTemperature: 300 as Celsius }
@@ -702,6 +875,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
@@ -717,6 +891,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],

@@ -1,18 +1,21 @@
 import { useAtom, useAtomValue } from 'jotai';
-import { ChevronRightIcon } from 'lucide-react';
+import { ChevronRightIcon, CircleHelpIcon } from 'lucide-react';
 import { HotendSelection } from '@/components/hotend-selection';
 import { SeriesMarker } from '@/components/series-marker';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatNumber, formatSeconds } from '@/lib/format';
 import {
 	BLOCK_MATERIAL_DERATE,
 	BLOCK_MATERIAL_LABELS,
 	type BlockMaterial,
+	HF_NOZZLE_EQUIVALENT_LENGTH,
 	type HotendDefinition,
 	hotendLabel,
+	MZE_LENGTH,
 	orderedBlockOptions
 } from '@/lib/hotend';
 import { headroomStatus, STATUS_COLORS, STATUS_LABELS } from '@/lib/series';
@@ -24,6 +27,29 @@ import {
 	performanceAtom,
 	printTemperatureAtom
 } from '@/state/atoms';
+
+/**
+ * A column header whose abbreviation carries its explanation.
+ *
+ * The trigger is a real button rather than a `title` attribute so the text is reachable by
+ * keyboard, and so it survives on touch, where hover does not exist.
+ */
+function HeaderHelp({ label, children }: { label: string; children: React.ReactNode }) {
+	return (
+		<span className="inline-flex items-center gap-1">
+			{label}
+			<Tooltip>
+				<TooltipTrigger
+					className="text-muted-foreground hover:text-foreground focus-visible:text-foreground"
+					aria-label={`What ${label} means`}
+				>
+					<CircleHelpIcon className="size-3" />
+				</TooltipTrigger>
+				<TooltipContent className="font-normal">{children}</TooltipContent>
+			</Tooltip>
+		</span>
+	);
+}
 
 /**
  * The numbers behind every chart, and where each hotend is configured.
@@ -79,8 +105,29 @@ export function HotendTable() {
 								<TableHead className="text-right">Price</TableHead>
 								<TableHead>Block</TableHead>
 								<TableHead className="text-right">Max temp</TableHead>
-								<TableHead>MZE +8.5</TableHead>
-								<TableHead title="High-flow (CHT-style) nozzle">HF +8.5</TableHead>
+								<TableHead className="text-center">
+									<HeaderHelp label="MZE">
+										A melt zone extender: typically an adapter that lengthens the melt zone by{' '}
+										{MZE_LENGTH} mm, or a nut that lets a standard V6 hotend take V6 Volcano
+										nozzles.
+									</HeaderHelp>
+								</TableHead>
+								<TableHead className="text-center">
+									<HeaderHelp label="CHT">
+										High-flow internal geometry, such as a Core Heat Technology nozzle: the bore
+										splits into parallel channels, so the filament sees far more hot wall per
+										millimetre. Counted here as +{HF_NOZZLE_EQUIVALENT_LENGTH} mm of effective
+										melt zone.
+									</HeaderHelp>
+								</TableHead>
+								<TableHead className="text-center">
+									<HeaderHelp label="NS heatbreak">
+										A structural heatbreak is the load-bearing part holding the hot and cold
+										sides together, so every knock to the nozzle goes through it — far more
+										vulnerable to damage than a nonstructural one, where something else carries
+										the load.
+									</HeaderHelp>
+								</TableHead>
 								<TableHead className="text-right">Effective melt zone</TableHead>
 								<TableHead className="text-right">Max flow</TableHead>
 								<TableHead>Limited by</TableHead>
@@ -161,7 +208,7 @@ export function HotendTable() {
 											{formatNumber(entry.block.maxTemperature, 0)} °C
 										</TableCell>
 
-										<TableCell>
+										<TableCell className="text-center">
 											{entry.hotend.mzeCompatible ? (
 												<Checkbox
 													checked={options[entry.hotend.id]?.mze === true}
@@ -175,7 +222,7 @@ export function HotendTable() {
 											)}
 										</TableCell>
 
-										<TableCell>
+										<TableCell className="text-center">
 											{entry.hotend.hfNozzleCompatible ? (
 												<Checkbox
 													checked={entry.hfNozzle}
@@ -187,6 +234,20 @@ export function HotendTable() {
 											) : (
 												<span className="text-muted-foreground">—</span>
 											)}
+										</TableCell>
+
+										{/* A fact about the hotend, not a choice, so it reads rather than toggles */}
+										{/* Red on "No" because a structural heatbreak is the fragile case, not
+										    because the data is missing — the word says which, the colour only
+										    makes it findable down a long column */}
+										<TableCell
+											className={`text-center ${
+												entry.hotend.nonstructuralHeatbreak
+													? 'text-muted-foreground'
+													: 'text-destructive-foreground'
+											}`}
+										>
+											{entry.hotend.nonstructuralHeatbreak ? 'Yes' : 'No'}
 										</TableCell>
 
 										<TableCell
@@ -243,7 +304,7 @@ export function HotendTable() {
 							})}
 							{performance.length === 0 ? (
 								<TableRow>
-									<TableCell colSpan={13} className="text-muted-foreground">
+									<TableCell colSpan={14} className="text-muted-foreground">
 										No hotends selected.
 									</TableCell>
 								</TableRow>

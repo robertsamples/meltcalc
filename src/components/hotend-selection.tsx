@@ -1,6 +1,6 @@
 import { useAtom, useAtomValue } from 'jotai';
 import { PlusIcon } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import { SeriesMarker } from '@/components/series-marker';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -10,8 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MAX_COMPARED_HOTENDS } from '@/lib/configuration';
 import { formatNumber } from '@/lib/format';
-import { ECOSYSTEMS, HOTEND_DB, highestTemperature, hotendLabel } from '@/lib/hotend';
-import { currentSelectedHotendsAtom, materialAtom, printTemperatureAtom } from '@/state/atoms';
+import { ECOSYSTEMS, highestTemperature, hotendLabel } from '@/lib/hotend';
+import { allPerformanceAtom, currentSelectedHotendsAtom, materialAtom, printTemperatureAtom } from '@/state/atoms';
 
 const ALL_ECOSYSTEMS = 'all';
 
@@ -30,30 +30,60 @@ export function HotendSelection() {
 	const [selected, setSelected] = useAtom(currentSelectedHotendsAtom);
 	const printTemperature = useAtomValue(printTemperatureAtom);
 	const material = useAtomValue(materialAtom);
+	const performance = useAtomValue(allPerformanceAtom);
 	const [open, setOpen] = useState(false);
 	const [search, setSearch] = useState('');
 	const [ecosystem, setEcosystem] = useState(ALL_ECOSYSTEMS);
+	const [maxPrice, setMaxPrice] = useState('');
+	const [minFlow, setMinFlow] = useState('');
+	const [minTemp, setMinTemp] = useState('');
+	const [heatbreakOnly, setHeatbreakOnly] = useState(false);
+	const priceFilterId = useId();
+	const flowFilterId = useId();
+	const tempFilterId = useId();
+	const heatbreakFilterId = useId();
 
+	/**
+	 * Flow is per-hotend performance, not a database column: it depends on the material, the block
+	 * and any extender, so filtering on it means filtering on what each hotend does for the
+	 * configuration currently on screen.
+	 */
 	const visible = useMemo(() => {
 		const needle = search.trim().toLowerCase();
+		const priceCeiling = Number.parseFloat(maxPrice);
+		const flowFloor = Number.parseFloat(minFlow);
+		const temperatureFloor = Number.parseFloat(minTemp);
 
-		return HOTEND_DB.filter((hotend) => {
-			if (ecosystem !== ALL_ECOSYSTEMS && hotend.ecosystem !== ecosystem) return false;
-			if (!needle) return true;
+		return performance
+			.filter(({ hotend, maxFlow }) => {
+				if (ecosystem !== ALL_ECOSYSTEMS && hotend.ecosystem !== ecosystem) return false;
+				if (Number.isFinite(priceCeiling)) {
+					// An unknown price cannot satisfy "under $X", so those drop out while it is set
+					if (hotend.price === null || hotend.price > priceCeiling) return false;
+				}
+				if (Number.isFinite(flowFloor) && !(maxFlow >= flowFloor)) return false;
+				// The hottest block it can be built with, not the one currently selected: this is a
+				// question about what the hotend is capable of, not how it happens to be configured
+				if (Number.isFinite(temperatureFloor) && highestTemperature(hotend) < temperatureFloor) return false;
+				if (heatbreakOnly && !hotend.nonstructuralHeatbreak) return false;
+				if (!needle) return true;
 
-			return `${hotend.manufacturer} ${hotend.name} ${hotend.ecosystem ?? ''}`.toLowerCase().includes(needle);
-		}).sort((a, b) => a.meltZoneLength - b.meltZoneLength);
-	}, [search, ecosystem]);
+				return `${hotend.manufacturer} ${hotend.name} ${hotend.ecosystem ?? ''}`
+					.toLowerCase()
+					.includes(needle);
+			})
+			.sort((a, b) => b.maxFlow - a.maxFlow);
+	}, [performance, search, ecosystem, maxPrice, minFlow, minTemp, heatbreakOnly]);
 
 	const full = selected.length >= MAX_COMPARED_HOTENDS;
-	const tooCold = visible.filter((hotend) => highestTemperature(hotend) < printTemperature).length;
+	const tooCold = visible.filter((entry) => highestTemperature(entry.hotend) < printTemperature).length;
 
-	// Bulk actions apply to what the filter is showing, not to the whole database: "add all" after
-	// a search should mean the search
+	// Bulk actions apply to what the filters are showing, not to the whole database: "add all"
+	// after a search should mean the search
 	const addable = visible.filter(
-		(hotend) => !selected.includes(hotend.id) && highestTemperature(hotend) >= printTemperature
+		(entry) => !selected.includes(entry.hotend.id) && highestTemperature(entry.hotend) >= printTemperature
 	);
-	const removable = visible.filter((hotend) => selected.includes(hotend.id));
+	const removable = visible.filter((entry) => selected.includes(entry.hotend.id));
 	const room = MAX_COMPARED_HOTENDS - selected.length;
 
 	function toggle(id: string) {
@@ -70,17 +100,28 @@ export function HotendSelection() {
 		setSelected((previous) => [
 			...previous,
 			...addable
-				.filter((hotend) => !previous.includes(hotend.id))
-				.map((hotend) => hotend.id)
+				.filter((entry) => !previous.includes(entry.hotend.id))
+				.map((entry) => entry.hotend.id)
 				// The cap still applies; a filter matching more than fits adds what it can
 				.slice(0, MAX_COMPARED_HOTENDS - previous.length)
 		]);
 	}
 
 	function removeAll() {
-		const ids = new Set(visible.map((hotend) => hotend.id));
+		const ids = new Set(visible.map((entry) => entry.hotend.id));
 		setSelected((previous) => previous.filter((id) => !ids.has(id)));
 	}
+
+	function clearFilters() {
+		setSearch('');
+		setEcosystem(ALL_ECOSYSTEMS);
+		setMaxPrice('');
+		setMinFlow('');
+		setMinTemp('');
+		setHeatbreakOnly(false);
+	}
+
+	const filtered = visible.length !== performance.length;
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
@@ -90,7 +131,9 @@ export function HotendSelection() {
 					Add or remove hotends
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="max-w-2xl">
+			{/* The `sm:` variant is what the dialog component itself sets, so overriding it needs the
+			    same variant — a bare `max-w-*` loses at every width above the breakpoint */}
+			<DialogContent className="max-w-[95vw] sm:max-w-4xl">
 				<DialogHeader>
 					<DialogTitle className="flex items-center justify-between gap-2 pr-6">
 						Hotends
@@ -122,6 +165,72 @@ export function HotendSelection() {
 					</Select>
 				</div>
 
+				{/* Price and flow filters. Both are "at most"/"at least" rather than ranges: the
+				    question is almost always a budget, or a flow rate to hit, not a window */}
+				<div className="flex items-center gap-2">
+					<Label htmlFor={priceFilterId} className="gap-1.5 text-xs font-normal text-muted-foreground">
+						Under
+						<Input
+							id={priceFilterId}
+							type="number"
+							inputMode="decimal"
+							min={0}
+							step={5}
+							placeholder="$ any"
+							value={maxPrice}
+							onChange={(event) => setMaxPrice(event.target.value)}
+							className="h-7 w-24"
+						/>
+					</Label>
+					<Label htmlFor={flowFilterId} className="gap-1.5 text-xs font-normal text-muted-foreground">
+						At least
+						<Input
+							id={flowFilterId}
+							type="number"
+							inputMode="decimal"
+							min={0}
+							step={1}
+							placeholder="mm³/s any"
+							value={minFlow}
+							onChange={(event) => setMinFlow(event.target.value)}
+							className="h-7 w-28"
+						/>
+					</Label>
+					<Label htmlFor={tempFilterId} className="gap-1.5 text-xs font-normal text-muted-foreground">
+						Reaches
+						<Input
+							id={tempFilterId}
+							type="number"
+							inputMode="decimal"
+							min={0}
+							step={10}
+							placeholder="°C any"
+							value={minTemp}
+							onChange={(event) => setMinTemp(event.target.value)}
+							className="h-7 w-24"
+						/>
+					</Label>
+					{/* A yes/no property rather than a threshold, so it is a toggle: on means "only
+					    these", off means "do not care", never "only the structural ones" */}
+					<Label
+						htmlFor={heatbreakFilterId}
+						className="gap-1.5 text-xs font-normal text-muted-foreground cursor-pointer"
+						title="Heatbreak carries no clamping load, so it can be thin-walled"
+					>
+						<Checkbox
+							id={heatbreakFilterId}
+							checked={heatbreakOnly}
+							onCheckedChange={(checked) => setHeatbreakOnly(checked === true)}
+						/>
+						Nonstructural heatbreak
+					</Label>
+					{filtered ? (
+						<Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={clearFilters}>
+							Clear filters
+						</Button>
+					) : null}
+				</div>
+
 				<div className="flex items-center gap-2">
 					<Button
 						size="sm"
@@ -142,12 +251,12 @@ export function HotendSelection() {
 						Remove all {removable.length > 0 ? `(${removable.length})` : ''}
 					</Button>
 					<span className="text-[11px] text-muted-foreground">
-						{visible.length === HOTEND_DB.length ? 'the whole database' : `${visible.length} shown`}
+						{filtered ? `${visible.length} of ${performance.length} shown` : 'the whole database'}
 					</span>
 				</div>
 
-				<div className="max-h-80 overflow-y-auto rounded-md border divide-y">
-					{visible.map((hotend) => {
+				<div className="max-h-[55vh] overflow-y-auto rounded-md border divide-y">
+					{visible.map(({ hotend, maxFlow }) => {
 						const index = selected.indexOf(hotend.id);
 						const checked = index !== -1;
 						const maxTemperature = highestTemperature(hotend);
@@ -182,23 +291,40 @@ export function HotendSelection() {
 										<span className="size-[11px] shrink-0" />
 									)}
 									<span className="flex-1 truncate">{hotendLabel(hotend)}</span>
+									{/* The two columns the filters act on, then the two that explain them */}
 									<span
-										className={`text-xs tabular-nums shrink-0 ${
+										className="text-xs text-muted-foreground tabular-nums shrink-0 w-14 text-right"
+										title={hotend.price === null ? 'No price in the database yet' : undefined}
+									>
+										{hotend.price === null ? '—' : `$${formatNumber(hotend.price, 0)}`}
+									</span>
+									<span
+										className="text-xs tabular-nums shrink-0 w-20 text-right"
+										title={`Sustainable flow in ${material.name}`}
+									>
+										{formatNumber(maxFlow, 1)} mm³/s
+									</span>
+									<span
+										className={`text-xs tabular-nums shrink-0 w-16 text-right ${
 											tooCold ? 'text-destructive-foreground' : 'text-muted-foreground'
 										}`}
 										title={tooCold ? `Only rated to ${maxTemperature} °C` : undefined}
 									>
 										{formatNumber(maxTemperature, 0)} °C
 									</span>
+									{/* The melt zone is what the flow beside it is bought with; there is room for
+									    both now the dialog is wider */}
 									<span className="text-xs text-muted-foreground tabular-nums shrink-0 w-16 text-right">
-										{formatNumber(hotend.meltZoneLength)} mm
+										{formatNumber(hotend.meltZoneLength, 1)} mm
 									</span>
 								</Label>
 							</div>
 						);
 					})}
 					{visible.length === 0 ? (
-						<p className="px-2 py-3 text-sm text-muted-foreground">No hotends match that search.</p>
+						<p className="px-2 py-3 text-sm text-muted-foreground">
+							No hotends match those filters.
+						</p>
 					) : null}
 				</div>
 
