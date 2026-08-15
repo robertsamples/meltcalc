@@ -1,4 +1,6 @@
 import { BAND_SAMPLES } from '@/lib/cost-bands';
+import { labelMetrics, placeLabels } from '@/lib/point-labels';
+import { markerPaint, shapePath } from '@/lib/series';
 import type { OgModel, OgTone } from './model';
 
 /**
@@ -25,6 +27,9 @@ const COLORS = {
 };
 
 const FONT_FAMILY = 'sans-serif';
+
+/** Only for readability of the emitted SVG; the rasterizer does not care */
+const SVG_JOIN = '\n\t';
 
 const PADDING_X = 56;
 const TITLE_Y = 132;
@@ -156,110 +161,174 @@ function renderBars(model: OgModel): string {
 }
 
 /**
- * The cost card's cloud: price against flow for the whole database, with the fitted line through it.
+ * The cost card: the chart *is* the card.
  *
- * Log x, because the prices span two and a half orders of magnitude and a linear axis would pile
- * three quarters of the database against the left edge. No tick labels beyond the corners — at
- * unfurl size the shape is the message, and a grid of numbers nobody can read is just noise.
+ * A scatter shrunk into the lower third of an unfurl is a smear, so this one runs edge to edge and
+ * the title sits on top of it behind a scrim. It carries the app's own markers and its own label
+ * placement, from the same modules, so the picture in a feed is the picture that was shared rather
+ * than a diagram of it.
+ *
+ * Log x, because prices span two and a half orders of magnitude and a linear axis would pile three
+ * quarters of the database against the left edge.
  */
-function renderScatter(scatter: NonNullable<OgModel['scatter']>): string {
+const SCATTER_LABEL_SIZE = 15;
+/** Room at the edges so a marker or its name never touches the border */
+const SCATTER_INSET = { left: 96, right: 40, top: 150, bottom: 60 };
+
+function renderScatter(scatter: NonNullable<OgModel['scatter']>, model: OgModel, siteName: string): string {
 	const points = scatter.points.filter((point) => point.x > 0 && Number.isFinite(point.y));
 	if (points.length === 0) return '';
 
-	const plotLeft = PADDING_X + 52;
-	const plotRight = OG_WIDTH - PADDING_X;
-	const plotTop = CHART_TOP - 24;
-	const plotBottom = CHART_BOTTOM - 26;
-
 	const xs = points.map((point) => Math.log(point.x));
-	const minX = Math.min(...xs);
-	const maxX = Math.max(...xs);
-	const maxY = Math.max(...points.map((point) => point.y));
+	// The domain is padded rather than the pixels, so the bands still reach every edge. The corner
+	// labels quote the real extremes, not the padding, or the card would name prices nothing costs
+	const dataMinX = Math.min(...xs);
+	const dataMaxX = Math.max(...xs);
+	const minX = dataMinX - 0.12;
+	const maxX = dataMaxX + 0.12;
+	const dataMaxY = Math.max(...points.map((point) => point.y));
+	const maxY = dataMaxY * 1.06;
 	const spanX = maxX - minX || 1;
 
-	const toX = (price: number) => plotLeft + ((Math.log(price) - minX) / spanX) * (plotRight - plotLeft);
-	const toY = (flow: number) => plotBottom - (flow / (maxY || 1)) * (plotBottom - plotTop);
+	const toX = (price: number) => ((Math.log(price) - minX) / spanX) * OG_WIDTH;
+	const toY = (flow: number) => OG_HEIGHT - (flow / (maxY || 1)) * OG_HEIGHT;
 
-	const frame = [
-		`<line x1="${plotLeft}" y1="${plotBottom}" x2="${plotRight}" y2="${plotBottom}" stroke="${COLORS.dim}" stroke-opacity="0.6" />`,
-		`<line x1="${plotLeft}" y1="${plotTop}" x2="${plotLeft}" y2="${plotBottom}" stroke="${COLORS.dim}" stroke-opacity="0.6" />`
-	].join('\n\t');
+	const prices = Array.from({ length: BAND_SAMPLES }, (_, index) =>
+		Math.exp(minX + (spanX * index) / (BAND_SAMPLES - 1))
+	);
+	const clamp = (flow: number) => Math.min(Math.max(flow, 0), maxY);
 
 	// The same background the app draws, from the same band spec, so a shared link unfurls in the
 	// colour scheme it was shared in
-	const bands = scatter.bands
-		? (() => {
-				const prices = Array.from({ length: BAND_SAMPLES }, (_, index) =>
-					Math.exp(minX + (spanX * index) / (BAND_SAMPLES - 1))
-				);
-				const clamp = (flow: number) => Math.min(Math.max(flow, 0), maxY);
-				const spec = scatter.bands;
+	const spec = scatter.bands;
+	const bands = spec
+		? spec.bands
+				.map(({ color, opacity }, index) => {
+					const upper = prices.map((price) => clamp(spec.edges[index](price)));
+					const lower = prices.map((price) => clamp(spec.edges[index + 1](price)));
+					if (upper.every((flow, at) => flow <= lower[at])) return '';
 
-				return spec.bands
-					.map(({ color, opacity }, index) => {
-						const upper = prices.map((price) => clamp(spec.edges[index](price)));
-						const lower = prices.map((price) => clamp(spec.edges[index + 1](price)));
-						if (upper.every((flow, at) => flow <= lower[at])) return '';
+					const path = [
+						...prices.map(
+							(price, at) => `${at === 0 ? 'M' : 'L'} ${toX(price).toFixed(1)} ${toY(upper[at]).toFixed(1)}`
+						),
+						...prices.map((price, at) => `L ${toX(price).toFixed(1)} ${toY(lower[at]).toFixed(1)}`).reverse(),
+						'Z'
+					].join(' ');
 
-						const path = [
-							...prices.map(
-								(price, at) => `${at === 0 ? 'M' : 'L'} ${toX(price).toFixed(1)} ${toY(upper[at]).toFixed(1)}`
-							),
-							...prices
-								.map((price, at) => `L ${toX(price).toFixed(1)} ${toY(lower[at]).toFixed(1)}`)
-								.reverse(),
-							'Z'
-						].join(' ');
-
-						return `<path d="${path}" fill="${color}" fill-opacity="${opacity}" />`;
-					})
-					.filter(Boolean)
-					.join('\n\t');
-			})()
+					return `<path d="${path}" fill="${color}" fill-opacity="${opacity}" />`;
+				})
+				.filter(Boolean)
+				.join(SVG_JOIN)
 		: '';
 
 	const trend = scatter.trend
 		? (() => {
-				const at = (price: number) => scatter.trend!.intercept + scatter.trend!.slope * Math.log(price);
+				const line = scatter.trend;
+				const at = (price: number) => clamp(line.intercept + line.slope * Math.log(price));
 				const from = Math.exp(minX);
 				const to = Math.exp(maxX);
-				const clamp = (flow: number) => Math.min(Math.max(flow, 0), maxY);
 
-				return `<line x1="${toX(from)}" y1="${toY(clamp(at(from)))}" x2="${toX(to)}" y2="${toY(clamp(at(to)))}" stroke="${COLORS.muted}" stroke-opacity="0.5" stroke-width="3" />`;
+				return `<line x1="${toX(from).toFixed(1)}" y1="${toY(at(from)).toFixed(1)}" x2="${toX(to).toFixed(1)}" y2="${toY(at(to)).toFixed(1)}" stroke="${COLORS.muted}" stroke-opacity="0.55" stroke-width="3" />`;
 			})()
 		: '';
 
 	// Unselected first, so a hotend someone picked is never buried under one they did not
 	const marks = [...points]
-		.sort((a, b) => Number(a.selected) - Number(b.selected))
-		.map(
-			(point) =>
-				`<circle cx="${toX(point.x).toFixed(1)}" cy="${toY(point.y).toFixed(1)}" r="${point.selected ? 9 : 6}" fill="${point.selected ? COLORS.accent : COLORS.dim}" fill-opacity="${point.selected ? 1 : 0.65}" />`
-		)
-		.join('\n\t');
+		.sort((a, b) => Number(a.marker !== null) - Number(b.marker !== null))
+		.map((point) => {
+			const x = toX(point.x).toFixed(1);
+			const y = toY(point.y).toFixed(1);
+			if (!point.marker) {
+				return `<circle cx="${x}" cy="${y}" r="7" fill="${COLORS.dim}" fill-opacity="0.6" />`;
+			}
 
-	const axes = [
-		text(scatter.yLabel, { x: plotLeft - 10, y: plotTop + 6, size: 17, fill: COLORS.dim, anchor: 'end' }),
-		text(`${formatWhole(maxY)}`, { x: plotLeft - 10, y: plotTop + 26, size: 17, fill: COLORS.muted, anchor: 'end' }),
-		text('0', { x: plotLeft - 10, y: plotBottom, size: 17, fill: COLORS.muted, anchor: 'end' }),
-		text(`$${formatWhole(Math.exp(minX))}`, { x: plotLeft, y: plotBottom + 26, size: 17, fill: COLORS.muted }),
-		text(`$${formatWhole(Math.exp(maxX))}`, {
-			x: plotRight,
-			y: plotBottom + 26,
-			size: 17,
+			// The app's own marker: same hue, same shape, same filled-or-outlined variant
+			const paint = markerPaint(point.marker.color, point.marker.filled);
+
+			return `<path d="${shapePath(point.marker.shape, 18)}" transform="translate(${x} ${y})" fill="${paint.fill}" stroke="${paint.stroke}" stroke-width="${paint.strokeWidth * 1.8}" />`;
+		})
+		.join(SVG_JOIN);
+
+	// The app's placement rules, at this card's scale
+	const placements = placeLabels(
+		points.map((point, index) => ({
+			id: String(index),
+			label: point.label ?? '',
+			x: toX(point.x),
+			y: toY(point.y),
+			named: point.marker !== null && !!point.label,
+			rank: index
+		})),
+		{
+			left: SCATTER_INSET.left,
+			right: OG_WIDTH - SCATTER_INSET.right,
+			top: SCATTER_INSET.top,
+			bottom: OG_HEIGHT - SCATTER_INSET.bottom
+		},
+		labelMetrics(SCATTER_LABEL_SIZE)
+	);
+	const labels = placements
+		.map((placement) =>
+			text(placement.label, {
+				x: placement.x,
+				y: placement.y,
+				size: SCATTER_LABEL_SIZE,
+				fill: COLORS.foreground,
+				anchor: placement.anchor
+			})
+		)
+		.join(SVG_JOIN);
+
+	// A scrim, so the title reads over whatever the bands happen to be doing up there
+	const scrim = [
+		`<linearGradient id="scrim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${COLORS.background}" stop-opacity="0.92" /><stop offset="1" stop-color="${COLORS.background}" stop-opacity="0" /></linearGradient>`,
+		`<rect x="0" y="0" width="${OG_WIDTH}" height="200" fill="url(#scrim)" />`
+	].join(SVG_JOIN);
+
+	const corners = [
+		text(`${formatWhole(dataMaxY)} ${scatter.yLabel}`, {
+			x: OG_WIDTH - SCATTER_INSET.right,
+			y: OG_HEIGHT - 60,
+			size: 18,
 			fill: COLORS.muted,
 			anchor: 'end'
 		}),
+		text(`$${formatWhole(Math.exp(dataMinX))}`, { x: 24, y: OG_HEIGHT - 22, size: 18, fill: COLORS.muted }),
 		text(scatter.xLabel, {
-			x: (plotLeft + plotRight) / 2,
-			y: plotBottom + 26,
-			size: 17,
+			x: OG_WIDTH / 2,
+			y: OG_HEIGHT - 22,
+			size: 18,
 			fill: COLORS.dim,
 			anchor: 'middle'
+		}),
+		text(`$${formatWhole(Math.exp(dataMaxX))}`, {
+			x: OG_WIDTH - 24,
+			y: OG_HEIGHT - 22,
+			size: 18,
+			fill: COLORS.muted,
+			anchor: 'end'
 		})
-	].join('\n\t');
+	].join(SVG_JOIN);
 
-	return [bands, frame, trend, marks, axes].filter(Boolean).join('\n\t');
+	const heading = [
+		text(siteName, { x: PADDING_X, y: 62, size: 22, fill: COLORS.muted }),
+		text(fitText(model.title, 46, OG_WIDTH - PADDING_X * 2, true), {
+			x: PADDING_X,
+			y: 108,
+			size: 46,
+			fill: COLORS.foreground,
+			weight: 'bold'
+		}),
+		text(fitText(model.subtitle, 22, OG_WIDTH - PADDING_X * 2), {
+			x: PADDING_X,
+			y: 142,
+			size: 22,
+			fill: COLORS.muted
+		})
+	].join(SVG_JOIN);
+
+	return [bands, trend, marks, labels, scrim, heading, corners].filter(Boolean).join(SVG_JOIN);
 }
 
 function formatWhole(value: number): string {
@@ -297,6 +366,16 @@ function renderFacts(model: OgModel): string {
 export function renderOgSvg(model: OgModel, siteName: string): string {
 	const contentWidth = OG_WIDTH - PADDING_X * 2;
 
+	// The scatter card draws its own heading, because it needs to sit over the chart rather than
+	// above it — the whole point of that layout is that the plot reaches every edge
+	if (model.scatter) {
+		return `<svg xmlns="http://www.w3.org/2000/svg" width="${OG_WIDTH}" height="${OG_HEIGHT}" viewBox="0 0 ${OG_WIDTH} ${OG_HEIGHT}">
+	<rect width="${OG_WIDTH}" height="${OG_HEIGHT}" fill="${COLORS.background}" />
+	${renderScatter(model.scatter, model, siteName)}
+	<rect x="0" y="0" width="${OG_WIDTH}" height="8" fill="${COLORS.accent}" />
+</svg>`;
+	}
+
 	return `<svg xmlns="http://www.w3.org/2000/svg" width="${OG_WIDTH}" height="${OG_HEIGHT}" viewBox="0 0 ${OG_WIDTH} ${OG_HEIGHT}">
 	<rect width="${OG_WIDTH}" height="${OG_HEIGHT}" fill="${COLORS.background}" />
 	<rect x="0" y="0" width="${OG_WIDTH}" height="8" fill="${COLORS.accent}" />
@@ -305,6 +384,6 @@ export function renderOgSvg(model: OgModel, siteName: string): string {
 	${text(fitText(model.subtitle, 26, contentWidth), { x: PADDING_X, y: SUBTITLE_Y, size: 26, fill: COLORS.muted })}
 	<line x1="${PADDING_X}" y1="${SUBTITLE_Y + 26}" x2="${OG_WIDTH - PADDING_X}" y2="${SUBTITLE_Y + 26}" stroke="${COLORS.dim}" stroke-opacity="0.5" />
 	${renderFacts(model)}
-	${model.scatter ? renderScatter(model.scatter) : renderBars(model)}
+	${renderBars(model)}
 </svg>`;
 }

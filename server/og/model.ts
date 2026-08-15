@@ -1,10 +1,11 @@
-import { performanceLabel } from '@/lib/chart-labels';
+import { performanceLabel, shortPerformanceLabel } from '@/lib/chart-labels';
 import { decodeConfig } from '@/lib/config-sharing';
 import type { CostBandMode } from '@/lib/configuration';
 import { type BandSpec, costBands, valueBands } from '@/lib/cost-bands';
 import { blockMaterialFactor, HOTEND_DB, resolveHotends } from '@/lib/hotend';
 import { findMaterial, MATERIAL_DB } from '@/lib/material';
 import { fitAgainstLogX } from '@/lib/regression';
+import { type SeriesMarkerSpec, seriesMarker } from '@/lib/series';
 import {
 	energyPerVolume,
 	extrusionCrossSection,
@@ -46,7 +47,12 @@ export type OgSeries = {
 
 /** A cloud of hotends for the cost card, which is a scatter on screen and so a scatter here */
 export type OgScatter = {
-	points: { x: number; y: number; selected: boolean }[];
+	/**
+	 * `marker` is set only for the hotends in the comparison; everything else is an anonymous dot.
+	 * Carrying the full marker spec rather than a colour is what lets the card draw the app's own
+	 * shapes, including the outlined variants that appear past the first forty selections.
+	 */
+	points: { x: number; y: number; label: string | null; marker: SeriesMarkerSpec | null }[];
 	/** Fitted line through them, in `y = intercept + slope · ln(x)` form */
 	trend: { slope: number; intercept: number } | null;
 	/**
@@ -257,7 +263,8 @@ function buildCostModel(
 
 	if (priced.length === 0) return buildFlowModel(performance, common);
 
-	const selected = new Set(performance.map((entry) => entry.hotend.id));
+	// Selection order decides colour and shape in the app, so the card has to preserve it
+	const order = performance.map((entry) => entry.hotend.id);
 	const cloud = all.filter((entry) => entry.hotend.price !== null && Number.isFinite(entry.maxFlow));
 	const trend = fitAgainstLogX(cloud.map((entry) => ({ x: entry.hotend.price as number, y: entry.maxFlow })));
 
@@ -265,11 +272,17 @@ function buildCostModel(
 	const bounds = { cheapest: Math.min(...costs), dearest: Math.max(...costs) };
 
 	const scatter: OgScatter = {
-		points: cloud.map((entry) => ({
-			x: entry.hotend.price as number,
-			y: entry.maxFlow,
-			selected: selected.has(entry.hotend.id)
-		})),
+		points: cloud.map((entry) => {
+			const at = order.indexOf(entry.hotend.id);
+
+			return {
+				x: entry.hotend.price as number,
+				y: entry.maxFlow,
+				label: at === -1 ? null : shortPerformanceLabel(entry),
+				// The same slot the app would give it, so a hotend keeps its colour and shape
+				marker: at === -1 ? null : seriesMarker(at)
+			};
+		}),
 		// Only where it means something: it is the reference the value bands are measured against,
 		// and the cost bands have nothing to do with it. The app makes the same choice
 		trend: mode === 'value' && trend ? { slope: trend.slope, intercept: trend.intercept } : null,

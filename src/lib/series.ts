@@ -119,3 +119,34 @@ export const AXIS_LINE = { stroke: 'currentColor', className: 'text-border' } as
 
 /** The reference lines (targets, limits) share one look so they read as the same kind of thing */
 export const THRESHOLD_LINE = { stroke: '#a1a1aa', strokeDasharray: '4 4' } as const;
+
+/**
+ * Path for a shape of the given size, centred on the origin.
+ *
+ * The triangles are drawn slightly oversized and centroid-centred: an equilateral triangle
+ * inscribed in the same circle as a square looks noticeably smaller than it.
+ */
+export function shapePath(shape: SeriesShape, size: number): string {
+	const r = size / 2;
+
+	switch (shape) {
+		case 'square':
+			return `M ${-r} ${-r} H ${r} V ${r} H ${-r} Z`;
+		case 'triangle':
+			return `M 0 ${-r * 1.15} L ${r * 1.15} ${r * 0.75} L ${-r * 1.15} ${r * 0.75} Z`;
+		case 'triangleDown':
+			return `M 0 ${r * 1.15} L ${r * 1.15} ${-r * 0.75} L ${-r * 1.15} ${-r * 0.75} Z`;
+		case 'diamond':
+			return `M 0 ${-r * 1.25} L ${r * 1.25} 0 L 0 ${r * 1.25} L ${-r * 1.25} 0 Z`;
+		default:
+			return `M ${-r} 0 A ${r} ${r} 0 1 0 ${r} 0 A ${r} ${r} 0 1 0 ${-r} 0 Z`;
+	}
+}
+
+/** Stroke width for an outlined marker: enough to read without the hole closing up */
+export const MARKER_STROKE = 1.75;
+
+/** Fill and stroke for one marker, so a swatch, a chart point and a rendered card all agree */
+export function markerPaint(color: string, filled: boolean) {
+	return { fill: filled ? color : 'none', stroke: color, strokeWidth: filled ? 0 : MARKER_STROKE };
+}

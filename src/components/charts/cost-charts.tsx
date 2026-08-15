@@ -2,7 +2,7 @@ import { useAtom, useAtomValue } from 'jotai';
 import { useId, useMemo } from 'react';
 import { Bar, BarChart, Customized, LabelList, Scatter, ScatterChart, XAxis, YAxis, ZAxis } from 'recharts';
 import { pointTooltip } from '@/components/charts/chart-tooltip';
-import { markerAttributes, SeriesMarker, shapePath } from '@/components/series-marker';
+import { markerAttributes, SeriesMarker } from '@/components/series-marker';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -17,8 +17,9 @@ import {
 import type { CostBandMode } from '@/lib/configuration';
 import { BAND_SAMPLES, type BandSpec, costBands, valueBands } from '@/lib/cost-bands';
 import { formatFlow, formatNumber } from '@/lib/format';
+import { labelMetrics, placeLabels } from '@/lib/point-labels';
 import { fitAgainstLogX, type LogTrend, trendAt } from '@/lib/regression';
-import { AXIS_LINE, STATUS_COLORS, seriesMarker } from '@/lib/series';
+import { AXIS_LINE, STATUS_COLORS, seriesMarker, shapePath } from '@/lib/series';
 import {
 	allPerformanceAtom,
 	currentCostBandModeAtom,
@@ -276,26 +277,7 @@ type ScatterPoint = {
 };
 
 const LABEL_SIZE = 9;
-/**
- * Nothing here can measure text, so width is estimated from the glyph count — and deliberately
- * over-estimated. Under-estimating puts two names a pixel apart and calls it a fit, which looks
- * exactly like the collision test not running at all.
- */
-const LABEL_CHAR_WIDTH = LABEL_SIZE * 0.63;
-const LABEL_HEIGHT = LABEL_SIZE + 4;
-/** Breathing room around every placed label, so neighbours are separated rather than merely apart */
-const LABEL_PAD = 3;
-/** Clearance from the marker a label belongs to, and from every other marker on the chart */
-const LABEL_OFFSET = 7;
-const MARKER_RADIUS = 6;
-/** How far around a point counts as crowded when deciding who gets a name first */
-const CROWDING_RADIUS = 55;
-
-type Box = { left: number; right: number; top: number; bottom: number };
-
-function overlaps(a: Box, b: Box): boolean {
-	return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
-}
+const LABEL_METRICS = labelMetrics(LABEL_SIZE);
 
 /**
  * Names for the hotends in the comparison.
@@ -305,11 +287,8 @@ function overlaps(a: Box, b: Box): boolean {
  * nothing else's label can block one — the only obstacles are the markers themselves and the
  * handful of names already placed.
  *
- * Placed most-isolated first, and never more than one line-height from its own marker. Both of
- * those cost labels — a name in the thick of the cloud usually cannot be placed at all now — and
- * both are the point: a label that has to sit three rows away from its marker to find space is not
- * telling the reader which dot it belongs to, and a chart full of those is worse than a chart with
- * a dozen names on the points that had room for them.
+ * The placement rules live in `@/lib/point-labels` so the card rendered for a shared link puts its
+ * names in the same places this does.
  */
 function PointLabels({
 	xAxisMap,
@@ -326,98 +305,36 @@ function PointLabels({
 
 	const [priceMin, priceMax] = xScale.domain();
 	const [flowMin, flowMax] = yScale.domain();
-	const left = xScale(priceMin);
-	const right = xScale(priceMax);
-	const top = yScale(flowMax);
-	const bottom = yScale(flowMin);
 
-	const at = (point: ScatterPoint) => ({ x: xScale(point.price), y: yScale(point.maxFlow) });
+	const placements = placeLabels(
+		points.map((point) => ({
+			id: point.id,
+			label: point.shortLabel,
+			x: xScale(point.price),
+			y: yScale(point.maxFlow),
+			named: point.seriesIndex !== -1,
+			rank: point.seriesIndex
+		})),
+		{ left: xScale(priceMin), right: xScale(priceMax), top: yScale(flowMax), bottom: yScale(flowMin) },
+		LABEL_METRICS
+	);
 
-	const placed: Box[] = [];
-	// Every marker is an obstacle, whether or not it ends up with a label of its own
-	const markers: Box[] = points.map((point) => {
-		const { x, y } = at(point);
-
-		return {
-			left: x - MARKER_RADIUS,
-			right: x + MARKER_RADIUS,
-			top: y - MARKER_RADIUS,
-			bottom: y + MARKER_RADIUS
-		};
-	});
-
-	// Most isolated first. Whoever is placed first gets the space, and giving it to a point with
-	// room to spare leaves the crowded ones no worse off while keeping every name next to its dot
-	const crowding = (point: ScatterPoint) => {
-		const here = at(point);
-
-		return points.filter((other) => {
-			const there = at(other);
-
-			return Math.hypot(there.x - here.x, there.y - here.y) < CROWDING_RADIUS;
-		}).length;
-	};
-
-	const named = points
-		.filter((point) => point.seriesIndex !== -1)
-		.map((point) => ({ point, crowding: crowding(point) }))
-		.sort((a, b) => a.crowding - b.crowding || a.point.seriesIndex - b.point.seriesIndex);
-
-	const labels = named.map(({ point }) => {
-		const { x, y } = at(point);
-		const width = point.shortLabel.length * LABEL_CHAR_WIDTH;
-
-		const beside = (anchor: 'start' | 'end', dy: number) => ({
-			anchor,
-			dy,
-			box: {
-				left: (anchor === 'start' ? x + LABEL_OFFSET : x - LABEL_OFFSET - width) - LABEL_PAD,
-				right: (anchor === 'start' ? x + LABEL_OFFSET + width : x - LABEL_OFFSET) + LABEL_PAD,
-				top: y + dy - LABEL_HEIGHT / 2,
-				bottom: y + dy + LABEL_HEIGHT / 2
-			}
-		});
-
-		// Beside, then one line above or below — never further. Past that the name stops obviously
-		// belonging to the marker it names
-		const step = LABEL_HEIGHT + MARKER_RADIUS;
-		const candidates = [
-			beside('start', 0),
-			beside('end', 0),
-			beside('start', -step),
-			beside('end', -step),
-			beside('start', step),
-			beside('end', step)
-		];
-
-		const fit = candidates.find(
-			(candidate) =>
-				candidate.box.left >= left &&
-				candidate.box.right <= right &&
-				candidate.box.top >= top &&
-				candidate.box.bottom <= bottom &&
-				!placed.some((box) => overlaps(box, candidate.box)) &&
-				!markers.some((box) => overlaps(box, candidate.box))
-		);
-		if (!fit) return null;
-
-		placed.push(fit.box);
-
-		return (
-			<text
-				key={point.id}
-				x={fit.anchor === 'start' ? x + LABEL_OFFSET : x - LABEL_OFFSET}
-				y={y + fit.dy + LABEL_SIZE / 2 - 1}
-				fontSize={LABEL_SIZE}
-				textAnchor={fit.anchor}
-				className="fill-foreground"
-			>
-				{point.shortLabel}
-			</text>
-		);
-	});
-
-	return <g>{labels}</g>;
+	return (
+		<g>
+			{placements.map((placement) => (
+				<text
+					key={placement.id}
+					x={placement.x}
+					y={placement.y}
+					fontSize={LABEL_SIZE}
+					textAnchor={placement.anchor}
+					className="fill-foreground"
+				>
+					{placement.label}
+				</text>
+			))}
+		</g>
+	);
 }
 
 /**
