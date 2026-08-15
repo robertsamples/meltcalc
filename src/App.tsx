@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { AboutCard } from '@/components/about';
 import { CostPerFlowChart, PriceVsFlowScatter } from '@/components/charts/cost-charts';
 import { EnergyChart } from '@/components/charts/energy-chart';
+import { HeaterChart } from '@/components/charts/heater-chart';
 import { MaxFlowChart } from '@/components/charts/max-flow-chart';
 import { MeltZoneLandscape, SpecificPowerChart } from '@/components/charts/melt-zone-charts';
 import { ResidenceByHotendChart, ResidenceCurveChart } from '@/components/charts/residence-charts';
@@ -82,6 +83,7 @@ export function App() {
 						</>
 					) : null}
 					{viewMode === 'energy' ? <EnergyChart /> : null}
+					{viewMode === 'heater' ? <HeaterChart /> : null}
 					{viewMode === 'cost' ? (
 						<>
 							<CostPerFlowChart />

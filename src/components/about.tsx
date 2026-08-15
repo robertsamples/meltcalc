@@ -3,7 +3,7 @@ import { ChevronRightIcon } from 'lucide-react';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { formatNumber } from '@/lib/format';
 import { HF_NOZZLE_EQUIVALENT_LENGTH } from '@/lib/hotend';
-import { FILAMENT_CROSS_SECTION, FILAMENT_DIAMETER } from '@/lib/thermal';
+import { FILAMENT_CROSS_SECTION, FILAMENT_DIAMETER, HEATER_EFFICIENCY } from '@/lib/thermal';
 import { cn } from '@/lib/utils';
 import { currentThermalSettingsAtom, specificPowerLimitAtom } from '@/state/atoms';
 
@@ -40,6 +40,14 @@ export function AboutCard({ className }: { className?: string }) {
 					constraints are separate: the melt zone has to get the filament molten, so it is sized against
 					the melting point, while the heater has to supply the superheat above it as well. Running the
 					nozzle hotter therefore raises the wattage but not the melt zone a hotend needs.
+				</p>
+				<p>
+					<span className="text-foreground">The heater is assumed adequate.</span> Every flow number here
+					is limited by the melt zone alone, on the basis that a cartridge is the cheap, swappable part
+					of a hotend and nobody is stuck with an undersized one. What adequate costs is a separate
+					question, answered by the heater view: the wattage that keeps each hotend fed at its own
+					maximum, at {formatNumber(HEATER_EFFICIENCY, 0)}% of rated output reaching the plastic — the
+					rest holds the block at temperature and leaks into the mount and the air.
 				</p>
 				<p>
 					<span className="text-foreground">Residence.</span> {FILAMENT_DIAMETER} mm filament has a

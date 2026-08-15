@@ -20,9 +20,7 @@ import {
 	CubicMillimetersPerSecondPerMillimeter,
 	Millimeter,
 	MillimetersPerSecond,
-	Percent,
-	Seconds,
-	Watts
+	Seconds
 } from '@/lib/units';
 
 /**
@@ -55,7 +53,8 @@ const VIEW_MODE_CODES: Record<ViewMode, string> = {
 	residence: 'r',
 	energy: 'e',
 	meltZone: 'z',
-	cost: 'c'
+	cost: 'c',
+	heater: 'h'
 };
 const VIEW_MODE_BY_CODE = Object.fromEntries(
 	Object.entries(VIEW_MODE_CODES).map(([mode, code]) => [code, mode as ViewMode])
@@ -81,11 +80,11 @@ const LegacyConfigurationSchema = z.object({
 			startTemperature: Celsius.nullable().default(null)
 		})
 		.default(DEFAULT_MATERIAL_SETTINGS),
+	// Links made before heater power and efficiency became fixed constants still carry them; zod
+	// drops unknown keys, so those links keep working and simply lose the two settings
 	thermalSettings: z
 		.object({
 			referenceFlowPerMeltZoneMm: CubicMillimetersPerSecondPerMillimeter,
-			heaterPower: Watts,
-			heaterEfficiency: Percent,
 			minimumResidenceTime: Seconds
 		})
 		.default(DEFAULT_THERMAL_SETTINGS),
@@ -100,7 +99,7 @@ const LegacyConfigurationSchema = z.object({
 			})
 		)
 		.default({}),
-	viewMode: z.enum(['flow', 'residence', 'energy', 'meltZone', 'cost']).default(DEFAULT_VIEW_MODE),
+	viewMode: z.enum(['flow', 'residence', 'energy', 'meltZone', 'cost', 'heater']).default(DEFAULT_VIEW_MODE),
 	energyPerSecond: z.boolean().default(DEFAULT_ENERGY_PER_SECOND),
 	energyPerMaterialStart: z.boolean().default(DEFAULT_ENERGY_PER_MATERIAL_START),
 	debug: z.boolean().default(DEFAULT_DEBUG)
@@ -134,8 +133,6 @@ const CompactSchema = z.object({
 	t: z
 		.object({
 			r: z.number().optional(),
-			w: z.number().optional(),
-			e: z.number().optional(),
 			m: z.number().optional()
 		})
 		.optional(),
@@ -212,8 +209,6 @@ function compact(config: ShareableConfiguration): Compact {
 		}),
 		t: pruned({
 			r: changed(thermal.referenceFlowPerMeltZoneMm, DEFAULT_THERMAL_SETTINGS.referenceFlowPerMeltZoneMm),
-			w: changed(thermal.heaterPower, DEFAULT_THERMAL_SETTINGS.heaterPower),
-			e: changed(thermal.heaterEfficiency, DEFAULT_THERMAL_SETTINGS.heaterEfficiency),
 			m: changed(thermal.minimumResidenceTime, DEFAULT_THERMAL_SETTINGS.minimumResidenceTime)
 		}),
 		s: sameHotends(config.selectedHotends) ? undefined : config.selectedHotends.map(hotendCode),
@@ -258,8 +253,6 @@ function expand(payload: Compact): ShareableConfiguration {
 			...DEFAULT_THERMAL_SETTINGS,
 			...pruned({
 				referenceFlowPerMeltZoneMm: payload.t?.r as CubicMillimetersPerSecondPerMillimeter | undefined,
-				heaterPower: payload.t?.w as Watts | undefined,
-				heaterEfficiency: payload.t?.e as Percent | undefined,
 				minimumResidenceTime: payload.t?.m as Seconds | undefined
 			})
 		},

@@ -7,7 +7,6 @@ import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/
 import { HF_NOZZLE_FOOTNOTE, hasHfNozzleSeries, performanceLabel } from '@/lib/chart-labels';
 import { formatNumber } from '@/lib/format';
 import { AXIS_LINE, headroomStatus, STATUS_COLORS, STATUS_LABELS, THRESHOLD_LINE } from '@/lib/series';
-import type { HotendPerformance } from '@/lib/thermal';
 import { flowRateAtom, performanceAtom } from '@/state/atoms';
 
 /**
@@ -26,9 +25,7 @@ type Row = {
 	id: string;
 	label: string;
 	maxFlow: number;
-	meltZoneFlow: number;
-	heaterFlow: number;
-	limitedBy: HotendPerformance['limitedBy'];
+	meltZoneLength: number;
 	headroom: number;
 };
 
@@ -40,9 +37,7 @@ export function MaxFlowChart() {
 		id: entry.hotend.id,
 		label: performanceLabel(entry),
 		maxFlow: entry.maxFlow,
-		meltZoneFlow: entry.meltZoneFlow,
-		heaterFlow: entry.heaterFlow,
-		limitedBy: entry.limitedBy,
+		meltZoneLength: entry.meltZoneLength,
 		headroom: entry.headroom
 	}));
 
@@ -123,13 +118,10 @@ const FLOW_TOOLTIP = pointTooltip<Row>((row) => {
 		<>
 			<p className="font-medium text-sm">{row.label}</p>
 			<p className="tabular-nums">
-				Melt zone allows <span className="font-medium">{formatNumber(row.meltZoneFlow, 1)}</span> mm³/s
+				<span className="font-medium">{formatNumber(row.maxFlow, 1)}</span> mm³/s
 			</p>
-			<p className="tabular-nums">
-				Heater allows <span className="font-medium">{formatNumber(row.heaterFlow, 1)}</span> mm³/s
-			</p>
-			<p className="text-muted-foreground">
-				Limited by {row.limitedBy === 'heater' ? 'heater power' : 'melt zone length'}
+			<p className="text-muted-foreground tabular-nums">
+				From {formatNumber(row.meltZoneLength, 1)} mm of effective melt zone
 			</p>
 			<p className="flex items-center gap-1.5">
 				<span className="size-2 rounded-full" style={{ background: STATUS_COLORS[status] }} />

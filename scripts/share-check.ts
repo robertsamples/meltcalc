@@ -1,5 +1,5 @@
 import { decodeConfig, encodeConfig } from '@/lib/config-sharing';
-import { DEFAULT_CONFIGURATION, type ShareableConfiguration } from '@/lib/configuration';
+import { DEFAULT_CONFIGURATION, MAX_COMPARED_HOTENDS, type ShareableConfiguration } from '@/lib/configuration';
 import { HOTEND_DB } from '@/lib/hotend';
 import type { Celsius, CubicMillimetersPerSecond } from '@/lib/units';
 
@@ -52,9 +52,12 @@ check('6 hotends + options', {
 	viewMode: 'cost'
 });
 
-check('every hotend selected', {
+// The worst case a link can carry: the app will not let more than this be selected, and the
+// decoder rejects a link that claims more, so the database growing past the cap is not a failure
+check('a full comparison', {
 	...DEFAULT_CONFIGURATION,
-	selectedHotends: HOTEND_DB.map((hotend) => hotend.id)
+	selectedHotends: HOTEND_DB.slice(0, MAX_COMPARED_HOTENDS).map((hotend) => hotend.id),
+	viewMode: 'heater'
 });
 
 const legacy = Buffer.from(

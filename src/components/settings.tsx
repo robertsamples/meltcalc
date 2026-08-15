@@ -14,9 +14,7 @@ import type {
 	CubicMillimetersPerSecondPerMillimeter,
 	Millimeter,
 	MillimetersPerSecond,
-	Percent,
-	Seconds,
-	Watts
+	Seconds
 } from '@/lib/units';
 import {
 	currentMaterialSettingsAtom,
@@ -255,27 +253,6 @@ export function ModelSettingsCard() {
 					}
 					hint={`PLA with a standard nozzle. Everything else scales from this: currently ${formatNumber(limit, 2)} W per mm of melt zone.`}
 				/>
-				<div className="grid grid-cols-2 gap-3">
-					<NumberField
-						label="Heater power"
-						unit="W"
-						min={10}
-						max={300}
-						step={5}
-						value={settings.heaterPower}
-						onChange={(value) => setSettings({ ...settings, heaterPower: value as Watts })}
-					/>
-					<NumberField
-						label="Heater efficiency"
-						unit="%"
-						min={10}
-						max={100}
-						step={5}
-						value={settings.heaterEfficiency}
-						onChange={(value) => setSettings({ ...settings, heaterEfficiency: value as Percent })}
-						hint="Share reaching the plastic"
-					/>
-				</div>
 				<NumberField
 					label="Minimum residence time"
 					unit="s"

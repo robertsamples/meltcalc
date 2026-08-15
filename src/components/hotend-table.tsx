@@ -130,7 +130,6 @@ export function HotendTable() {
 								</TableHead>
 								<TableHead className="text-right">Effective melt zone</TableHead>
 								<TableHead className="text-right">Max flow</TableHead>
-								<TableHead>Limited by</TableHead>
 								<TableHead className="text-right" title="At the current layer height and line width">
 									Max speed
 								</TableHead>
@@ -263,11 +262,6 @@ export function HotendTable() {
 										<TableCell className="text-right tabular-nums">
 											{formatNumber(entry.maxFlow, 1)} mm³/s
 										</TableCell>
-										{/* Which of the two ceilings binds: its own column, so the row stays one
-										    line tall and the words are never read as a unit */}
-										<TableCell className="text-muted-foreground">
-											{entry.limitedBy === 'heater' ? 'Heater' : 'Melt zone'}
-										</TableCell>
 										<TableCell className="text-right tabular-nums">
 											{crossSection > 0 ? `${formatNumber(entry.maxFlow / crossSection, 0)} mm/s` : '—'}
 										</TableCell>
@@ -304,7 +298,7 @@ export function HotendTable() {
 							})}
 							{performance.length === 0 ? (
 								<TableRow>
-									<TableCell colSpan={14} className="text-muted-foreground">
+									<TableCell colSpan={13} className="text-muted-foreground">
 										No hotends selected.
 									</TableCell>
 								</TableRow>

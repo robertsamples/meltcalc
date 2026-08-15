@@ -180,19 +180,50 @@ export function meltZoneLimitedFlow(
 }
 
 /**
- * Flow the heater cartridge can sustain.
+ * The share of a heater cartridge's rated output that ends up in the plastic.
  *
- * Only part of the heater's output reaches the plastic; the rest holds the block itself at
- * temperature and leaks into the mount and the air. `efficiency` is that fraction.
+ * The rest holds the block itself at temperature and leaks into the mount, the nozzle and the air.
+ * It is a fixed number rather than a setting because it is not something a user of this app knows
+ * about their machine — measured hotends land near a third, and the figure moves far less between
+ * them than the melt zone lengths this app is really about.
  */
-export function heaterLimitedFlow(
-	heaterPower: Watts,
-	efficiency: Percent,
-	energy: JoulesPerCubicMillimeter
-): CubicMillimetersPerSecond {
-	if (!(energy > 0)) return Number.POSITIVE_INFINITY as CubicMillimetersPerSecond;
+export const HEATER_EFFICIENCY = 30 as Percent;
 
-	return ((heaterPower * (efficiency / 100)) / energy) as CubicMillimetersPerSecond;
+/**
+ * Cartridge wattages that are actually easy to buy. A heater is not a continuous choice: the answer
+ * to "what do I need" is one of these, so the recommendation snaps to the list.
+ */
+export const HEATER_SIZES: readonly Watts[] = [30, 40, 60, 70, 80, 100, 120, 240].map((size) => size as Watts);
+
+/**
+ * Electrical watts a cartridge has to be rated for to sustain a flow rate.
+ *
+ * The energy is the full amount up to the nozzle setpoint — unlike the melt zone, the heater pays
+ * for the superheat too — divided by the share of its output that gets there.
+ */
+export function requiredHeaterPower(
+	energy: JoulesPerCubicMillimeter,
+	flowRate: CubicMillimetersPerSecond
+): Watts {
+	return ((energy * flowRate) / (HEATER_EFFICIENCY / 100)) as Watts;
+}
+
+/**
+ * The cartridge to actually fit: one size *past* the smallest that covers the requirement.
+ *
+ * The smallest that covers it is a heater with no margin. Everything feeding this number is a
+ * steady-state figure — it pays for the plastic and nothing else — while a real heater also has to
+ * bring the block up from cold, hold setpoint against the part fan, and claw back the drop when a
+ * cold layer of filament arrives. Skipping a size buys the reserve for all of that.
+ *
+ * Falls back to the largest cartridge on the list when there is no size beyond, and `null` only
+ * when even that one cannot meet the bare requirement.
+ */
+export function recommendedHeater(required: Watts): Watts | null {
+	const minimum = HEATER_SIZES.findIndex((size) => size > required);
+	if (minimum === -1) return null;
+
+	return HEATER_SIZES[minimum + 1] ?? HEATER_SIZES[HEATER_SIZES.length - 1];
 }
 
 /** Melt zone a target flow rate needs, which is the question when picking a hotend */
@@ -206,8 +237,6 @@ export function requiredMeltZoneLength(
 	return ((flowRate * energy) / limit) as Millimeter;
 }
 
-export type FlowLimit = 'meltZone' | 'heater';
-
 export type HotendPerformance = {
 	hotend: HotendDefinition;
 	/** The block variant in use, which sets both the temperature ceiling and the derate */
@@ -218,13 +247,16 @@ export type HotendPerformance = {
 	hfNozzle: boolean;
 	/** Whether that block can reach the material's print temperature at all */
 	withinTemperature: boolean;
-	/** Flow ceiling from the melt zone alone */
-	meltZoneFlow: CubicMillimetersPerSecond;
-	/** Flow ceiling from the heater alone */
-	heaterFlow: CubicMillimetersPerSecond;
-	/** The binding one of the two */
+	/**
+	 * Flow ceiling from the melt zone, which is the only ceiling this app models: the heater is
+	 * assumed to be sized for the hotend rather than treated as a second constraint. What that
+	 * sizing costs is answered separately, by `requiredHeaterPower`.
+	 */
 	maxFlow: CubicMillimetersPerSecond;
-	limitedBy: FlowLimit;
+	/** Watts a cartridge must be rated for to keep `maxFlow` fed */
+	requiredHeaterPower: Watts;
+	/** Smallest stocked cartridge that covers it, or `null` if nothing on the list does */
+	recommendedHeater: Watts | null;
 	/** At the configured flow rate */
 	residenceTime: Seconds;
 	specificPower: WattsPerMillimeter;
@@ -244,8 +276,6 @@ export type PerformanceInput = {
 	printEnergy: JoulesPerCubicMillimeter;
 	flowRate: CubicMillimetersPerSecond;
 	limit: WattsPerMillimeter;
-	heaterPower: Watts;
-	heaterEfficiency: Percent;
 	/** The temperature the block has to hold, i.e. the nozzle setpoint */
 	printTemperature: Celsius;
 	/** Per-hotend choices: block variant and whether an extender is fitted */
@@ -254,7 +284,7 @@ export type PerformanceInput = {
 
 export function hotendPerformance(
 	hotend: HotendDefinition,
-	{ meltEnergy, printEnergy, flowRate, limit, heaterPower, heaterEfficiency, printTemperature, options }: PerformanceInput
+	{ meltEnergy, printEnergy, flowRate, limit, printTemperature, options }: PerformanceInput
 ): HotendPerformance {
 	const hotendOptions = options?.[hotend.id];
 	const block = resolveBlock(hotend, hotendOptions);
@@ -264,10 +294,8 @@ export function hotendPerformance(
 	// scales the limit rather than the length: a brass block is not a shorter copper one
 	const blockLimit = (limit * blockMaterialFactor(block.material)) as WattsPerMillimeter;
 
-	const meltZoneFlow = meltZoneLimitedFlow(meltZoneLength, meltEnergy, blockLimit);
-	const heaterFlow = heaterLimitedFlow(heaterPower, heaterEfficiency, printEnergy);
-	const limitedBy: FlowLimit = heaterFlow < meltZoneFlow ? 'heater' : 'meltZone';
-	const maxFlow = Math.min(meltZoneFlow, heaterFlow) as CubicMillimetersPerSecond;
+	const maxFlow = meltZoneLimitedFlow(meltZoneLength, meltEnergy, blockLimit);
+	const heaterPower = requiredHeaterPower(printEnergy, maxFlow);
 
 	return {
 		hotend,
@@ -275,10 +303,9 @@ export function hotendPerformance(
 		meltZoneLength,
 		hfNozzle: hasHfNozzle(hotend, hotendOptions),
 		withinTemperature: printTemperature <= block.maxTemperature,
-		meltZoneFlow,
-		heaterFlow,
 		maxFlow,
-		limitedBy,
+		requiredHeaterPower: heaterPower,
+		recommendedHeater: recommendedHeater(heaterPower),
 		residenceTime: residenceTime(meltZoneLength, flowRate),
 		specificPower: specificMeltPower(meltPower(meltEnergy, flowRate), meltZoneLength),
 		headroom: flowRate > 0 ? maxFlow / flowRate : Number.POSITIVE_INFINITY,

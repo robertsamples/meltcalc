@@ -34,6 +34,9 @@ const CHART_BOTTOM = OG_HEIGHT - 44;
 const LABEL_WIDTH = 260;
 const BAR_GAP = 10;
 const MAX_BAR_HEIGHT = 30;
+const VALUE_SIZE = 18;
+/** Past this the bars would be squeezed to make room for their own labels */
+const MAX_VALUE_RESERVE = 240;
 
 /**
  * Nothing here can measure text: there is no DOM, and the rasterizer only sees the finished SVG.
@@ -89,7 +92,15 @@ function renderBars(model: OgModel): string {
 	if (model.series.length === 0) return '';
 
 	const plotLeft = PADDING_X + LABEL_WIDTH;
-	const plotWidth = OG_WIDTH - PADDING_X - plotLeft - 90;
+	// The value sits at the end of the longest bar, so the space it needs has to come out of the
+	// plot rather than out of the canvas. Measured from the widest one: the heater view writes
+	// "55 W → fit 70 W" where the flow view writes "33.5 mm³/s", and a fixed reserve clips one or
+	// wastes half the width on the other
+	const valueReserve = Math.min(
+		Math.max(...model.series.map((entry) => estimateTextWidth(entry.text, VALUE_SIZE)), 0) + 24,
+		MAX_VALUE_RESERVE
+	);
+	const plotWidth = OG_WIDTH - PADDING_X - plotLeft - Math.max(valueReserve, 90);
 	const available = CHART_BOTTOM - CHART_TOP;
 	const rowHeight = Math.min(available / model.series.length, MAX_BAR_HEIGHT + BAR_GAP);
 	const barHeight = Math.max(rowHeight - BAR_GAP, 8);
@@ -110,10 +121,10 @@ function renderBars(model: OgModel): string {
 				anchor: 'end'
 			}),
 			`<rect x="${plotLeft}" y="${y}" width="${width}" height="${barHeight}" rx="4" fill="${TONE_COLORS[entry.tone]}" />`,
-			text(entry.text, {
+			text(fitText(entry.text, VALUE_SIZE, MAX_VALUE_RESERVE - 24), {
 				x: plotLeft + width + 12,
 				y: y + barHeight / 2 + 6,
-				size: 18,
+				size: VALUE_SIZE,
 				fill: COLORS.muted
 			})
 		].join('\n\t');

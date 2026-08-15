@@ -180,7 +180,6 @@ export const selectedHotendDefinitionsAtom = atom<HotendDefinition[]>(
 
 /** Bundled once so both hotend views are computed against exactly the same numbers */
 const performanceInputAtom = atom((get) => {
-	const thermal = get(currentThermalSettingsAtom);
 	const energy = get(energyAtom);
 
 	return {
@@ -188,8 +187,6 @@ const performanceInputAtom = atom((get) => {
 		printEnergy: energy.toPrint,
 		flowRate: get(flowRateAtom),
 		limit: get(specificPowerLimitAtom),
-		heaterPower: thermal.heaterPower,
-		heaterEfficiency: thermal.heaterEfficiency,
 		printTemperature: get(printTemperatureAtom),
 		options: get(currentHotendOptionsAtom)
 	};

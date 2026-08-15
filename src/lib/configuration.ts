@@ -7,9 +7,7 @@ import type {
 	CubicMillimetersPerSecondPerMillimeter,
 	Millimeter,
 	MillimetersPerSecond,
-	Percent,
-	Seconds,
-	Watts
+	Seconds
 } from '@/lib/units';
 
 /**
@@ -60,22 +58,17 @@ export type ThermalSettings = {
 	 * melt zone sustains with the reference material (PLA at its default temperatures).
 	 */
 	referenceFlowPerMeltZoneMm: CubicMillimetersPerSecondPerMillimeter;
-	heaterPower: Watts;
-	/** Fraction of heater output that reaches the plastic rather than the block and the air */
-	heaterEfficiency: Percent;
 	/** Drawn as a floor on the residence charts; below it the melt is unlikely to be uniform */
 	minimumResidenceTime: Seconds;
 };
 
 export const DEFAULT_THERMAL_SETTINGS: ThermalSettings = {
 	referenceFlowPerMeltZoneMm: 1 as CubicMillimetersPerSecondPerMillimeter,
-	heaterPower: 50 as Watts,
-	heaterEfficiency: 70 as Percent,
 	minimumResidenceTime: 1 as Seconds
 };
 
 /** Which analysis is on screen */
-export type ViewMode = 'flow' | 'residence' | 'energy' | 'meltZone' | 'cost';
+export type ViewMode = 'flow' | 'residence' | 'energy' | 'meltZone' | 'cost' | 'heater';
 
 /**
  * The views, in two groups, because they answer two different questions: three of them hold the
@@ -90,6 +83,7 @@ export const VIEW_GROUPS: { label: string; modes: { value: ViewMode; label: stri
 			{ value: 'flow', label: 'Max flow' },
 			{ value: 'residence', label: 'Residence' },
 			{ value: 'meltZone', label: 'Melt zone' },
+			{ value: 'heater', label: 'Heater' },
 			{ value: 'cost', label: 'Cost' }
 		]
 	},

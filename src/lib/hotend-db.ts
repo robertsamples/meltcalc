@@ -53,6 +53,22 @@ export const HOTEND_DB: HotendDefinition[] = [
 		price: 10 as Dollars
 	},
 	{
+		id: 'Bambulab|H2 hotend',
+		manufacturer: 'Bambulab',
+		name: 'H2 hotend',
+		ecosystem: 'H2',
+		mountingPattern: 'H2',
+		nozzle: 'Integrated',
+		mzeCompatible: false,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 350 as Celsius }
+		],
+		meltZoneLength: 33 as Millimeter,
+		price: 18 as Dollars
+	},
+	{
 		id: 'Bambulab|X1C OEM hotend',
 		manufacturer: 'Bambulab',
 		name: 'X1C OEM hotend',

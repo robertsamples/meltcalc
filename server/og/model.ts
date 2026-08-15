@@ -1,7 +1,13 @@
 import { decodeConfig } from '@/lib/config-sharing';
 import { hotendLabel, resolveHotends } from '@/lib/hotend';
 import { findMaterial, MATERIAL_DB } from '@/lib/material';
-import { energyPerVolume, hotendPerformance, specificPowerLimit, volumetricFlow } from '@/lib/thermal';
+import {
+	energyPerVolume,
+	HEATER_EFFICIENCY,
+	hotendPerformance,
+	specificPowerLimit,
+	volumetricFlow
+} from '@/lib/thermal';
 
 /**
  * Everything the OpenGraph image and the OpenGraph meta tags need, derived from a `?config=`
@@ -108,8 +114,6 @@ export function buildOgModel(configParam: string | null | undefined): OgModel {
 			printEnergy: energy.toPrint,
 			flowRate,
 			limit: specificPowerLimit(thermalSettings.referenceFlowPerMeltZoneMm),
-			heaterPower: thermalSettings.heaterPower,
-			heaterEfficiency: thermalSettings.heaterEfficiency,
 			printTemperature,
 			options: imported.config.hotendOptions
 		})
@@ -122,7 +126,10 @@ export function buildOgModel(configParam: string | null | undefined): OgModel {
 		meltEnergy: energy.toMelt
 	};
 
-	return viewMode === 'cost' ? buildCostModel(performance, common) : buildFlowModel(performance, common);
+	if (viewMode === 'cost') return buildCostModel(performance, common);
+	if (viewMode === 'heater') return buildHeaterModel(performance, common);
+
+	return buildFlowModel(performance, common);
 }
 
 type CommonInput = {
@@ -211,6 +218,53 @@ function buildCostModel(performance: Performance[], common: CommonInput): OgMode
 			{ label: 'Cheapest flow', value: `$${formatNumber(cheapest.costPerFlow as number, 2)} per mm³/s` },
 			{ label: 'On', value: truncate(cheapest.hotend.name, 18) },
 			{ label: 'Priced', value: `${priced.length}/${performance.length}` }
+		],
+		series,
+		target: null
+	};
+}
+
+/** The heater tab: the cartridge each hotend needs to be fed at its own maximum, biggest first */
+function buildHeaterModel(performance: Performance[], common: CommonInput): OgModel {
+	const series: OgSeries[] = performance
+		.filter((entry) => Number.isFinite(entry.requiredHeaterPower))
+		.map((entry) => ({
+			label: truncate(hotendLabel(entry.hotend)),
+			value: entry.requiredHeaterPower,
+			text:
+				entry.recommendedHeater === null
+					? `${formatNumber(entry.requiredHeaterPower, 0)} W · none stocked`
+					: `${formatNumber(entry.requiredHeaterPower, 0)} W → fit ${formatNumber(entry.recommendedHeater, 0)} W`,
+			// A requirement no cartridge covers is the one judgement this view makes
+			tone: (entry.recommendedHeater === null ? 'bad' : 'accent') as OgTone
+		}))
+		.sort((a, b) => b.value - a.value);
+
+	if (series.length === 0) return buildFlowModel(performance, common);
+
+	const hungriest = performance
+		.slice()
+		.sort((a, b) => b.requiredHeaterPower - a.requiredHeaterPower)[0];
+	const subtitle = [
+		common.materialName,
+		`${formatNumber(common.meltEnergy, 3)} J/mm³ to melt`,
+		`${formatNumber(HEATER_EFFICIENCY, 0)}% of rated output reaching the plastic`
+	].join(' · ');
+
+	return {
+		variant: 'config',
+		title: `${truncate(hungriest.hotend.name, 20)} needs ${formatNumber(hungriest.requiredHeaterPower, 0)} W at full flow`,
+		subtitle,
+		description: `${subtitle}. Heater power to sustain each hotend's maximum flow rate.`,
+		alt: `Heater power required in ${common.materialName} for ${series.map((entry) => entry.label).join(', ')}`,
+		facts: [
+			{ label: 'Material', value: truncate(common.materialName) },
+			{ label: 'Hungriest', value: `${formatNumber(hungriest.requiredHeaterPower, 0)} W` },
+			{ label: 'On', value: truncate(hungriest.hotend.name, 18) },
+			{
+				label: 'Cartridge',
+				value: hungriest.recommendedHeater === null ? 'none stocked' : `${formatNumber(hungriest.recommendedHeater, 0)} W`
+			}
 		],
 		series,
 		target: null
