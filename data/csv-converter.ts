@@ -162,6 +162,8 @@ async function generateHotends() {
 			nonstructuralHeatbreak: required(row, 'Nonstructural heatbreak', context).toUpperCase() === 'Y',
 			blockOptions: parseBlockOptions(row, context),
 			meltZoneLength: requiredNumber(row, 'Melt zone', context),
+			// Blank means the 1.75 mm nearly everything takes, so only the odd one out needs a value
+			filamentDiameter: optionalNumber(row, 'Filament (mm)', context) ?? 1.75,
 			price: optionalNumber(row, 'Price (USD)', context)
 		};
 	});
@@ -196,6 +198,7 @@ async function generateHotends() {
 					.join(',\n') +
 				`\n\t\t],\n` +
 				`\t\tmeltZoneLength: ${hotend.meltZoneLength} as Millimeter,\n` +
+				`\t\tfilamentDiameter: ${hotend.filamentDiameter} as Millimeter,\n` +
 				`\t\tprice: ${hotend.price === null ? 'null' : `${hotend.price} as Dollars`}\n` +
 				`\t}`
 		)

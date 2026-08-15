@@ -1,3 +1,4 @@
+import { BAND_SAMPLES } from '@/lib/cost-bands';
 import type { OgModel, OgTone } from './model';
 
 /**
@@ -154,6 +155,117 @@ function renderBars(model: OgModel): string {
 	return [target, ...rows].join('\n\t');
 }
 
+/**
+ * The cost card's cloud: price against flow for the whole database, with the fitted line through it.
+ *
+ * Log x, because the prices span two and a half orders of magnitude and a linear axis would pile
+ * three quarters of the database against the left edge. No tick labels beyond the corners — at
+ * unfurl size the shape is the message, and a grid of numbers nobody can read is just noise.
+ */
+function renderScatter(scatter: NonNullable<OgModel['scatter']>): string {
+	const points = scatter.points.filter((point) => point.x > 0 && Number.isFinite(point.y));
+	if (points.length === 0) return '';
+
+	const plotLeft = PADDING_X + 52;
+	const plotRight = OG_WIDTH - PADDING_X;
+	const plotTop = CHART_TOP - 24;
+	const plotBottom = CHART_BOTTOM - 26;
+
+	const xs = points.map((point) => Math.log(point.x));
+	const minX = Math.min(...xs);
+	const maxX = Math.max(...xs);
+	const maxY = Math.max(...points.map((point) => point.y));
+	const spanX = maxX - minX || 1;
+
+	const toX = (price: number) => plotLeft + ((Math.log(price) - minX) / spanX) * (plotRight - plotLeft);
+	const toY = (flow: number) => plotBottom - (flow / (maxY || 1)) * (plotBottom - plotTop);
+
+	const frame = [
+		`<line x1="${plotLeft}" y1="${plotBottom}" x2="${plotRight}" y2="${plotBottom}" stroke="${COLORS.dim}" stroke-opacity="0.6" />`,
+		`<line x1="${plotLeft}" y1="${plotTop}" x2="${plotLeft}" y2="${plotBottom}" stroke="${COLORS.dim}" stroke-opacity="0.6" />`
+	].join('\n\t');
+
+	// The same background the app draws, from the same band spec, so a shared link unfurls in the
+	// colour scheme it was shared in
+	const bands = scatter.bands
+		? (() => {
+				const prices = Array.from({ length: BAND_SAMPLES }, (_, index) =>
+					Math.exp(minX + (spanX * index) / (BAND_SAMPLES - 1))
+				);
+				const clamp = (flow: number) => Math.min(Math.max(flow, 0), maxY);
+				const spec = scatter.bands;
+
+				return spec.bands
+					.map(({ color, opacity }, index) => {
+						const upper = prices.map((price) => clamp(spec.edges[index](price)));
+						const lower = prices.map((price) => clamp(spec.edges[index + 1](price)));
+						if (upper.every((flow, at) => flow <= lower[at])) return '';
+
+						const path = [
+							...prices.map(
+								(price, at) => `${at === 0 ? 'M' : 'L'} ${toX(price).toFixed(1)} ${toY(upper[at]).toFixed(1)}`
+							),
+							...prices
+								.map((price, at) => `L ${toX(price).toFixed(1)} ${toY(lower[at]).toFixed(1)}`)
+								.reverse(),
+							'Z'
+						].join(' ');
+
+						return `<path d="${path}" fill="${color}" fill-opacity="${opacity}" />`;
+					})
+					.filter(Boolean)
+					.join('\n\t');
+			})()
+		: '';
+
+	const trend = scatter.trend
+		? (() => {
+				const at = (price: number) => scatter.trend!.intercept + scatter.trend!.slope * Math.log(price);
+				const from = Math.exp(minX);
+				const to = Math.exp(maxX);
+				const clamp = (flow: number) => Math.min(Math.max(flow, 0), maxY);
+
+				return `<line x1="${toX(from)}" y1="${toY(clamp(at(from)))}" x2="${toX(to)}" y2="${toY(clamp(at(to)))}" stroke="${COLORS.muted}" stroke-opacity="0.5" stroke-width="3" />`;
+			})()
+		: '';
+
+	// Unselected first, so a hotend someone picked is never buried under one they did not
+	const marks = [...points]
+		.sort((a, b) => Number(a.selected) - Number(b.selected))
+		.map(
+			(point) =>
+				`<circle cx="${toX(point.x).toFixed(1)}" cy="${toY(point.y).toFixed(1)}" r="${point.selected ? 9 : 6}" fill="${point.selected ? COLORS.accent : COLORS.dim}" fill-opacity="${point.selected ? 1 : 0.65}" />`
+		)
+		.join('\n\t');
+
+	const axes = [
+		text(scatter.yLabel, { x: plotLeft - 10, y: plotTop + 6, size: 17, fill: COLORS.dim, anchor: 'end' }),
+		text(`${formatWhole(maxY)}`, { x: plotLeft - 10, y: plotTop + 26, size: 17, fill: COLORS.muted, anchor: 'end' }),
+		text('0', { x: plotLeft - 10, y: plotBottom, size: 17, fill: COLORS.muted, anchor: 'end' }),
+		text(`$${formatWhole(Math.exp(minX))}`, { x: plotLeft, y: plotBottom + 26, size: 17, fill: COLORS.muted }),
+		text(`$${formatWhole(Math.exp(maxX))}`, {
+			x: plotRight,
+			y: plotBottom + 26,
+			size: 17,
+			fill: COLORS.muted,
+			anchor: 'end'
+		}),
+		text(scatter.xLabel, {
+			x: (plotLeft + plotRight) / 2,
+			y: plotBottom + 26,
+			size: 17,
+			fill: COLORS.dim,
+			anchor: 'middle'
+		})
+	].join('\n\t');
+
+	return [bands, frame, trend, marks, axes].filter(Boolean).join('\n\t');
+}
+
+function formatWhole(value: number): string {
+	return String(Math.round(value));
+}
+
 function renderFacts(model: OgModel): string {
 	if (model.facts.length === 0) return '';
 
@@ -193,6 +305,6 @@ export function renderOgSvg(model: OgModel, siteName: string): string {
 	${text(fitText(model.subtitle, 26, contentWidth), { x: PADDING_X, y: SUBTITLE_Y, size: 26, fill: COLORS.muted })}
 	<line x1="${PADDING_X}" y1="${SUBTITLE_Y + 26}" x2="${OG_WIDTH - PADDING_X}" y2="${SUBTITLE_Y + 26}" stroke="${COLORS.dim}" stroke-opacity="0.5" />
 	${renderFacts(model)}
-	${renderBars(model)}
+	${model.scatter ? renderScatter(model.scatter) : renderBars(model)}
 </svg>`;
 }

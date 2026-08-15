@@ -1,6 +1,7 @@
 import { useAtom, useSetAtom } from 'jotai';
 import { useEffect } from 'react';
 import { AboutCard } from '@/components/about';
+import { AttributionCard } from '@/components/attribution';
 import { CostPerFlowChart, PriceVsFlowScatter } from '@/components/charts/cost-charts';
 import { EnergyChart } from '@/components/charts/energy-chart';
 import { HeaterChart } from '@/components/charts/heater-chart';
@@ -86,10 +87,12 @@ export function App() {
 					{viewMode === 'energy' ? <EnergyChart /> : null}
 					{viewMode === 'heater' ? <HeaterChart /> : null}
 					{viewMode === 'materialFlow' ? <MaterialFlowChart /> : null}
+					{/* The scatter leads: it is the one that answers "what should I buy", and the ranked
+					    bars below it are the detail for the shortlist */}
 					{viewMode === 'cost' ? (
 						<>
-							<CostPerFlowChart />
 							<PriceVsFlowScatter />
+							<CostPerFlowChart />
 						</>
 					) : null}
 					{viewMode === 'meltZone' ? (
@@ -111,10 +114,12 @@ export function App() {
 						</>
 					)}
 					<AboutCard className="max-lg:hidden" />
+					<AttributionCard className="max-lg:hidden" />
 				</div>
 			</div>
 
 			<AboutCard className="lg:hidden" />
+			<AttributionCard className="lg:hidden" />
 		</div>
 	);
 }

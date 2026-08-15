@@ -3,8 +3,9 @@ import {
 	blockMaterialFactor,
 	effectiveMeltZoneLength,
 	type HotendDefinition,
-	type HotendOptions, 
+	type HotendOptions,
 	hasHfNozzle,
+	hasMze,
 	resolveBlock
 } from '@/lib/hotend';
 import { defaultMaterial, type MaterialDefinition } from '@/lib/material';
@@ -34,11 +35,26 @@ import type {
  * The one empirical input is `referenceFlowPerMeltZoneMm` — see `specificPowerLimit`.
  */
 
-/** Everything here assumes 1.75 mm filament */
+/** What the model is calibrated on, and what a hotend is assumed to take unless it says otherwise */
 export const FILAMENT_DIAMETER = 1.75 as Millimeter;
 
+export function filamentCrossSection(diameter: Millimeter): SquareMillimeter {
+	return ((Math.PI / 4) * diameter ** 2) as SquareMillimeter;
+}
+
 /** ≈2.405 mm². The channel the melt zone heats is filament-sized, so this sets residence time */
-export const FILAMENT_CROSS_SECTION = ((Math.PI / 4) * FILAMENT_DIAMETER ** 2) as SquareMillimeter;
+export const FILAMENT_CROSS_SECTION = filamentCrossSection(FILAMENT_DIAMETER);
+
+/**
+ * Filament diameter deliberately does not scale the melt zone's flow ceiling.
+ *
+ * The ceiling is a power balance — watts a millimetre can couple in, divided by joules per cubic
+ * millimetre — and neither term is a function of bore. Thicker filament needs proportionally more
+ * energy per millimetre of its own length, but that is already paid for by the energy term, and it
+ * buys proportionally more residence time in the same melt zone. What the model does not capture is
+ * that the extra heat has further to travel inwards, so the numbers for a 2.85 mm hotend are
+ * optimistic in the same way as everything else here: as a comparison, not a promise.
+ */
 
 /**
  * Cross-section of one extruded line: a rectangle with semicircular sides, which is the model
@@ -61,13 +77,19 @@ export function volumetricFlow(
 }
 
 /** How fast the extruder has to push filament to sustain a flow rate */
-export function filamentFeedRate(flowRate: CubicMillimetersPerSecond): MillimetersPerSecond {
-	return (flowRate / FILAMENT_CROSS_SECTION) as MillimetersPerSecond;
+export function filamentFeedRate(
+	flowRate: CubicMillimetersPerSecond,
+	diameter: Millimeter = FILAMENT_DIAMETER
+): MillimetersPerSecond {
+	return (flowRate / filamentCrossSection(diameter)) as MillimetersPerSecond;
 }
 
 /** The volume of plastic inside the heated length at any instant */
-export function meltZoneVolume(meltZoneLength: Millimeter): CubicMillimeter {
-	return (meltZoneLength * FILAMENT_CROSS_SECTION) as CubicMillimeter;
+export function meltZoneVolume(
+	meltZoneLength: Millimeter,
+	diameter: Millimeter = FILAMENT_DIAMETER
+): CubicMillimeter {
+	return (meltZoneLength * filamentCrossSection(diameter)) as CubicMillimeter;
 }
 
 /**
@@ -77,10 +99,14 @@ export function meltZoneVolume(meltZoneLength: Millimeter): CubicMillimeter {
  * of the filament, and it falls off as `1/flow`: the reason fast printing needs a long melt zone
  * rather than just a hotter one.
  */
-export function residenceTime(meltZoneLength: Millimeter, flowRate: CubicMillimetersPerSecond): Seconds {
+export function residenceTime(
+	meltZoneLength: Millimeter,
+	flowRate: CubicMillimetersPerSecond,
+	diameter: Millimeter = FILAMENT_DIAMETER
+): Seconds {
 	if (!(flowRate > 0)) return Number.POSITIVE_INFINITY as Seconds;
 
-	return (meltZoneVolume(meltZoneLength) / flowRate) as Seconds;
+	return (meltZoneVolume(meltZoneLength, diameter) / flowRate) as Seconds;
 }
 
 export function temperatureDelta(from: Celsius, to: Celsius): Kelvin {
@@ -299,6 +325,8 @@ export type HotendPerformance = {
 	block: BlockOption;
 	/** Melt zone length as configured, including an extender and any high-flow nozzle equivalent */
 	meltZoneLength: Millimeter;
+	/** Whether a melt zone extender is fitted */
+	mze: boolean;
 	/** Whether that length includes a high-flow nozzle, i.e. is longer than the physical channel */
 	hfNozzle: boolean;
 	/** Whether that block can reach the material's print temperature at all */
@@ -309,6 +337,8 @@ export type HotendPerformance = {
 	 * sizing costs is answered separately, by `requiredHeaterPower`.
 	 */
 	maxFlow: CubicMillimetersPerSecond;
+	/** Extruder velocity at the configured flow, on whatever filament this hotend takes */
+	feedRate: MillimetersPerSecond;
 	/** Watts a cartridge must be rated for to keep `maxFlow` fed */
 	requiredHeaterPower: Watts;
 	/** Smallest stocked cartridge that covers it, or `null` if nothing on the list does */
@@ -358,12 +388,14 @@ export function hotendPerformance(
 		hotend,
 		block,
 		meltZoneLength,
+		mze: hasMze(hotend, hotendOptions),
 		hfNozzle: hasHfNozzle(hotend, hotendOptions),
 		withinTemperature: printTemperature <= block.maxTemperature,
 		maxFlow,
 		requiredHeaterPower: heaterPower,
 		recommendedHeater: recommendedHeater(heaterPower),
-		residenceTime: residenceTime(meltZoneLength, flowRate),
+		residenceTime: residenceTime(meltZoneLength, flowRate, hotend.filamentDiameter),
+		feedRate: filamentFeedRate(flowRate, hotend.filamentDiameter),
 		specificPower: specificMeltPower(meltPower(meltEnergy, flowRate), meltZoneLength),
 		headroom: flowRate > 0 ? maxFlow / flowRate : Number.POSITIVE_INFINITY,
 		costPerFlow:

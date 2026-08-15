@@ -18,6 +18,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 26 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 160 as Dollars
 	},
 	{
@@ -34,6 +35,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 53 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 210 as Dollars
 	},
 	{
@@ -50,12 +52,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 27.2 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 10 as Dollars
 	},
 	{
-		id: 'Bambulab|H2 hotend',
+		id: 'Bambulab|H2 Hotend',
 		manufacturer: 'Bambulab',
-		name: 'H2 hotend',
+		name: 'H2 Hotend',
 		ecosystem: 'H2',
 		mountingPattern: 'H2',
 		nozzle: 'Integrated',
@@ -66,12 +69,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 33 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 18 as Dollars
 	},
 	{
-		id: 'Bambulab|X1C OEM hotend',
+		id: 'Bambulab|X1C OEM Hotend',
 		manufacturer: 'Bambulab',
-		name: 'X1C OEM hotend',
+		name: 'X1C OEM Hotend',
 		ecosystem: 'X1C',
 		mountingPattern: 'X1C',
 		nozzle: 'Integrated',
@@ -82,6 +86,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 24.2 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 20 as Dollars
 	},
 	{
@@ -98,12 +103,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'St', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 28 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 45 as Dollars
 	},
 	{
-		id: 'Brumpo Tungus|brumpo hotend',
+		id: 'Brumpo Tungus|Brumpo Hotend',
 		manufacturer: 'Brumpo Tungus',
-		name: 'brumpo hotend',
+		name: 'Brumpo Hotend',
 		ecosystem: null,
 		mountingPattern: null,
 		nozzle: 'V6',
@@ -114,12 +120,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 74.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: null
 	},
 	{
-		id: 'Brumpo Tungus|Brumpo WC hotend',
+		id: 'Brumpo Tungus|Brumpo WC Hotend',
 		manufacturer: 'Brumpo Tungus',
-		name: 'Brumpo WC hotend',
+		name: 'Brumpo WC Hotend',
 		ecosystem: null,
 		mountingPattern: null,
 		nozzle: 'V6',
@@ -130,6 +137,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 50 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: null
 	},
 	{
@@ -146,6 +154,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'St', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 92 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: null
 	},
 	{
@@ -162,6 +171,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 114 as Millimeter,
+		filamentDiameter: 2.85 as Millimeter,
 		price: 2700 as Dollars
 	},
 	{
@@ -178,12 +188,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Br', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 19.6 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 95 as Dollars
 	},
 	{
-		id: 'E3D|supervolcano',
+		id: 'E3D|Supervolcano',
 		manufacturer: 'E3D',
-		name: 'supervolcano',
+		name: 'Supervolcano',
 		ecosystem: 'V6',
 		mountingPattern: 'Groove',
 		nozzle: 'V6 Supervolcano',
@@ -195,12 +206,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 57.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 30 as Dollars
 	},
 	{
-		id: 'E3D|v6',
+		id: 'E3D|V6',
 		manufacturer: 'E3D',
-		name: 'v6',
+		name: 'V6',
 		ecosystem: 'V6',
 		mountingPattern: 'Groove',
 		nozzle: 'V6',
@@ -212,12 +224,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 17.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 8 as Dollars
 	},
 	{
-		id: 'E3D|v6 volcano',
+		id: 'E3D|V6 Volcano',
 		manufacturer: 'E3D',
-		name: 'v6 volcano',
+		name: 'V6 Volcano',
 		ecosystem: 'V6',
 		mountingPattern: 'Groove',
 		nozzle: 'V6 Volcano',
@@ -229,6 +242,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 26 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 12 as Dollars
 	},
 	{
@@ -245,6 +259,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Br', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 35.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 9 as Dollars
 	},
 	{
@@ -261,12 +276,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 34.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 22 as Dollars
 	},
 	{
-		id: 'Generic|TZ hotends',
+		id: 'Generic|TZ Hotends',
 		manufacturer: 'Generic',
-		name: 'TZ hotends',
+		name: 'TZ Hotends',
 		ecosystem: 'X1C',
 		mountingPattern: 'X1C',
 		nozzle: 'TZ',
@@ -277,6 +293,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 24.2 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 12 as Dollars
 	},
 	{
@@ -293,6 +310,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 25.35 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 12 as Dollars
 	},
 	{
@@ -309,12 +327,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 35.65 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 22 as Dollars
 	},
 	{
-		id: 'Lukes Lab|chube air',
+		id: 'Lukes Lab|Chube Air',
 		manufacturer: 'Lukes Lab',
-		name: 'chube air',
+		name: 'Chube Air',
 		ecosystem: 'Chube',
 		mountingPattern: 'Dragon',
 		nozzle: 'V6',
@@ -325,12 +344,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 46 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 260 as Dollars
 	},
 	{
-		id: 'Lukes Lab|chube compact',
+		id: 'Lukes Lab|Chube Compact',
 		manufacturer: 'Lukes Lab',
-		name: 'chube compact',
+		name: 'Chube Compact',
 		ecosystem: 'Chube',
 		mountingPattern: 'Dragon',
 		nozzle: 'V6',
@@ -341,12 +361,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 38.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 165 as Dollars
 	},
 	{
-		id: 'Lukes Lab|chube conduction',
+		id: 'Lukes Lab|Chube Conduction',
 		manufacturer: 'Lukes Lab',
-		name: 'chube conduction',
+		name: 'Chube Conduction',
 		ecosystem: 'Chube',
 		mountingPattern: 'Dragon',
 		nozzle: 'V6',
@@ -357,6 +378,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 56 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 320 as Dollars
 	},
 	{
@@ -373,12 +395,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 33 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 125 as Dollars
 	},
 	{
-		id: 'Mellow|goliath',
+		id: 'Mellow|Goliath',
 		manufacturer: 'Mellow',
-		name: 'goliath',
+		name: 'Goliath',
 		ecosystem: 'Vzbot',
 		mountingPattern: 'Dragon',
 		nozzle: 'V6',
@@ -389,6 +412,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 51.15 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 120 as Dollars
 	},
 	{
@@ -406,6 +430,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 18.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 41 as Dollars
 	},
 	{
@@ -423,6 +448,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 25 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 44 as Dollars
 	},
 	{
@@ -440,6 +466,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 34.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 50 as Dollars
 	},
 	{
@@ -457,12 +484,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 28 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 48 as Dollars
 	},
 	{
-		id: 'Metaform|Pico hotend',
+		id: 'Metaform|Pico Hotend',
 		manufacturer: 'Metaform',
-		name: 'Pico hotend',
+		name: 'Pico Hotend',
 		ecosystem: 'V6',
 		mountingPattern: 'Groove',
 		nozzle: 'V6',
@@ -474,6 +502,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 20.55 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 100 as Dollars
 	},
 	{
@@ -490,12 +519,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 28.6 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 80 as Dollars
 	},
 	{
-		id: 'Peopoly|Lancer long',
+		id: 'Peopoly|Lancer Long',
 		manufacturer: 'Peopoly',
-		name: 'Lancer long',
+		name: 'Lancer Long',
 		ecosystem: 'Lancer',
 		mountingPattern: 'Lancer',
 		nozzle: 'V6 Volcano',
@@ -506,12 +536,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 45 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 37.5 as Dollars
 	},
 	{
-		id: 'Peopoly|Lancer short',
+		id: 'Peopoly|Lancer Short',
 		manufacturer: 'Peopoly',
-		name: 'Lancer short',
+		name: 'Lancer Short',
 		ecosystem: 'Lancer',
 		mountingPattern: 'Lancer',
 		nozzle: 'V6 Volcano',
@@ -522,12 +553,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 28 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 22.5 as Dollars
 	},
 	{
-		id: 'Peopoly|Lancer standard',
+		id: 'Peopoly|Lancer Standard',
 		manufacturer: 'Peopoly',
-		name: 'Lancer standard',
+		name: 'Lancer Standard',
 		ecosystem: 'Lancer',
 		mountingPattern: 'Lancer',
 		nozzle: 'V6 Volcano',
@@ -538,12 +570,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 36.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 30 as Dollars
 	},
 	{
-		id: 'Phaetus|dragon',
+		id: 'Phaetus|Dragon',
 		manufacturer: 'Phaetus',
-		name: 'dragon',
+		name: 'Dragon',
 		ecosystem: 'Dragon',
 		mountingPattern: 'Dragon',
 		nozzle: 'V6',
@@ -555,12 +588,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 26 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 55 as Dollars
 	},
 	{
-		id: 'Phaetus|dragon HF',
+		id: 'Phaetus|Dragon HF',
 		manufacturer: 'Phaetus',
-		name: 'dragon HF',
+		name: 'Dragon HF',
 		ecosystem: 'Dragon',
 		mountingPattern: 'Dragon',
 		nozzle: 'V6',
@@ -572,12 +606,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 33.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 60 as Dollars
 	},
 	{
-		id: 'Phaetus|dragon volcano',
+		id: 'Phaetus|Dragon Volcano',
 		manufacturer: 'Phaetus',
-		name: 'dragon volcano',
+		name: 'Dragon Volcano',
 		ecosystem: 'Dragon',
 		mountingPattern: 'Dragon',
 		nozzle: 'V6 Volcano',
@@ -589,12 +624,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 34.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 65 as Dollars
 	},
 	{
-		id: 'Phaetus|dragon volcano UHF',
+		id: 'Phaetus|Dragon Volcano UHF',
 		manufacturer: 'Phaetus',
-		name: 'dragon volcano UHF',
+		name: 'Dragon Volcano UHF',
 		ecosystem: 'Dragon',
 		mountingPattern: 'Dragon',
 		nozzle: 'V6 Volcano',
@@ -606,12 +642,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 35.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 70 as Dollars
 	},
 	{
-		id: 'Phaetus|dragon volcano UUHF',
+		id: 'Phaetus|Dragon Volcano UUHF',
 		manufacturer: 'Phaetus',
-		name: 'dragon volcano UUHF',
+		name: 'Dragon Volcano UUHF',
 		ecosystem: 'Dragon',
 		mountingPattern: 'Dragon',
 		nozzle: 'V6 Volcano',
@@ -623,6 +660,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 43 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 75 as Dollars
 	},
 	{
@@ -639,6 +677,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 35 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 37.6 as Dollars
 	},
 	{
@@ -655,6 +694,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 34 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 90 as Dollars
 	},
 	{
@@ -671,6 +711,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 17.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 450 as Dollars
 	},
 	{
@@ -687,12 +728,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 23.7 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 35 as Dollars
 	},
 	{
-		id: 'Slice Engineering|mosquito',
+		id: 'Slice Engineering|Mosquito',
 		manufacturer: 'Slice Engineering',
-		name: 'mosquito',
+		name: 'Mosquito',
 		ecosystem: 'Mosquito',
 		mountingPattern: 'Mosquito',
 		nozzle: 'V6',
@@ -703,12 +745,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 18.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 150 as Dollars
 	},
 	{
-		id: 'Slice Engineering|mosquito magnum',
+		id: 'Slice Engineering|Mosquito Magnum',
 		manufacturer: 'Slice Engineering',
-		name: 'mosquito magnum',
+		name: 'Mosquito Magnum',
 		ecosystem: 'Mosquito',
 		mountingPattern: 'Mosquito',
 		nozzle: 'V6',
@@ -719,12 +762,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 25 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 175 as Dollars
 	},
 	{
-		id: 'Slice Engineering|mosquito magnum+',
+		id: 'Slice Engineering|Mosquito Magnum+',
 		manufacturer: 'Slice Engineering',
-		name: 'mosquito magnum+',
+		name: 'Mosquito Magnum+',
 		ecosystem: 'Mosquito',
 		mountingPattern: 'Mosquito',
 		nozzle: 'V6',
@@ -735,12 +779,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 38.7 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 369 as Dollars
 	},
 	{
-		id: 'Slice Engineering|mosquito magnum+ HF',
+		id: 'Slice Engineering|Mosquito Magnum+ HF',
 		manufacturer: 'Slice Engineering',
-		name: 'mosquito magnum+ HF',
+		name: 'Mosquito Magnum+ HF',
 		ecosystem: 'Mosquito',
 		mountingPattern: 'Mosquito',
 		nozzle: 'V6',
@@ -751,12 +796,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 45.2 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 423 as Dollars
 	},
 	{
-		id: 'Slice Engineering|mosquito prime',
+		id: 'Slice Engineering|Mosquito Prime',
 		manufacturer: 'Slice Engineering',
-		name: 'mosquito prime',
+		name: 'Mosquito Prime',
 		ecosystem: 'Mosquito',
 		mountingPattern: 'Mosquito',
 		nozzle: 'V6',
@@ -767,6 +813,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 66.7 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 1577 as Dollars
 	},
 	{
@@ -783,6 +830,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 330 as Celsius }
 		],
 		meltZoneLength: 51.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 67 as Dollars
 	},
 	{
@@ -799,12 +847,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 35 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 44 as Dollars
 	},
 	{
-		id: 'Trianglelab|dragon ace',
+		id: 'Trianglelab|Dragon Ace',
 		manufacturer: 'Trianglelab',
-		name: 'dragon ace',
+		name: 'Dragon Ace',
 		ecosystem: 'Dragon',
 		mountingPattern: 'Dragon',
 		nozzle: 'V6',
@@ -815,12 +864,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 36.2 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 80 as Dollars
 	},
 	{
-		id: 'Trianglelab|dragon ace volcano',
+		id: 'Trianglelab|Dragon Ace Volcano',
 		manufacturer: 'Trianglelab',
-		name: 'dragon ace volcano',
+		name: 'Dragon Ace Volcano',
 		ecosystem: 'Dragon',
 		mountingPattern: 'Dragon',
 		nozzle: 'V6',
@@ -831,6 +881,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 44.7 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 85 as Dollars
 	},
 	{
@@ -847,12 +898,13 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 51.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 116.5 as Dollars
 	},
 	{
-		id: 'Unknown|Lattice hotend',
+		id: 'Unknown|Lattice Hotend',
 		manufacturer: 'Unknown',
-		name: 'Lattice hotend',
+		name: 'Lattice Hotend',
 		ecosystem: null,
 		mountingPattern: null,
 		nozzle: 'V6',
@@ -863,6 +915,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 57.9 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: null
 	},
 	{
@@ -880,6 +933,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 18.8 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 8 as Dollars
 	},
 	{
@@ -896,6 +950,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 53 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 200 as Dollars
 	},
 	{
@@ -912,6 +967,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 39.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
 		price: 220 as Dollars
 	}
 ];

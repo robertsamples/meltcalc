@@ -36,20 +36,44 @@ export function seriesColor(index: number): string {
  * different marker, so a series is a colour *and* a shape rather than a colour alone — which is
  * also what keeps two similar hues apart for a reader who cannot separate them.
  */
-export const SERIES_SHAPES = ['circle', 'square', 'triangle', 'diamond', 'triangleDown', 'hexagon'] as const;
+export const SERIES_SHAPES = ['circle', 'square', 'triangle', 'diamond', 'triangleDown'] as const;
 
 export type SeriesShape = (typeof SERIES_SHAPES)[number];
 
-export function seriesShape(index: number): SeriesShape {
-	return SERIES_SHAPES[Math.floor(index / SERIES_COLORS.length) % SERIES_SHAPES.length];
+/**
+ * Filled and outlined, which doubles the shapes without inventing any.
+ *
+ * A hexagon was the sixth shape until this existed, and it was the weakest of them — at 10px it is
+ * a circle with opinions. Outlining is the better second axis: it survives at marker size, it does
+ * not depend on hue, and an outlined square is unmistakably not a filled one.
+ */
+export const SERIES_FILLS = [true, false] as const;
+
+/** Distinct drawings before a colour has to be reused: every shape in every fill */
+const SERIES_VARIANTS = SERIES_SHAPES.length * SERIES_FILLS.length;
+
+export type SeriesMarkerSpec = { color: string; shape: SeriesShape; filled: boolean };
+
+/**
+ * Colour varies fastest, then shape, then fill. So the first eight hotends are eight hues of filled
+ * circle, and the outlined set only appears once every filled shape has been used.
+ */
+export function seriesMarker(index: number): SeriesMarkerSpec {
+	const variant = Math.floor(index / SERIES_COLORS.length) % SERIES_VARIANTS;
+
+	return {
+		color: seriesColor(index),
+		shape: SERIES_SHAPES[variant % SERIES_SHAPES.length],
+		filled: variant < SERIES_SHAPES.length
+	};
 }
 
-export function seriesMarker(index: number): { color: string; shape: SeriesShape } {
-	return { color: seriesColor(index), shape: seriesShape(index) };
+export function seriesShape(index: number): SeriesShape {
+	return seriesMarker(index).shape;
 }
 
 /** Distinct pairings before one has to be reused */
-export const SERIES_CAPACITY = SERIES_COLORS.length * SERIES_SHAPES.length;
+export const SERIES_CAPACITY = SERIES_COLORS.length * SERIES_VARIANTS;
 
 /**
  * Status colours, deliberately distinct from the categorical slots so a state never impersonates

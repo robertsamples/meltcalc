@@ -124,12 +124,12 @@ export const MAX_COMPARED_HOTENDS = SERIES_CAPACITY;
 
 /** Hotends selected by default: one per family, spanning the range of melt zone lengths */
 export const DEFAULT_HOTEND_IDS = [
-	'E3D|v6',
-	'E3D|v6 volcano',
-	'Slice Engineering|mosquito magnum',
-	'Phaetus|dragon HF',
+	'E3D|V6',
+	'E3D|V6 Volcano',
+	'Slice Engineering|Mosquito Magnum',
+	'Phaetus|Dragon HF',
 	'Phaetus|Rapido UHF',
-	'Bambulab|X1C OEM hotend'
+	'Bambulab|X1C OEM Hotend'
 ];
 
 /** Energy chart axis: per cubic millimetre, or per second at the configured flow rate */
@@ -158,6 +158,17 @@ export const DEFAULT_MATERIAL_FLOW_AS_SPEED = false;
 /** Polymer families switched off in the material views, by name. Empty shows everything */
 export const DEFAULT_HIDDEN_FAMILIES: string[] = [];
 
+/**
+ * What the background of the price scatter means: what a mm³/s costs outright, or how each hotend
+ * stands against the price/flow trend of the whole database.
+ */
+export type CostBandMode = 'cost' | 'value';
+
+export const DEFAULT_COST_BAND_MODE: CostBandMode = 'cost';
+
+/** Whether the price scatter names the hotends it has room to name */
+export const DEFAULT_COST_LABELS = true;
+
 export const DEFAULT_DEBUG = false;
 
 /** Everything a share link carries. Keep it serialisable: it round-trips through JSON */
@@ -176,6 +187,8 @@ export type ShareableConfiguration = {
 	materialFlowAsSpeed: boolean;
 	/** Polymer families hidden from the material comparisons */
 	hiddenFamilies: string[];
+	costBandMode: CostBandMode;
+	costLabels: boolean;
 	debug: boolean;
 };
 
@@ -191,5 +204,7 @@ export const DEFAULT_CONFIGURATION: ShareableConfiguration = {
 	materialFlowHotend: DEFAULT_MATERIAL_FLOW_HOTEND,
 	materialFlowAsSpeed: DEFAULT_MATERIAL_FLOW_AS_SPEED,
 	hiddenFamilies: DEFAULT_HIDDEN_FAMILIES,
+	costBandMode: DEFAULT_COST_BAND_MODE,
+	costLabels: DEFAULT_COST_LABELS,
 	debug: DEFAULT_DEBUG
 };

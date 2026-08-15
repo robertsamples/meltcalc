@@ -1,6 +1,10 @@
+import { performanceLabel } from '@/lib/chart-labels';
 import { decodeConfig } from '@/lib/config-sharing';
-import { blockMaterialFactor, hotendLabel, resolveHotends } from '@/lib/hotend';
+import type { CostBandMode } from '@/lib/configuration';
+import { type BandSpec, costBands, valueBands } from '@/lib/cost-bands';
+import { blockMaterialFactor, HOTEND_DB, resolveHotends } from '@/lib/hotend';
 import { findMaterial, MATERIAL_DB } from '@/lib/material';
+import { fitAgainstLogX } from '@/lib/regression';
 import {
 	energyPerVolume,
 	extrusionCrossSection,
@@ -40,6 +44,21 @@ export type OgSeries = {
 	tone: OgTone;
 };
 
+/** A cloud of hotends for the cost card, which is a scatter on screen and so a scatter here */
+export type OgScatter = {
+	points: { x: number; y: number; selected: boolean }[];
+	/** Fitted line through them, in `y = intercept + slope · ln(x)` form */
+	trend: { slope: number; intercept: number } | null;
+	/**
+	 * The same background the sharer had on screen. Carried as the live band spec rather than as
+	 * colours alone, because the boundaries are curves that only exist as functions of price — and
+	 * this model never leaves the process, so there is nothing to serialise it through.
+	 */
+	bands: BandSpec | null;
+	xLabel: string;
+	yLabel: string;
+};
+
 export type OgModel = {
 	/** `generic` is the fallback card: no config, or one we could not decode */
 	variant: 'config' | 'generic';
@@ -53,6 +72,8 @@ export type OgModel = {
 	series: OgSeries[];
 	/** The dashed line across the bars, for the views that have a threshold */
 	target: { value: number; label: string } | null;
+	/** Drawn instead of the bars when present */
+	scatter?: OgScatter;
 };
 
 const GENERIC_MODEL: OgModel = {
@@ -119,17 +140,17 @@ export function buildOgModel(configParam: string | null | undefined): OgModel {
 	const availableLimit = (specificPowerLimit(thermalSettings.referenceFlowPerMeltZoneMm) *
 		superheatFactor(material.meltTemperature, material.printTemperature, printTemperature)) as WattsPerMillimeter;
 
+	const performanceInput = {
+		meltEnergy: energy.toMelt,
+		printEnergy: energy.toPrint,
+		flowRate,
+		limit: availableLimit,
+		printTemperature,
+		options: imported.config.hotendOptions
+	};
+
 	const { hotends } = resolveHotends(selectedHotends);
-	const performance = hotends.slice(0, MAX_SERIES).map((hotend) =>
-		hotendPerformance(hotend, {
-			meltEnergy: energy.toMelt,
-			printEnergy: energy.toPrint,
-			flowRate,
-			limit: availableLimit,
-			printTemperature,
-			options: imported.config.hotendOptions
-		})
-	);
+	const performance = hotends.slice(0, MAX_SERIES).map((hotend) => hotendPerformance(hotend, performanceInput));
 
 	const common = {
 		materialName: material.name,
@@ -138,7 +159,12 @@ export function buildOgModel(configParam: string | null | undefined): OgModel {
 		meltEnergy: energy.toMelt
 	};
 
-	if (viewMode === 'cost') return buildCostModel(performance, common);
+	// The cost card plots the whole database, not just the comparison, so it needs every hotend
+	if (viewMode === 'cost') {
+		const everything = HOTEND_DB.map((hotend) => hotendPerformance(hotend, performanceInput));
+
+		return buildCostModel(performance, common, everything, imported.config.costBandMode);
+	}
 	if (viewMode === 'heater') return buildHeaterModel(performance, common);
 	if (viewMode === 'materialFlow') {
 		const pinned = performance.find((entry) => entry.hotend.id === imported.config.materialFlowHotend);
@@ -175,7 +201,7 @@ type Performance = ReturnType<typeof hotendPerformance>;
 function buildFlowModel(performance: Performance[], common: CommonInput): OgModel {
 	const series: OgSeries[] = performance
 		.map((entry) => ({
-			label: truncate(hotendLabel(entry.hotend)),
+			label: truncate(performanceLabel(entry)),
 			value: Number.isFinite(entry.maxFlow) ? entry.maxFlow : 0,
 			text: `${formatNumber(entry.maxFlow, 1)} mm³/s`,
 			tone: (entry.headroom >= 1 ? 'good' : 'bad') as OgTone
@@ -215,15 +241,47 @@ function buildFlowModel(performance: Performance[], common: CommonInput): OgMode
 	};
 }
 
-/** The cost tab: what a mm³/s of flow costs on each hotend, cheapest first */
-function buildCostModel(performance: Performance[], common: CommonInput): OgModel {
+/**
+ * The cost tab, which leads with price against flow for the whole database — so the card does too.
+ *
+ * The bars underneath rank only the selected hotends; the scatter is the picture someone sharing
+ * this link is pointing at, and the one that survives being shrunk to unfurl size.
+ */
+function buildCostModel(
+	performance: Performance[],
+	common: CommonInput,
+	all: Performance[],
+	mode: CostBandMode
+): OgModel {
 	const priced = performance.filter((entry) => entry.hotend.price !== null && entry.costPerFlow !== null);
 
 	if (priced.length === 0) return buildFlowModel(performance, common);
 
+	const selected = new Set(performance.map((entry) => entry.hotend.id));
+	const cloud = all.filter((entry) => entry.hotend.price !== null && Number.isFinite(entry.maxFlow));
+	const trend = fitAgainstLogX(cloud.map((entry) => ({ x: entry.hotend.price as number, y: entry.maxFlow })));
+
+	const costs = cloud.map((entry) => entry.costPerFlow ?? 0).filter((cost) => cost > 0);
+	const bounds = { cheapest: Math.min(...costs), dearest: Math.max(...costs) };
+
+	const scatter: OgScatter = {
+		points: cloud.map((entry) => ({
+			x: entry.hotend.price as number,
+			y: entry.maxFlow,
+			selected: selected.has(entry.hotend.id)
+		})),
+		// Only where it means something: it is the reference the value bands are measured against,
+		// and the cost bands have nothing to do with it. The app makes the same choice
+		trend: mode === 'value' && trend ? { slope: trend.slope, intercept: trend.intercept } : null,
+		// Exactly what the app draws, from the same module, for the mode the link carries
+		bands: mode === 'value' ? valueBands(trend) : costBands(bounds),
+		xLabel: 'price (USD, log)',
+		yLabel: 'mm³/s'
+	};
+
 	const series: OgSeries[] = priced
 		.map((entry) => ({
-			label: truncate(hotendLabel(entry.hotend)),
+			label: truncate(performanceLabel(entry)),
 			value: entry.costPerFlow as number,
 			text: `$${formatNumber(entry.costPerFlow as number, 2)}`,
 			tone: 'accent' as OgTone
@@ -242,15 +300,16 @@ function buildCostModel(performance: Performance[], common: CommonInput): OgMode
 		title: `${truncate(cheapest.hotend.name, 22)} at $${formatNumber(cheapest.costPerFlow as number, 2)} per mm³/s`,
 		subtitle,
 		description: `${subtitle}. Cheapest flow in ${common.materialName} of the hotends compared.`,
-		alt: `Cost per mm³/s of flow in ${common.materialName} for ${series.map((entry) => entry.label).join(', ')}`,
+		alt: `Price against maximum flow rate in ${common.materialName} for ${cloud.length} hotends`,
 		facts: [
 			{ label: 'Material', value: truncate(common.materialName) },
 			{ label: 'Cheapest flow', value: `$${formatNumber(cheapest.costPerFlow as number, 2)} per mm³/s` },
 			{ label: 'On', value: truncate(cheapest.hotend.name, 18) },
-			{ label: 'Priced', value: `${priced.length}/${performance.length}` }
+			{ label: 'Plotted', value: `${cloud.length} hotends` }
 		],
 		series,
-		target: null
+		target: null,
+		scatter
 	};
 }
 
@@ -259,7 +318,7 @@ function buildHeaterModel(performance: Performance[], common: CommonInput): OgMo
 	const series: OgSeries[] = performance
 		.filter((entry) => Number.isFinite(entry.requiredHeaterPower))
 		.map((entry) => ({
-			label: truncate(hotendLabel(entry.hotend)),
+			label: truncate(performanceLabel(entry)),
 			value: entry.requiredHeaterPower,
 			text:
 				entry.recommendedHeater === null
@@ -353,7 +412,7 @@ function buildMaterialFlowModel(
 		tone: (row.compatible ? 'accent' : 'bad') as OgTone
 	}));
 
-	const name = hotendLabel(entry.hotend);
+	const name = performanceLabel(entry);
 	const leader = rows[0];
 	const subtitle = [
 		`${formatNumber(entry.meltZoneLength, 1)} mm effective melt zone`,

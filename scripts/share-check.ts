@@ -1,6 +1,6 @@
 import { decodeConfig, encodeConfig } from '@/lib/config-sharing';
 import { DEFAULT_CONFIGURATION, MAX_COMPARED_HOTENDS, type ShareableConfiguration } from '@/lib/configuration';
-import { HOTEND_DB } from '@/lib/hotend';
+import { HOTEND_DB, hotendCode } from '@/lib/hotend';
 import type { Celsius, CubicMillimetersPerSecond } from '@/lib/units';
 
 /**
@@ -49,14 +49,14 @@ check('material + manual flow', {
 check('6 hotends + options', {
 	...DEFAULT_CONFIGURATION,
 	selectedHotends: [
-		'E3D|v6',
-		'E3D|v6 volcano',
-		'Phaetus|dragon HF',
-		'Slice Engineering|mosquito magnum',
-		'Lukes Lab|chube compact',
-		'Bambulab|X1C OEM hotend'
+		'E3D|V6',
+		'E3D|V6 Volcano',
+		'Phaetus|Dragon HF',
+		'Slice Engineering|Mosquito Magnum',
+		'Lukes Lab|Chube Compact',
+		'Bambulab|X1C OEM Hotend'
 	],
-	hotendOptions: { 'E3D|v6': { block: 'Cu', hfNozzle: true }, 'Phaetus|dragon HF': { mze: true } },
+	hotendOptions: { 'E3D|V6': { block: 'Cu', hfNozzle: true }, 'Phaetus|Dragon HF': { mze: true } },
 	materialSettings: {
 		...DEFAULT_CONFIGURATION.materialSettings,
 		materialId: 'peek',
@@ -78,8 +78,23 @@ check('material flow, pinned hotend', {
 	viewMode: 'materialFlow',
 	materialFlowHotend: 'Phaetus|Rapido UHF',
 	materialFlowAsSpeed: true,
-	hiddenFamilies: ['Superpolymer', 'Vinylic']
+	hiddenFamilies: ['Superpolymer', 'Vinylic'],
+	costBandMode: 'value'
 });
+
+// Version 2 named hotends with six-character codes in a JSON array. Links in that shape are
+// already out in the world, so they have to keep resolving to the same hotends
+const v2Hotends = ['E3D|V6', 'Phaetus|Rapido UHF', 'Slice Engineering|Mosquito Magnum'];
+const v2 = Buffer.from(
+	JSON.stringify({ v: 2, c: { s: v2Hotends.map(hotendCode), d: 'c' } })
+).toString('base64url');
+const fromV2 = decodeConfig(v2);
+const v2Same = JSON.stringify(fromV2?.config.selectedHotends) === JSON.stringify(v2Hotends);
+console.log(
+	`${v2Same && fromV2?.config.viewMode === 'cost' ? 'OK  ' : 'FAIL'} v2 link still decodes` +
+		`      ${v2.length} chars, ${fromV2?.config.selectedHotends.length ?? 0} hotends resolved`
+);
+if (!v2Same) console.log('  got', fromV2?.config.selectedHotends);
 
 const legacy = Buffer.from(
 	JSON.stringify({

@@ -1,6 +1,8 @@
 import { z } from 'zod/v4';
 import {
 	DEFAULT_CONFIGURATION,
+	DEFAULT_COST_BAND_MODE,
+	DEFAULT_COST_LABELS,
 	DEFAULT_DEBUG,
 	DEFAULT_ENERGY_PER_MATERIAL_START,
 	DEFAULT_ENERGY_PER_SECOND,
@@ -15,7 +17,16 @@ import {
 	type ShareableConfiguration,
 	type ViewMode
 } from '@/lib/configuration';
-import { BlockMaterial, type HotendOptions, hotendCode, hotendFromCode, resolveHotends } from '@/lib/hotend';
+import {
+	BlockMaterial,
+	type HotendOptions,
+	hotendCode,
+	hotendFromCode,
+	hotendFromShortCode,
+	resolveHotends,
+	shortHotendCode,
+	unpackHotendCodes
+} from '@/lib/hotend';
 import { findMaterial } from '@/lib/material';
 import {
 	Celsius,
@@ -42,9 +53,13 @@ import {
  * Wire format of `?config=`.
  *
  * - **1** — the whole `ShareableConfiguration` as JSON. Still decoded; nothing emits it.
- * - **2** — the compact form below.
+ * - **2** — the compact form below, with hotends as an array of six-character codes.
+ * - **3** — the same, with hotends packed into one string of four-character codes.
+ *
+ * The hotend list is almost the entire payload of a large comparison — 97% of it for a full one —
+ * so that is the only thing worth compressing, and packing it beats anything clever done elsewhere.
  */
-export const SHARE_FORMAT_VERSION = 2;
+export const SHARE_FORMAT_VERSION = 3;
 
 /** Longer than any link this app generates; a bigger one is not worth decoding */
 const MAX_CONFIG_PARAM_LENGTH = 8192;
@@ -111,6 +126,8 @@ const LegacyConfigurationSchema = z.object({
 	materialFlowHotend: z.string().default(DEFAULT_MATERIAL_FLOW_HOTEND),
 	materialFlowAsSpeed: z.boolean().default(DEFAULT_MATERIAL_FLOW_AS_SPEED),
 	hiddenFamilies: z.array(z.string()).default(DEFAULT_HIDDEN_FAMILIES),
+	costBandMode: z.enum(['cost', 'value']).default(DEFAULT_COST_BAND_MODE),
+	costLabels: z.boolean().default(DEFAULT_COST_LABELS),
 	debug: z.boolean().default(DEFAULT_DEBUG)
 });
 
@@ -145,8 +162,12 @@ const CompactSchema = z.object({
 			m: z.number().optional()
 		})
 		.optional(),
-	/** selectedHotends, as short codes */
-	s: z.array(z.string()).max(MAX_SELECTED_HOTENDS).optional(),
+	/**
+	 * selectedHotends. Version 2 spelled this as an array of six-character codes; version 3 packs
+	 * four-character codes end to end into one string, which drops the quotes and commas that made
+	 * up a third of the list.
+	 */
+	s: z.union([z.array(z.string()).max(MAX_SELECTED_HOTENDS), z.string()]).optional(),
 	/** hotendOptions, keyed by the same short codes */
 	o: z
 		.record(
@@ -160,10 +181,12 @@ const CompactSchema = z.object({
 	k: z.string().optional(),
 	/** hiddenFamilies, by name — there are only eight, and a name cannot drift the way an index can */
 	q: z.array(z.string()).optional(),
-	/** energyPerSecond, energyPerMaterialStart, materialFlowAsSpeed, debug */
+	/** energyPerSecond, energyPerMaterialStart, materialFlowAsSpeed, costBandMode, debug */
 	x: Flag.optional(),
 	y: Flag.optional(),
 	v: Flag.optional(),
+	w: Flag.optional(),
+	l: Flag.optional(),
 	g: Flag.optional()
 });
 
@@ -171,7 +194,8 @@ type Compact = z.infer<typeof CompactSchema>;
 
 const PayloadSchema = z.union([
 	z.object({ v: z.literal(1), c: LegacyConfigurationSchema }),
-	z.object({ v: z.literal(2), c: CompactSchema })
+	z.object({ v: z.literal(2), c: CompactSchema }),
+	z.object({ v: z.literal(3), c: CompactSchema })
 ]);
 
 export type ImportedConfiguration = {
@@ -202,10 +226,35 @@ function sameHotends(selected: string[]): boolean {
 	return selected.length === defaults.length && selected.every((id, index) => id === defaults[index]);
 }
 
+/**
+ * Packs the comparison into one fixed-width run of codes, which is what makes a long link short.
+ *
+ * Falls back to the version-2 array if any hotend has no short code — impossible for anything in
+ * the database, but a config carrying an id this build does not know must still round-trip rather
+ * than lose the hotend.
+ */
+function packSelected(selected: string[]): string | string[] {
+	const codes = selected.map(shortHotendCode);
+
+	return codes.every((code) => code !== null) ? (codes as string[]).join('') : selected.map(hotendCode);
+}
+
+function unpackSelected(packed: string | string[] | undefined): string[] {
+	if (packed === undefined) return DEFAULT_CONFIGURATION.selectedHotends;
+
+	return typeof packed === 'string' ? unpackHotendCodes(packed) : packed.map(hotendFromCode);
+}
+
 function compact(config: ShareableConfiguration): Compact {
 	const { printSettings: print, materialSettings: material, thermalSettings: thermal } = config;
 	const options = Object.entries(config.hotendOptions)
-		.map(([id, entry]) => [hotendCode(id), pruned({ b: entry.block, z: flag(!!entry.mze, false), n: flag(!!entry.hfNozzle, false) })] as const)
+		.map(
+			([id, entry]) =>
+				[
+					shortHotendCode(id) ?? hotendCode(id),
+					pruned({ b: entry.block, z: flag(!!entry.mze, false), n: flag(!!entry.hfNozzle, false) })
+				] as const
+		)
 		.filter(([, entry]) => entry !== undefined);
 
 	return {
@@ -225,14 +274,18 @@ function compact(config: ShareableConfiguration): Compact {
 			r: changed(thermal.referenceFlowPerMeltZoneMm, DEFAULT_THERMAL_SETTINGS.referenceFlowPerMeltZoneMm),
 			m: changed(thermal.minimumResidenceTime, DEFAULT_THERMAL_SETTINGS.minimumResidenceTime)
 		}),
-		s: sameHotends(config.selectedHotends) ? undefined : config.selectedHotends.map(hotendCode),
+		s: sameHotends(config.selectedHotends) ? undefined : packSelected(config.selectedHotends),
 		o: options.length > 0 ? (Object.fromEntries(options) as Compact['o']) : undefined,
 		d: changed(VIEW_MODE_CODES[config.viewMode], VIEW_MODE_CODES[DEFAULT_VIEW_MODE]),
-		k: config.materialFlowHotend ? hotendCode(config.materialFlowHotend) : undefined,
+		k: config.materialFlowHotend
+			? shortHotendCode(config.materialFlowHotend) ?? hotendCode(config.materialFlowHotend)
+			: undefined,
 		q: config.hiddenFamilies.length > 0 ? config.hiddenFamilies : undefined,
 		x: flag(config.energyPerSecond, DEFAULT_ENERGY_PER_SECOND),
 		y: flag(config.energyPerMaterialStart, DEFAULT_ENERGY_PER_MATERIAL_START),
 		v: flag(config.materialFlowAsSpeed, DEFAULT_MATERIAL_FLOW_AS_SPEED),
+		w: flag(config.costBandMode === 'value', DEFAULT_COST_BAND_MODE === 'value'),
+		l: flag(config.costLabels, DEFAULT_COST_LABELS),
 		g: flag(config.debug, DEFAULT_DEBUG)
 	};
 }
@@ -240,7 +293,7 @@ function compact(config: ShareableConfiguration): Compact {
 function expand(payload: Compact): ShareableConfiguration {
 	const hotendOptions: Record<string, HotendOptions> = {};
 	for (const [code, entry] of Object.entries(payload.o ?? {})) {
-		hotendOptions[hotendFromCode(code)] = pruned({
+		hotendOptions[hotendFromShortCode(code) ?? hotendFromCode(code)] = pruned({
 			block: entry.b,
 			mze: entry.z === undefined ? undefined : entry.z === 1,
 			hfNozzle: entry.n === undefined ? undefined : entry.n === 1
@@ -273,14 +326,18 @@ function expand(payload: Compact): ShareableConfiguration {
 				minimumResidenceTime: payload.t?.m as Seconds | undefined
 			})
 		},
-		selectedHotends: payload.s ? payload.s.map(hotendFromCode) : DEFAULT_CONFIGURATION.selectedHotends,
+		selectedHotends: unpackSelected(payload.s),
 		hotendOptions,
 		viewMode: (payload.d && VIEW_MODE_BY_CODE[payload.d]) || DEFAULT_VIEW_MODE,
-		materialFlowHotend: payload.k ? hotendFromCode(payload.k) : DEFAULT_MATERIAL_FLOW_HOTEND,
+		materialFlowHotend: payload.k
+			? hotendFromShortCode(payload.k) ?? hotendFromCode(payload.k)
+			: DEFAULT_MATERIAL_FLOW_HOTEND,
 		hiddenFamilies: payload.q ?? DEFAULT_HIDDEN_FAMILIES,
 		energyPerSecond: payload.x === undefined ? DEFAULT_ENERGY_PER_SECOND : payload.x === 1,
 		energyPerMaterialStart: payload.y === undefined ? DEFAULT_ENERGY_PER_MATERIAL_START : payload.y === 1,
 		materialFlowAsSpeed: payload.v === undefined ? DEFAULT_MATERIAL_FLOW_AS_SPEED : payload.v === 1,
+		costBandMode: payload.w === undefined ? DEFAULT_COST_BAND_MODE : payload.w === 1 ? 'value' : 'cost',
+		costLabels: payload.l === undefined ? DEFAULT_COST_LABELS : payload.l === 1,
 		debug: payload.g === undefined ? DEFAULT_DEBUG : payload.g === 1
 	};
 }

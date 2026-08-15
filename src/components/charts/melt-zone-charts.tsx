@@ -14,7 +14,7 @@ import {
 	ZAxis
 } from 'recharts';
 import { pointTooltip } from '@/components/charts/chart-tooltip';
-import { SeriesMarker, shapePath } from '@/components/series-marker';
+import { markerAttributes, SeriesMarker, shapePath } from '@/components/series-marker';
 import { Term } from '@/components/term';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
@@ -325,13 +325,13 @@ export function MeltZoneLandscape() {
 							isAnimationActive={false}
 							shape={(props: unknown) => {
 								const point = props as { cx: number; cy: number; payload: LandscapePoint };
-								const { color, shape } = seriesMarker(point.payload.seriesIndex);
+								const { color, shape, filled } = seriesMarker(point.payload.seriesIndex);
 
 								return (
 									<path
 										d={shapePath(shape, 10)}
 										transform={`translate(${point.cx} ${point.cy})`}
-										fill={color}
+										{...markerAttributes(color, filled)}
 									/>
 								);
 							}}
@@ -348,9 +348,7 @@ export function MeltZoneLandscape() {
 						<SeriesMarker index={0} />
 						Selected for comparison
 					</span>
-					{points.some((point) => point.label.endsWith('*')) ? (
-						<span className="basis-full">{HF_NOZZLE_FOOTNOTE}</span>
-					) : null}
+					{hasHfNozzleSeries(all) ? <span className="basis-full">{HF_NOZZLE_FOOTNOTE}</span> : null}
 				</div>
 			</CardContent>
 		</Card>

@@ -83,6 +83,12 @@ export const HotendDefinition = z.object({
 	/** Block variants it ships in, stock option first */
 	blockOptions: z.array(BlockOption).min(1),
 	meltZoneLength: Millimeter,
+	/**
+	 * Filament this hotend takes. Almost everything is 1.75 mm, which is what the flow model is
+	 * calibrated on; a wider bore changes the feed rate, the volume held in the melt zone, the
+	 * residence time, and how much of the melt zone's heat reaches the middle of the filament.
+	 */
+	filamentDiameter: Millimeter,
 	/** Approximate street price in USD, or `null` where nobody has found one */
 	price: Dollars.nullable()
 });
@@ -205,6 +211,55 @@ for (const hotend of HOTEND_DB) {
 
 export function hotendCode(id: string): string {
 	return ID_TO_CODE.get(id) ?? id;
+}
+
+/**
+ * The same idea at four characters, which is what lets a share link pack a whole comparison into
+ * one fixed-width string instead of a JSON array of quoted, comma-separated ones.
+ *
+ * Four base-36 characters is 1.7 million slots for a database of dozens, so a collision is
+ * vanishingly unlikely — but "unlikely" is not "impossible" and two hotends sharing a code would be
+ * silently wrong, so one of them probes to the next free slot instead. The probe walks in database
+ * order, which is sorted by id, so adding a hotend can only ever disturb codes for hotends that
+ * sort after it *and* collide with it.
+ */
+const SHORT_CODE_WIDTH = 4;
+
+const SHORT_TO_ID = new Map<string, string>();
+const ID_TO_SHORT = new Map<string, string>();
+
+for (const hotend of HOTEND_DB) {
+	let code = shortCode(hotend.id).slice(-SHORT_CODE_WIDTH);
+	// Deterministic probe: base-36 increment, wrapping, until a free slot
+	for (let attempt = 0; SHORT_TO_ID.has(code) && attempt < 36 ** SHORT_CODE_WIDTH; attempt++) {
+		code = ((Number.parseInt(code, 36) + 1) % 36 ** SHORT_CODE_WIDTH)
+			.toString(36)
+			.padStart(SHORT_CODE_WIDTH, '0');
+	}
+
+	SHORT_TO_ID.set(code, hotend.id);
+	ID_TO_SHORT.set(hotend.id, code);
+}
+
+export function shortHotendCode(id: string): string | null {
+	return ID_TO_SHORT.get(id) ?? null;
+}
+
+/** Splits a packed run of fixed-width codes back into hotend ids */
+export function unpackHotendCodes(packed: string): string[] {
+	const ids: string[] = [];
+	for (let at = 0; at + SHORT_CODE_WIDTH <= packed.length; at += SHORT_CODE_WIDTH) {
+		const code = packed.slice(at, at + SHORT_CODE_WIDTH);
+		// Unknown codes come back as themselves, so they surface as unresolved rather than vanishing
+		ids.push(SHORT_TO_ID.get(code) ?? code);
+	}
+
+	return ids;
+}
+
+/** `null` for anything with no short code, so the caller can fall back rather than guess */
+export function hotendFromShortCode(code: string): string | null {
+	return SHORT_TO_ID.get(code) ?? null;
 }
 
 /** Unknown tokens come back unchanged so they surface as unresolved rather than vanishing */

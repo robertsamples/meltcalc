@@ -1,15 +1,31 @@
-import { useAtomValue } from 'jotai';
-import { useMemo } from 'react';
+import { useAtom, useAtomValue } from 'jotai';
+import { useId, useMemo } from 'react';
 import { Bar, BarChart, Customized, LabelList, Scatter, ScatterChart, XAxis, YAxis, ZAxis } from 'recharts';
 import { pointTooltip } from '@/components/charts/chart-tooltip';
-import { SeriesMarker, shapePath } from '@/components/series-marker';
+import { markerAttributes, SeriesMarker, shapePath } from '@/components/series-marker';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
-import { HF_NOZZLE_FOOTNOTE, hasHfNozzleSeries, performanceLabel } from '@/lib/chart-labels';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import {
+	HF_NOZZLE_FOOTNOTE,
+	hasHfNozzleSeries,
+	performanceLabel,
+	shortPerformanceLabel
+} from '@/lib/chart-labels';
+import type { CostBandMode } from '@/lib/configuration';
+import { BAND_SAMPLES, type BandSpec, costBands, valueBands } from '@/lib/cost-bands';
 import { formatFlow, formatNumber } from '@/lib/format';
-import { hotendLabel } from '@/lib/hotend';
-import { AXIS_LINE, STATUS_COLORS, seriesColor, seriesMarker } from '@/lib/series';
-import { allPerformanceAtom, currentSelectedHotendsAtom, performanceAtom } from '@/state/atoms';
+import { fitAgainstLogX, type LogTrend, trendAt } from '@/lib/regression';
+import { AXIS_LINE, STATUS_COLORS, seriesMarker } from '@/lib/series';
+import {
+	allPerformanceAtom,
+	currentCostBandModeAtom,
+	currentCostLabelsAtom,
+	currentSelectedHotendsAtom,
+	performanceAtom
+} from '@/state/atoms';
 
 /**
  * What flow costs.
@@ -142,79 +158,35 @@ export function CostPerFlowChart() {
 
 const SCATTER_CONFIG = { maxFlow: { label: 'Max flow' } } satisfies ChartConfig;
 
-/** Bands of equal value-for-money behind the points, and how strongly each is tinted */
-const BAND_COUNT = 8;
-const BAND_HUE = seriesColor(0);
-/**
- * The tint runs across a wider range than the band count alone would need, so that finer
- * divisions do not mean fainter differences between neighbours — the step between adjacent bands
- * stays visible and the corner-to-corner range gets deeper rather than flatter.
- *
- * Geometric rather than linear: on a near-black ground it is the *ratio* between two alphas that
- * the eye reads, so equal ratios give evenly spaced steps.
- */
-const BAND_OPACITY_MAX = 0.2;
-const BAND_OPACITY_MIN = 0.018;
-
-function bandOpacity(index: number): number {
-	const t = index / (BAND_COUNT - 1);
-
-	return BAND_OPACITY_MAX * (BAND_OPACITY_MIN / BAND_OPACITY_MAX) ** t;
-}
-
-/** Points sampled along each boundary; the curves are gentle, so this is plenty */
-const BAND_SAMPLES = 48;
-
 type Scale = { domain: () => number[]; (value: number): number };
 type AxisMap = Record<string, { scale: Scale }>;
 
 /**
- * The background: bands whose boundaries are lines of constant price per unit flow.
- *
- * Cost is `price / flow`, so a fixed cost is the line `flow = price / cost` — a straight ray from
- * the origin on linear axes, and a curve here because price is logarithmic. Filling between
- * successive rays turns "value for money" into position: the further into the tinted corner a
- * hotend sits, the more flow its price is buying.
+ * The background itself, whichever question it is answering.
  *
  * Deliberately unlabelled and barely there. It is orientation, not a scale to read values off, and
- * the bands are spaced across whatever the current data actually spans rather than at round
- * numbers, so labelling them would invite precision they do not have.
+ * annotating the boundaries would invite a precision neither reading has.
  */
-function CostBands({
-	xAxisMap,
-	yAxisMap,
-	bounds
-}: {
-	xAxisMap?: AxisMap;
-	yAxisMap?: AxisMap;
-	bounds: { cheapest: number; dearest: number };
-}) {
+function Bands({ xAxisMap, yAxisMap, spec }: { xAxisMap?: AxisMap; yAxisMap?: AxisMap; spec: BandSpec | null }) {
 	const xScale = xAxisMap && Object.values(xAxisMap)[0]?.scale;
 	const yScale = yAxisMap && Object.values(yAxisMap)[0]?.scale;
-	if (!xScale || !yScale || !(bounds.cheapest > 0) || !(bounds.dearest > bounds.cheapest)) return null;
+	if (!xScale || !yScale || !spec) return null;
 
 	const [priceMin, priceMax] = xScale.domain();
 	const [flowMin, flowMax] = yScale.domain();
 	if (!(priceMin > 0) || !(priceMax > priceMin)) return null;
-
-	// Geometric steps, because the costs they separate span an order of magnitude
-	const ratio = (bounds.dearest / bounds.cheapest) ** (1 / (BAND_COUNT - 1));
-	const boundaries = Array.from({ length: BAND_COUNT - 1 }, (_, index) => bounds.cheapest * ratio ** (index + 1));
-	// Open-ended on both sides: everything cheaper than the first boundary, dearer than the last
-	const edges = [0, ...boundaries, Number.POSITIVE_INFINITY];
 
 	const prices = Array.from({ length: BAND_SAMPLES }, (_, index) => {
 		const t = index / (BAND_SAMPLES - 1);
 
 		return priceMin * (priceMax / priceMin) ** t;
 	});
+	const clamp = (flow: number) => Math.min(Math.max(flow, flowMin), flowMax);
 
-	const bands = edges.slice(0, -1).map((cheap, index) => {
-		const dear = edges[index + 1];
-		const clamp = (flow: number) => Math.min(Math.max(flow, flowMin), flowMax);
-
-		const upper = prices.map((price) => ({ price, flow: clamp(cheap === 0 ? flowMax : price / cheap) }));
-		const lower = prices.map((price) => ({ price, flow: clamp(dear === Number.POSITIVE_INFINITY ? flowMin : price / dear) }));
+	const bands = spec.bands.map(({ color, opacity }, index) => {
+		const upper = prices.map((price) => ({ price, flow: clamp(spec.edges[index](price)) }));
+		const lower = prices.map((price) => ({ price, flow: clamp(spec.edges[index + 1](price)) }));
+		// Entirely off-screen, or inverted because the trend runs the other way at this price
 		if (upper.every((point, at) => point.flow <= lower[at].flow)) return null;
 
 		const path = [
@@ -226,20 +198,227 @@ function CostBands({
 			'Z'
 		].join(' ');
 
-		return <path key={String(cheap)} d={path} fill={BAND_HUE} fillOpacity={bandOpacity(index)} />;
+		return <path key={color} d={path} fill={color} fillOpacity={opacity} />;
 	});
 
 	return <g>{bands}</g>;
 }
 
+/**
+ * A colourbar for whichever background is on: the same swatches at the same opacities, so what is
+ * behind the points can be read rather than guessed at.
+ *
+ * Only a few boundaries are named. Both scales are continuous and neither is precise enough to
+ * deserve a tick per band — the point is roughly where a hotend sits, not which stripe it is in.
+ */
+function BandLegend({ legend }: { legend: BandSpec['legend'] }) {
+	return (
+		<div className="space-y-1">
+			<div className="flex h-2.5 overflow-hidden rounded-sm">
+				{legend.bands.map((band) => (
+					<div
+						key={band.color}
+						className="flex-1"
+						// Composited against the card, exactly as it is over the plot
+						style={{ background: band.color, opacity: band.opacity }}
+					/>
+				))}
+			</div>
+			<div className="relative h-3.5">
+				{legend.stops.map((stop) => (
+					<span
+						key={stop.label}
+						className="absolute -translate-x-1/2 whitespace-nowrap text-[10px] text-muted-foreground tabular-nums"
+						style={{ left: `${stop.at * 100}%` }}
+					>
+						{stop.label}
+					</span>
+				))}
+			</div>
+			<p className="text-[11px] text-muted-foreground">{legend.caption}</p>
+		</div>
+	);
+}
+
+/** The fitted line itself, drawn under the markers so it orients without competing with them */
+function TrendLine({ xAxisMap, yAxisMap, trend }: { xAxisMap?: AxisMap; yAxisMap?: AxisMap; trend: LogTrend | null }) {
+	const xScale = xAxisMap && Object.values(xAxisMap)[0]?.scale;
+	const yScale = yAxisMap && Object.values(yAxisMap)[0]?.scale;
+	if (!xScale || !yScale || !trend) return null;
+
+	const [priceMin, priceMax] = xScale.domain();
+	const [flowMin, flowMax] = yScale.domain();
+	if (!(priceMin > 0) || !(priceMax > priceMin)) return null;
+
+	// Straight on a log axis, but sampled anyway so it clips against the plot rather than the domain
+	const points = Array.from({ length: BAND_SAMPLES }, (_, index) => {
+		const price = priceMin * (priceMax / priceMin) ** (index / (BAND_SAMPLES - 1));
+
+		return { price, flow: Math.min(Math.max(trendAt(trend, price), flowMin), flowMax) };
+	});
+
+	const path = points
+		.map((point, at) => `${at === 0 ? 'M' : 'L'} ${xScale(point.price)} ${yScale(point.flow)}`)
+		.join(' ');
+
+	return <path d={path} fill="none" stroke="#a1a1aa" strokeOpacity={0.55} strokeWidth={1.5} />;
+}
+
 type ScatterPoint = {
 	id: string;
 	label: string;
+	/** Name without the manufacturer, for labels drawn onto the plot */
+	shortLabel: string;
 	price: number;
 	maxFlow: number;
 	costPerFlow: number;
 	seriesIndex: number;
 };
+
+const LABEL_SIZE = 9;
+/**
+ * Nothing here can measure text, so width is estimated from the glyph count — and deliberately
+ * over-estimated. Under-estimating puts two names a pixel apart and calls it a fit, which looks
+ * exactly like the collision test not running at all.
+ */
+const LABEL_CHAR_WIDTH = LABEL_SIZE * 0.63;
+const LABEL_HEIGHT = LABEL_SIZE + 4;
+/** Breathing room around every placed label, so neighbours are separated rather than merely apart */
+const LABEL_PAD = 3;
+/** Clearance from the marker a label belongs to, and from every other marker on the chart */
+const LABEL_OFFSET = 7;
+const MARKER_RADIUS = 6;
+/** How far around a point counts as crowded when deciding who gets a name first */
+const CROWDING_RADIUS = 55;
+
+type Box = { left: number; right: number; top: number; bottom: number };
+
+function overlaps(a: Box, b: Box): boolean {
+	return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+}
+
+/**
+ * Names for the hotends in the comparison.
+ *
+ * Only the selected ones, because a scatter of fifty points cannot carry fifty labels and the
+ * selection is already the reader's own answer to which points matter. Nothing else is labelled, so
+ * nothing else's label can block one — the only obstacles are the markers themselves and the
+ * handful of names already placed.
+ *
+ * Placed most-isolated first, and never more than one line-height from its own marker. Both of
+ * those cost labels — a name in the thick of the cloud usually cannot be placed at all now — and
+ * both are the point: a label that has to sit three rows away from its marker to find space is not
+ * telling the reader which dot it belongs to, and a chart full of those is worse than a chart with
+ * a dozen names on the points that had room for them.
+ */
+function PointLabels({
+	xAxisMap,
+	yAxisMap,
+	points
+}: {
+	xAxisMap?: AxisMap;
+	yAxisMap?: AxisMap;
+	points: ScatterPoint[];
+}) {
+	const xScale = xAxisMap && Object.values(xAxisMap)[0]?.scale;
+	const yScale = yAxisMap && Object.values(yAxisMap)[0]?.scale;
+	if (!xScale || !yScale) return null;
+
+	const [priceMin, priceMax] = xScale.domain();
+	const [flowMin, flowMax] = yScale.domain();
+	const left = xScale(priceMin);
+	const right = xScale(priceMax);
+	const top = yScale(flowMax);
+	const bottom = yScale(flowMin);
+
+	const at = (point: ScatterPoint) => ({ x: xScale(point.price), y: yScale(point.maxFlow) });
+
+	const placed: Box[] = [];
+	// Every marker is an obstacle, whether or not it ends up with a label of its own
+	const markers: Box[] = points.map((point) => {
+		const { x, y } = at(point);
+
+		return {
+			left: x - MARKER_RADIUS,
+			right: x + MARKER_RADIUS,
+			top: y - MARKER_RADIUS,
+			bottom: y + MARKER_RADIUS
+		};
+	});
+
+	// Most isolated first. Whoever is placed first gets the space, and giving it to a point with
+	// room to spare leaves the crowded ones no worse off while keeping every name next to its dot
+	const crowding = (point: ScatterPoint) => {
+		const here = at(point);
+
+		return points.filter((other) => {
+			const there = at(other);
+
+			return Math.hypot(there.x - here.x, there.y - here.y) < CROWDING_RADIUS;
+		}).length;
+	};
+
+	const named = points
+		.filter((point) => point.seriesIndex !== -1)
+		.map((point) => ({ point, crowding: crowding(point) }))
+		.sort((a, b) => a.crowding - b.crowding || a.point.seriesIndex - b.point.seriesIndex);
+
+	const labels = named.map(({ point }) => {
+		const { x, y } = at(point);
+		const width = point.shortLabel.length * LABEL_CHAR_WIDTH;
+
+		const beside = (anchor: 'start' | 'end', dy: number) => ({
+			anchor,
+			dy,
+			box: {
+				left: (anchor === 'start' ? x + LABEL_OFFSET : x - LABEL_OFFSET - width) - LABEL_PAD,
+				right: (anchor === 'start' ? x + LABEL_OFFSET + width : x - LABEL_OFFSET) + LABEL_PAD,
+				top: y + dy - LABEL_HEIGHT / 2,
+				bottom: y + dy + LABEL_HEIGHT / 2
+			}
+		});
+
+		// Beside, then one line above or below — never further. Past that the name stops obviously
+		// belonging to the marker it names
+		const step = LABEL_HEIGHT + MARKER_RADIUS;
+		const candidates = [
+			beside('start', 0),
+			beside('end', 0),
+			beside('start', -step),
+			beside('end', -step),
+			beside('start', step),
+			beside('end', step)
+		];
+
+		const fit = candidates.find(
+			(candidate) =>
+				candidate.box.left >= left &&
+				candidate.box.right <= right &&
+				candidate.box.top >= top &&
+				candidate.box.bottom <= bottom &&
+				!placed.some((box) => overlaps(box, candidate.box)) &&
+				!markers.some((box) => overlaps(box, candidate.box))
+		);
+		if (!fit) return null;
+
+		placed.push(fit.box);
+
+		return (
+			<text
+				key={point.id}
+				x={fit.anchor === 'start' ? x + LABEL_OFFSET : x - LABEL_OFFSET}
+				y={y + fit.dy + LABEL_SIZE / 2 - 1}
+				fontSize={LABEL_SIZE}
+				textAnchor={fit.anchor}
+				className="fill-foreground"
+			>
+				{point.shortLabel}
+			</text>
+		);
+	});
+
+	return <g>{labels}</g>;
+}
 
 /**
  * Price against what it buys, for the whole database.
@@ -251,6 +430,9 @@ type ScatterPoint = {
 export function PriceVsFlowScatter() {
 	const all = useAtomValue(allPerformanceAtom);
 	const selected = useAtomValue(currentSelectedHotendsAtom);
+	const [mode, setMode] = useAtom(currentCostBandModeAtom);
+	const [labels, setLabels] = useAtom(currentCostLabelsAtom);
+	const labelsId = useId();
 
 	const points: ScatterPoint[] = useMemo(
 		() =>
@@ -258,7 +440,8 @@ export function PriceVsFlowScatter() {
 				.filter((entry) => entry.hotend.price !== null && entry.costPerFlow !== null)
 				.map((entry) => ({
 					id: entry.hotend.id,
-					label: hotendLabel(entry.hotend),
+					label: performanceLabel(entry),
+					shortLabel: shortPerformanceLabel(entry),
 					price: entry.hotend.price as number,
 					maxFlow: Number.isFinite(entry.maxFlow) ? entry.maxFlow : 0,
 					costPerFlow: entry.costPerFlow as number,
@@ -278,6 +461,15 @@ export function PriceVsFlowScatter() {
 		return { cheapest: Math.min(...costs), dearest: Math.max(...costs) };
 	}, [points]);
 
+	// Fitted over every priced hotend, selected or not: the question is what the market charges for
+	// this much flow, which the six hotends someone happens to be comparing cannot answer
+	const trend = useMemo(() => fitAgainstLogX(points.map((point) => ({ x: point.price, y: point.maxFlow }))), [points]);
+
+	const spec = useMemo(
+		() => (mode === 'value' ? valueBands(trend) : costBands(costBounds)),
+		[mode, trend, costBounds]
+	);
+
 	// Round numbers inside the data's own range, so the ticks land where prices actually are
 	const priceTicks = useMemo(() => {
 		if (points.length === 0) return [];
@@ -292,14 +484,41 @@ export function PriceVsFlowScatter() {
 
 	return (
 		<Card>
-			<CardHeader>
+			<CardHeader className="flex-row items-center justify-between gap-2 space-y-0">
 				<CardTitle className="text-base">Price vs maximum flow rate</CardTitle>
+				{/* What the background means. The points do not move — only the ground under them */}
+				<ToggleGroup
+					type="single"
+					variant="outline"
+					size="sm"
+					value={mode}
+					onValueChange={(value) => {
+						if (value) setMode(value as CostBandMode);
+					}}
+				>
+					<ToggleGroupItem value="cost" className="px-3 text-xs">
+						Cost per flow
+					</ToggleGroupItem>
+					<ToggleGroupItem value="value" className="px-3 text-xs" disabled={!trend}>
+						Value vs trend
+					</ToggleGroupItem>
+				</ToggleGroup>
 			</CardHeader>
 			<CardContent className="space-y-3">
-				<ChartContainer config={SCATTER_CONFIG} className="w-full h-80">
+				<div className="flex items-center gap-2">
+					<Checkbox id={labelsId} checked={labels} onCheckedChange={(on) => setLabels(on === true)} />
+					<Label htmlFor={labelsId} className="text-xs font-normal">
+						Name the selected hotends where there is room
+					</Label>
+				</div>
+
+				{/* Tall on purpose: fifty points in a 320 px box is a smear, and the whole reason for
+				    this chart is the shape of the cloud */}
+				<ChartContainer config={SCATTER_CONFIG} className="w-full h-[40rem]">
 					<ScatterChart margin={{ left: 4, right: 16, top: 8, bottom: 4 }}>
 						{/* First child, so the bands sit behind the axes and the points */}
-						<Customized component={<CostBands bounds={costBounds} />} />
+						<Customized component={<Bands spec={spec} />} />
+						{mode === 'value' ? <Customized component={<TrendLine trend={trend} />} /> : null}
 						{/* Log price: the database spans $8 to four figures, and on a linear axis the
 						    twenty hotends people actually cross-shop pile up against the left edge */}
 						<XAxis
@@ -344,19 +563,23 @@ export function PriceVsFlowScatter() {
 							isAnimationActive={false}
 							shape={(props: unknown) => {
 								const point = props as { cx: number; cy: number; payload: ScatterPoint };
-								const { color, shape } = seriesMarker(point.payload.seriesIndex);
+								const { color, shape, filled } = seriesMarker(point.payload.seriesIndex);
 
 								return (
 									<path
 										d={shapePath(shape, 10)}
 										transform={`translate(${point.cx} ${point.cy})`}
-										fill={color}
+										{...markerAttributes(color, filled)}
 									/>
 								);
 							}}
 						/>
+						{/* Last, so names sit over every marker rather than under the next one drawn */}
+						{labels ? <Customized component={<PointLabels points={points} />} /> : null}
 					</ScatterChart>
 				</ChartContainer>
+
+				{spec ? <BandLegend legend={spec.legend} /> : null}
 
 				<div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
 					<span className="flex items-center gap-1.5">

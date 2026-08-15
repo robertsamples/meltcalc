@@ -20,7 +20,7 @@ import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/
 import { HF_NOZZLE_FOOTNOTE, hasHfNozzleSeries, performanceLabel } from '@/lib/chart-labels';
 import { formatFlow, formatNumber, formatSeconds } from '@/lib/format';
 import { AXIS_LINE, STATUS_COLORS, seriesColor, THRESHOLD_LINE } from '@/lib/series';
-import { FILAMENT_DIAMETER, meltZoneVolume, residenceTime } from '@/lib/thermal';
+import { meltZoneVolume, residenceTime } from '@/lib/thermal';
 import {
 	currentSelectedHotendsAtom,
 	currentThermalSettingsAtom,
@@ -93,8 +93,8 @@ export function ResidenceByHotendChart() {
 			<CardHeader>
 				<CardTitle className="text-base">Residence time at {formatFlow(flowRate)}</CardTitle>
 				<CardDescription>
-					How long a piece of {FILAMENT_DIAMETER} mm filament stays inside the{' '}
-					<Term term="melt zone" />: its volume divided by flow. Below the{' '}
+					How long a piece of filament stays inside the <Term term="melt zone" />: its volume divided
+					by flow. Below the{' '}
 					{formatSeconds(minimumResidenceTime)} floor the middle of the filament is unlikely to reach
 					temperature before it is extruded.
 				</CardDescription>
@@ -213,7 +213,7 @@ export function ResidenceCurveChart() {
 		return hotends
 			.map(({ entry, seriesIndex }) => ({
 				id: entry.hotend.id,
-				flow: meltZoneVolume(entry.meltZoneLength) / minimumResidenceTime,
+				flow: meltZoneVolume(entry.meltZoneLength, entry.hotend.filamentDiameter) / minimumResidenceTime,
 				color: seriesColor(seriesIndex)
 			}))
 			.filter((crossing) => crossing.flow > 0 && crossing.flow <= MAX_CROSSING_FLOW)
@@ -253,7 +253,11 @@ export function ResidenceCurveChart() {
 			const flow = (index + 1) * step;
 			const point: Record<string, number> = { flow };
 			for (const { entry } of hotends) {
-				point[entry.hotend.id] = residenceTime(entry.meltZoneLength, flow as never);
+					point[entry.hotend.id] = residenceTime(
+						entry.meltZoneLength,
+						flow as never,
+						entry.hotend.filamentDiameter
+					);
 			}
 
 			return point;

@@ -67,7 +67,8 @@ export function AboutCard({ className }: { className?: string }) {
 					cross-section of {formatNumber(FILAMENT_CROSS_SECTION, 3)} mm², so a melt zone holds that much
 					plastic per millimetre. Divided by flow rate, that is the{' '}
 					<Term term="residence time" /> — how long the hotend has to get heat into the middle of the
-					filament.
+					filament. The few hotends built for 2.85 mm hold 2.7× as much plastic per millimetre and
+					are fed 2.7× slower, so the same melt zone gives them proportionally longer.
 				</p>
 				<p>
 					<span className="text-foreground">The one empirical number.</span> How much power a millimetre
@@ -88,8 +89,9 @@ export function AboutCard({ className }: { className?: string }) {
 				<p>
 					<span className="text-foreground">What it ignores.</span> Nozzle geometry and melt viscosity —
 					a hotend that can melt the plastic may still not push it — differences in thermal
-					conductivity between polymers, heat lost to the incoming filament, and everything that
-					separates two hotends of the same melt zone length. Material properties are typical published
+					conductivity between polymers, heat lost to the incoming filament, the further the heat
+					has to travel inwards on 2.85 mm filament, and everything that separates two hotends of
+					the same melt zone length. Material properties are typical published
 					values, not brand data. It is a comparison between hotends, not a promise about one.
 					</p>
 				</CardContent>

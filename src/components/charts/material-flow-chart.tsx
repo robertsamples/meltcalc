@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { HF_NOZZLE_FOOTNOTE, performanceLabel } from '@/lib/chart-labels';
 import { formatNumber } from '@/lib/format';
-import { blockMaterialFactor, hotendLabel } from '@/lib/hotend';
+import { blockMaterialFactor } from '@/lib/hotend';
 import { familyIndex } from '@/lib/material';
 import { AXIS_LINE, STATUS_COLORS, seriesColor, THRESHOLD_LINE } from '@/lib/series';
 import { energyPerVolume, extrusionCrossSection, meltZoneLimitedFlow } from '@/lib/thermal';
@@ -181,7 +181,7 @@ export function MaterialFlowChart() {
 					<SelectContent>
 						{performance.map((candidate) => (
 							<SelectItem key={candidate.hotend.id} value={candidate.hotend.id}>
-								{hotendLabel(candidate.hotend)}
+								{performanceLabel(candidate)}
 							</SelectItem>
 						))}
 					</SelectContent>
