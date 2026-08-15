@@ -1,6 +1,6 @@
 import z from 'zod/v4';
 import { HOTEND_DB } from '@/lib/hotend-db';
-import { Celsius, Millimeter, type Percent } from '@/lib/units';
+import { Celsius, Dollars, Millimeter, type Percent } from '@/lib/units';
 
 /**
  * A hotend, described by the one dimension that decides how much plastic it can melt: the length
@@ -73,7 +73,9 @@ export const HotendDefinition = z.object({
 	hfNozzleCompatible: z.boolean(),
 	/** Block variants it ships in, stock option first */
 	blockOptions: z.array(BlockOption).min(1),
-	meltZoneLength: Millimeter
+	meltZoneLength: Millimeter,
+	/** Approximate street price in USD, or `null` where nobody has found one */
+	price: Dollars.nullable()
 });
 export type HotendDefinition = z.infer<typeof HotendDefinition>;
 
@@ -158,6 +160,47 @@ export function resolveHotends(ids: string[]): { hotends: HotendDefinition[]; un
 	}
 
 	return { hotends, unresolved };
+}
+
+/**
+ * Short stable code for a hotend, used by share links instead of the full `manufacturer|name`.
+ *
+ * It is a hash of the id rather than an index into the database, because an index would silently
+ * change meaning the moment a row is added — a link would come back pointing at a different
+ * hotend. A hash only breaks if the hotend is renamed, which already invalidates the id and is
+ * reported as unresolved.
+ */
+function shortCode(id: string): string {
+	// FNV-1a, 32-bit
+	let hash = 0x811c9dc5;
+	for (let index = 0; index < id.length; index++) {
+		hash ^= id.charCodeAt(index);
+		hash = Math.imul(hash, 0x01000193) >>> 0;
+	}
+
+	return hash.toString(36).padStart(6, '0').slice(-6);
+}
+
+const CODE_TO_ID = new Map<string, string>();
+const ID_TO_CODE = new Map<string, string>();
+
+for (const hotend of HOTEND_DB) {
+	const code = shortCode(hotend.id);
+	// A collision would make two hotends indistinguishable in a link; the loser keeps its full id,
+	// which is longer but never wrong
+	if (CODE_TO_ID.has(code)) continue;
+
+	CODE_TO_ID.set(code, hotend.id);
+	ID_TO_CODE.set(hotend.id, code);
+}
+
+export function hotendCode(id: string): string {
+	return ID_TO_CODE.get(id) ?? id;
+}
+
+/** Unknown tokens come back unchanged so they surface as unresolved rather than vanishing */
+export function hotendFromCode(code: string): string {
+	return CODE_TO_ID.get(code) ?? code;
 }
 
 export const ECOSYSTEMS = [...new Set(HOTEND_DB.map((hotend) => hotend.ecosystem).filter((e) => e !== null))].sort();

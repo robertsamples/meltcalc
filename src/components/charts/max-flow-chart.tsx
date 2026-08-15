@@ -2,13 +2,13 @@ import { useAtomValue } from 'jotai';
 import { Bar, BarChart, Cell, LabelList, ReferenceLine, XAxis, YAxis } from 'recharts';
 import { pointTooltip } from '@/components/charts/chart-tooltip';
 import { StatusLegend } from '@/components/charts/status-legend';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
 import { HF_NOZZLE_FOOTNOTE, hasHfNozzleSeries, performanceLabel } from '@/lib/chart-labels';
-import { formatFlow, formatNumber } from '@/lib/format';
+import { formatNumber } from '@/lib/format';
 import { AXIS_LINE, headroomStatus, STATUS_COLORS, STATUS_LABELS, THRESHOLD_LINE } from '@/lib/series';
 import type { HotendPerformance } from '@/lib/thermal';
-import { flowRateAtom, materialAtom, performanceAtom } from '@/state/atoms';
+import { flowRateAtom, performanceAtom } from '@/state/atoms';
 
 /**
  * What each hotend can actually deliver, against what is being asked of it.
@@ -35,7 +35,6 @@ type Row = {
 export function MaxFlowChart() {
 	const performance = useAtomValue(performanceAtom);
 	const flowRate = useAtomValue(flowRateAtom);
-	const material = useAtomValue(materialAtom);
 
 	const rows: Row[] = performance.map((entry) => ({
 		id: entry.hotend.id,
@@ -50,14 +49,7 @@ export function MaxFlowChart() {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle className="text-base">Sustainable flow rate</CardTitle>
-				<CardDescription>
-					What each hotend can bring to {material.name}'s melting point of{' '}
-					{formatNumber(material.meltTemperature, 0)} °C, against the {formatFlow(flowRate)} these print
-					settings ask for. A hotter nozzle setpoint does not change this — melting the plastic is what
-					the melt zone is for, and the superheat above it is the heater's job. Bars are green where the
-					hotend clears the target with margin, amber where it only just does, red where it cannot.
-				</CardDescription>
+				<CardTitle className="text-base">Estimated maximum volumetric flow rate</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-3">
 				{rows.length === 0 ? (

@@ -262,12 +262,6 @@ export function ResidenceCurveChart() {
 		<Card>
 			<CardHeader>
 				<CardTitle className="text-base">Residence time as flow rises</CardTitle>
-				<CardDescription>
-					The same quantity swept across flow rate, on a log₂ axis: every doubling of flow costs one
-					gridline of residence, and two hotends stay the same distance apart at every flow rate rather
-					than converging into the corner. The coloured ticks mark where each one crosses the floor,
-					labelled with the flow rate it gives out at.
-				</CardDescription>
 			</CardHeader>
 			<CardContent>
 				{hotends.length === 0 ? (

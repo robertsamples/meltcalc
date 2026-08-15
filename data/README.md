@@ -25,6 +25,12 @@ coupled into the plastic.
   the calibration is expressed in. A hotend whose block cannot hold the material's print
   temperature is greyed out in the picker.
 
+- **Price (USD)** is an approximate street price, and it is the one column that may be **left
+  blank**. Blank means nobody has found a price: the hotend shows a dash in the table, is left out
+  of the cost ranking, and is counted underneath the chart rather than plotted. That is deliberate —
+  an unknown price is not a low one, and any stand-in number would put it straight to the top of a
+  chart whose whole job is ranking by price. Fill the cell in and it joins the comparison.
+
 `hotend deltas.csv` records how much melt zone a given modification adds (a longer heatbreak, a
 volcano block). It is reference material for deriving new rows by hand; only the MZE delta is used
 by the app.

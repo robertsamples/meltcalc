@@ -43,5 +43,10 @@ export type WattsPerMillimeter = z.infer<typeof WattsPerMillimeter>;
 /** Flow a hotend sustains per millimetre of melt zone; the calibration constant of this model */
 export const CubicMillimetersPerSecondPerMillimeter = z.number().brand('mm³/(s·mm)');
 export type CubicMillimetersPerSecondPerMillimeter = z.infer<typeof CubicMillimetersPerSecondPerMillimeter>;
+/** Street price. `PLACEHOLDER_PRICE` marks the ones nobody has filled in yet */
+export const Dollars = z.number().brand('$');
+export type Dollars = z.infer<typeof Dollars>;
+export const DollarsPerFlow = z.number().brand('$/(mm³/s)');
+export type DollarsPerFlow = z.infer<typeof DollarsPerFlow>;
 export const Percent = z.number().brand('%');
 export type Percent = z.infer<typeof Percent>;

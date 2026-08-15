@@ -75,7 +75,7 @@ export const DEFAULT_THERMAL_SETTINGS: ThermalSettings = {
 };
 
 /** Which analysis is on screen */
-export type ViewMode = 'flow' | 'residence' | 'energy' | 'meltZone';
+export type ViewMode = 'flow' | 'residence' | 'energy' | 'meltZone' | 'cost';
 
 /**
  * The views, in two groups, because they answer two different questions: three of them hold the
@@ -89,7 +89,8 @@ export const VIEW_GROUPS: { label: string; modes: { value: ViewMode; label: stri
 		modes: [
 			{ value: 'flow', label: 'Max flow' },
 			{ value: 'residence', label: 'Residence' },
-			{ value: 'meltZone', label: 'Melt zone' }
+			{ value: 'meltZone', label: 'Melt zone' },
+			{ value: 'cost', label: 'Cost' }
 		]
 	},
 	{

@@ -1,7 +1,8 @@
 import { useAtom, useAtomValue } from 'jotai';
+import { ChevronRightIcon } from 'lucide-react';
 import { HotendSelection } from '@/components/hotend-selection';
 import { SeriesMarker } from '@/components/series-marker';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
@@ -49,17 +50,33 @@ export function HotendTable() {
 	}
 
 	return (
-		<Card>
-			<CardHeader className="flex-row items-center justify-between gap-2">
-				<CardTitle className="text-base">Selected hotends</CardTitle>
+		<Card className="relative py-0">
+			{/* Outside the <summary> on purpose: nested inside it, opening the dialog would also
+			    toggle the disclosure, and suppressing that means putting a click handler on a
+			    non-interactive element. Absolute keeps it on the header row and visible when the
+			    table is collapsed */}
+			<div className="absolute right-6 top-3">
 				<HotendSelection />
-			</CardHeader>
-			<CardContent className="px-0">
-				<div className="overflow-x-auto">
+			</div>
+			{/* Open by default: this is where the hotends are configured, not an aside. `open` on a
+			    native <details> is only the initial state, so it stays wherever the user puts it */}
+			<details className="group" open>
+				<summary className="flex w-full cursor-pointer items-center gap-2 px-6 py-4 list-none [&::-webkit-details-marker]:hidden">
+					<ChevronRightIcon className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90" />
+					<CardTitle className="text-base">
+						Selected hotends
+						<span className="ml-2 text-xs font-normal text-muted-foreground tabular-nums">
+							{performance.length}
+						</span>
+					</CardTitle>
+				</summary>
+				<CardContent className="px-0 pb-4">
+					<div className="overflow-x-auto">
 					<Table className="text-xs leading-tight [&_th]:px-2 [&_th]:h-8 [&_td]:px-2 [&_td]:py-1">
 						<TableHeader>
 							<TableRow>
 								<TableHead>Hotend</TableHead>
+								<TableHead className="text-right">Price</TableHead>
 								<TableHead>Block</TableHead>
 								<TableHead className="text-right">Max temp</TableHead>
 								<TableHead>MZE +8.5</TableHead>
@@ -89,6 +106,17 @@ export function HotendTable() {
 												<SeriesMarker index={Math.max(colorIndex, 0)} />
 												{hotendLabel(entry.hotend)}
 											</span>
+										</TableCell>
+
+										<TableCell
+											className="text-right tabular-nums"
+											title={entry.hotend.price === null ? 'No price in the database yet' : undefined}
+										>
+											{entry.hotend.price === null ? (
+												<span className="text-muted-foreground">—</span>
+											) : (
+												`$${formatNumber(entry.hotend.price, 0)}`
+											)}
 										</TableCell>
 
 										<TableCell>
@@ -215,15 +243,16 @@ export function HotendTable() {
 							})}
 							{performance.length === 0 ? (
 								<TableRow>
-									<TableCell colSpan={12} className="text-muted-foreground">
+									<TableCell colSpan={13} className="text-muted-foreground">
 										No hotends selected.
 									</TableCell>
 								</TableRow>
 							) : null}
 						</TableBody>
 					</Table>
-				</div>
-			</CardContent>
+					</div>
+				</CardContent>
+			</details>
 		</Card>
 	);
 }

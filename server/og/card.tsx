@@ -1,4 +1,4 @@
-import { formatNumber, type OgModel } from './model';
+import type { OgModel, OgTone } from './model';
 
 /**
  * Draws the OG card as a single SVG document.
@@ -74,7 +74,17 @@ function text(
 	return `<text x="${x}" y="${y}" font-family="${FONT_FAMILY}" font-size="${size}" font-weight="${weight}" fill="${fill}" text-anchor="${anchor}">${escapeXml(value)}</text>`;
 }
 
-/** The ranked bars: one per hotend, with the target flow drawn across them */
+const TONE_COLORS: Record<OgTone, string> = {
+	good: COLORS.good,
+	bad: COLORS.critical,
+	accent: COLORS.accent,
+	muted: COLORS.dim
+};
+
+/**
+ * The ranked bars, whatever the view is ranking: sustainable flow, cost per flow or melt energy.
+ * The model has already decided the order, the labels and the colours; this only draws them.
+ */
 function renderBars(model: OgModel): string {
 	if (model.series.length === 0) return '';
 
@@ -84,13 +94,12 @@ function renderBars(model: OgModel): string {
 	const rowHeight = Math.min(available / model.series.length, MAX_BAR_HEIGHT + BAR_GAP);
 	const barHeight = Math.max(rowHeight - BAR_GAP, 8);
 
-	const maxValue = Math.max(...model.series.map((entry) => entry.maxFlow), model.targetFlow) || 1;
+	const maxValue = Math.max(...model.series.map((entry) => entry.value), model.target?.value ?? 0) || 1;
 	const scale = plotWidth / maxValue;
 
 	const rows = model.series.map((entry, index) => {
 		const y = CHART_TOP + index * rowHeight;
-		const width = Math.max(entry.maxFlow * scale, 2);
-		const fill = entry.headroom >= 1 ? COLORS.good : COLORS.critical;
+		const width = Math.max(entry.value * scale, 2);
 
 		return [
 			text(fitText(entry.label, 20, LABEL_WIDTH - 16), {
@@ -100,8 +109,8 @@ function renderBars(model: OgModel): string {
 				fill: COLORS.foreground,
 				anchor: 'end'
 			}),
-			`<rect x="${plotLeft}" y="${y}" width="${width}" height="${barHeight}" rx="4" fill="${fill}" />`,
-			text(`${formatNumber(entry.maxFlow, 1)} mm³/s`, {
+			`<rect x="${plotLeft}" y="${y}" width="${width}" height="${barHeight}" rx="4" fill="${TONE_COLORS[entry.tone]}" />`,
+			text(entry.text, {
 				x: plotLeft + width + 12,
 				y: y + barHeight / 2 + 6,
 				size: 18,
@@ -111,20 +120,23 @@ function renderBars(model: OgModel): string {
 	});
 
 	// The threshold the bars are judged against, drawn over them like the app's reference line
-	const targetX = plotLeft + model.targetFlow * scale;
 	const chartHeight = model.series.length * rowHeight - BAR_GAP;
 	const target =
-		model.targetFlow > 0
-			? [
-					`<line x1="${targetX}" y1="${CHART_TOP - 12}" x2="${targetX}" y2="${CHART_TOP + chartHeight + 6}" stroke="${COLORS.foreground}" stroke-width="2" stroke-dasharray="5 5" />`,
-					text(`target ${formatNumber(model.targetFlow, 1)} mm³/s`, {
-						x: targetX,
-						y: CHART_TOP - 22,
-						size: 17,
-						fill: COLORS.muted,
-						anchor: 'middle'
-					})
-				].join('\n\t')
+		model.target && model.target.value > 0
+			? (() => {
+					const targetX = plotLeft + model.target.value * scale;
+
+					return [
+						`<line x1="${targetX}" y1="${CHART_TOP - 12}" x2="${targetX}" y2="${CHART_TOP + chartHeight + 6}" stroke="${COLORS.foreground}" stroke-width="2" stroke-dasharray="5 5" />`,
+						text(model.target.label, {
+							x: targetX,
+							y: CHART_TOP - 22,
+							size: 17,
+							fill: COLORS.muted,
+							anchor: 'middle'
+						})
+					].join('\n\t');
+				})()
 			: '';
 
 	return [target, ...rows].join('\n\t');

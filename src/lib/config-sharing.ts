@@ -9,9 +9,10 @@ import {
 	DEFAULT_THERMAL_SETTINGS,
 	DEFAULT_VIEW_MODE,
 	MAX_COMPARED_HOTENDS,
-	type ShareableConfiguration
+	type ShareableConfiguration,
+	type ViewMode
 } from '@/lib/configuration';
-import { BlockMaterial, resolveHotends } from '@/lib/hotend';
+import { BlockMaterial, type HotendOptions, hotendCode, hotendFromCode, resolveHotends } from '@/lib/hotend';
 import { findMaterial } from '@/lib/material';
 import {
 	Celsius,
@@ -30,20 +31,40 @@ import {
  *
  * The parameter is attacker-controlled, so decoding is total: anything that does not parse comes
  * back as `null` rather than throwing.
+ *
+ * The wire format is built for short URLs, which is why it looks nothing like the configuration:
+ * one-letter keys, `1`/`0` for booleans, hotends by short code, and — the big one — anything equal
+ * to its default is left out entirely. A link that changes two settings carries two settings.
  */
 
 /**
- * Wire format of `?config=`. Bump whenever the payload shape changes so old links can be migrated
- * rather than rejected, and add the migration below.
+ * Wire format of `?config=`.
+ *
+ * - **1** — the whole `ShareableConfiguration` as JSON. Still decoded; nothing emits it.
+ * - **2** — the compact form below.
  */
-export const SHARE_FORMAT_VERSION = 1;
+export const SHARE_FORMAT_VERSION = 2;
 
 /** Longer than any link this app generates; a bigger one is not worth decoding */
 const MAX_CONFIG_PARAM_LENGTH = 8192;
 /** A link cannot ask for more hotends than the comparison can colour */
 const MAX_SELECTED_HOTENDS = MAX_COMPARED_HOTENDS;
 
-const ShareableConfigurationSchema = z.object({
+const VIEW_MODE_CODES: Record<ViewMode, string> = {
+	flow: 'f',
+	residence: 'r',
+	energy: 'e',
+	meltZone: 'z',
+	cost: 'c'
+};
+const VIEW_MODE_BY_CODE = Object.fromEntries(
+	Object.entries(VIEW_MODE_CODES).map(([mode, code]) => [code, mode as ViewMode])
+) as Record<string, ViewMode>;
+
+// ---------------------------------------------------------------------------------------------
+// Version 1: the verbose form. Kept so links made before the compact format still open.
+
+const LegacyConfigurationSchema = z.object({
 	printSettings: z
 		.object({
 			flowMode: z.enum(['derived', 'manual']).default('derived'),
@@ -79,22 +100,177 @@ const ShareableConfigurationSchema = z.object({
 			})
 		)
 		.default({}),
-	viewMode: z.enum(['flow', 'residence', 'energy', 'meltZone']).default(DEFAULT_VIEW_MODE),
+	viewMode: z.enum(['flow', 'residence', 'energy', 'meltZone', 'cost']).default(DEFAULT_VIEW_MODE),
 	energyPerSecond: z.boolean().default(DEFAULT_ENERGY_PER_SECOND),
 	energyPerMaterialStart: z.boolean().default(DEFAULT_ENERGY_PER_MATERIAL_START),
 	debug: z.boolean().default(DEFAULT_DEBUG)
 });
 
-const PayloadSchema = z.object({
-	v: z.literal(SHARE_FORMAT_VERSION),
-	c: ShareableConfigurationSchema
+// ---------------------------------------------------------------------------------------------
+// Version 2: the compact form. Every field optional; absent means "the default".
+
+const Flag = z.union([z.literal(0), z.literal(1)]);
+
+const CompactSchema = z.object({
+	/** printSettings */
+	p: z
+		.object({
+			m: z.enum(['d', 'm']).optional(),
+			h: z.number().optional(),
+			w: z.number().optional(),
+			s: z.number().optional(),
+			f: z.number().optional()
+		})
+		.optional(),
+	/** materialSettings */
+	m: z
+		.object({
+			i: z.string().optional(),
+			p: z.number().nullable().optional(),
+			s: z.number().nullable().optional()
+		})
+		.optional(),
+	/** thermalSettings */
+	t: z
+		.object({
+			r: z.number().optional(),
+			w: z.number().optional(),
+			e: z.number().optional(),
+			m: z.number().optional()
+		})
+		.optional(),
+	/** selectedHotends, as short codes */
+	s: z.array(z.string()).max(MAX_SELECTED_HOTENDS).optional(),
+	/** hotendOptions, keyed by the same short codes */
+	o: z
+		.record(
+			z.string(),
+			z.object({ b: BlockMaterial.optional(), z: Flag.optional(), n: Flag.optional() })
+		)
+		.optional(),
+	/** viewMode */
+	d: z.string().optional(),
+	/** energyPerSecond, energyPerMaterialStart, debug */
+	x: Flag.optional(),
+	y: Flag.optional(),
+	g: Flag.optional()
 });
+
+type Compact = z.infer<typeof CompactSchema>;
+
+const PayloadSchema = z.union([
+	z.object({ v: z.literal(1), c: LegacyConfigurationSchema }),
+	z.object({ v: z.literal(2), c: CompactSchema })
+]);
 
 export type ImportedConfiguration = {
 	config: ShareableConfiguration;
 	/** Things the link referenced that this build could not resolve; surfaced as a warning */
 	warnings: string[];
 };
+
+/** Drops keys whose value is `undefined`, and the object itself if nothing is left */
+function pruned<T extends Record<string, unknown>>(value: T): T | undefined {
+	const entries = Object.entries(value).filter(([, entry]) => entry !== undefined);
+
+	return entries.length > 0 ? (Object.fromEntries(entries) as T) : undefined;
+}
+
+/** `undefined` when the value matches the default, which is what keeps links short */
+function changed<T>(value: T, fallback: T): T | undefined {
+	return value === fallback ? undefined : value;
+}
+
+function flag(value: boolean, fallback: boolean): 0 | 1 | undefined {
+	return value === fallback ? undefined : value ? 1 : 0;
+}
+
+function sameHotends(selected: string[]): boolean {
+	const defaults = DEFAULT_CONFIGURATION.selectedHotends;
+
+	return selected.length === defaults.length && selected.every((id, index) => id === defaults[index]);
+}
+
+function compact(config: ShareableConfiguration): Compact {
+	const { printSettings: print, materialSettings: material, thermalSettings: thermal } = config;
+	const options = Object.entries(config.hotendOptions)
+		.map(([id, entry]) => [hotendCode(id), pruned({ b: entry.block, z: flag(!!entry.mze, false), n: flag(!!entry.hfNozzle, false) })] as const)
+		.filter(([, entry]) => entry !== undefined);
+
+	return {
+		p: pruned({
+			m: changed(print.flowMode, DEFAULT_PRINT_SETTINGS.flowMode) && (print.flowMode === 'manual' ? 'm' : 'd'),
+			h: changed(print.layerHeight, DEFAULT_PRINT_SETTINGS.layerHeight),
+			w: changed(print.lineWidth, DEFAULT_PRINT_SETTINGS.lineWidth),
+			s: changed(print.printSpeed, DEFAULT_PRINT_SETTINGS.printSpeed),
+			f: changed(print.manualFlowRate, DEFAULT_PRINT_SETTINGS.manualFlowRate)
+		}),
+		m: pruned({
+			i: changed(material.materialId, DEFAULT_MATERIAL_SETTINGS.materialId),
+			p: changed(material.printTemperature, DEFAULT_MATERIAL_SETTINGS.printTemperature),
+			s: changed(material.startTemperature, DEFAULT_MATERIAL_SETTINGS.startTemperature)
+		}),
+		t: pruned({
+			r: changed(thermal.referenceFlowPerMeltZoneMm, DEFAULT_THERMAL_SETTINGS.referenceFlowPerMeltZoneMm),
+			w: changed(thermal.heaterPower, DEFAULT_THERMAL_SETTINGS.heaterPower),
+			e: changed(thermal.heaterEfficiency, DEFAULT_THERMAL_SETTINGS.heaterEfficiency),
+			m: changed(thermal.minimumResidenceTime, DEFAULT_THERMAL_SETTINGS.minimumResidenceTime)
+		}),
+		s: sameHotends(config.selectedHotends) ? undefined : config.selectedHotends.map(hotendCode),
+		o: options.length > 0 ? (Object.fromEntries(options) as Compact['o']) : undefined,
+		d: changed(VIEW_MODE_CODES[config.viewMode], VIEW_MODE_CODES[DEFAULT_VIEW_MODE]),
+		x: flag(config.energyPerSecond, DEFAULT_ENERGY_PER_SECOND),
+		y: flag(config.energyPerMaterialStart, DEFAULT_ENERGY_PER_MATERIAL_START),
+		g: flag(config.debug, DEFAULT_DEBUG)
+	};
+}
+
+function expand(payload: Compact): ShareableConfiguration {
+	const hotendOptions: Record<string, HotendOptions> = {};
+	for (const [code, entry] of Object.entries(payload.o ?? {})) {
+		hotendOptions[hotendFromCode(code)] = pruned({
+			block: entry.b,
+			mze: entry.z === undefined ? undefined : entry.z === 1,
+			hfNozzle: entry.n === undefined ? undefined : entry.n === 1
+		}) as HotendOptions;
+	}
+
+	return {
+		printSettings: {
+			...DEFAULT_PRINT_SETTINGS,
+			...pruned({
+				flowMode: payload.p?.m && (payload.p.m === 'm' ? ('manual' as const) : ('derived' as const)),
+				layerHeight: payload.p?.h as Millimeter | undefined,
+				lineWidth: payload.p?.w as Millimeter | undefined,
+				printSpeed: payload.p?.s as MillimetersPerSecond | undefined,
+				manualFlowRate: payload.p?.f as CubicMillimetersPerSecond | undefined
+			})
+		},
+		materialSettings: {
+			...DEFAULT_MATERIAL_SETTINGS,
+			...pruned({
+				materialId: payload.m?.i,
+				printTemperature: payload.m?.p as Celsius | null | undefined,
+				startTemperature: payload.m?.s as Celsius | null | undefined
+			})
+		},
+		thermalSettings: {
+			...DEFAULT_THERMAL_SETTINGS,
+			...pruned({
+				referenceFlowPerMeltZoneMm: payload.t?.r as CubicMillimetersPerSecondPerMillimeter | undefined,
+				heaterPower: payload.t?.w as Watts | undefined,
+				heaterEfficiency: payload.t?.e as Percent | undefined,
+				minimumResidenceTime: payload.t?.m as Seconds | undefined
+			})
+		},
+		selectedHotends: payload.s ? payload.s.map(hotendFromCode) : DEFAULT_CONFIGURATION.selectedHotends,
+		hotendOptions,
+		viewMode: (payload.d && VIEW_MODE_BY_CODE[payload.d]) || DEFAULT_VIEW_MODE,
+		energyPerSecond: payload.x === undefined ? DEFAULT_ENERGY_PER_SECOND : payload.x === 1,
+		energyPerMaterialStart: payload.y === undefined ? DEFAULT_ENERGY_PER_MATERIAL_START : payload.y === 1,
+		debug: payload.g === undefined ? DEFAULT_DEBUG : payload.g === 1
+	};
+}
 
 /** base64url, so the payload survives a URL without percent-encoding */
 function toBase64Url(json: string): string {
@@ -114,23 +290,25 @@ function fromBase64Url(value: string): string {
 }
 
 export function encodeConfig(config: ShareableConfiguration): string {
-	return toBase64Url(JSON.stringify({ v: SHARE_FORMAT_VERSION, c: config }));
+	const payload = pruned(compact(config)) ?? {};
+
+	return toBase64Url(JSON.stringify({ v: SHARE_FORMAT_VERSION, c: payload }));
 }
 
 export function decodeConfig(configParam: string): ImportedConfiguration | null {
 	if (!configParam || configParam.length > MAX_CONFIG_PARAM_LENGTH) return null;
 
-	let parsed: z.infer<typeof PayloadSchema>;
+	let config: ShareableConfiguration;
 	try {
 		const result = PayloadSchema.safeParse(JSON.parse(fromBase64Url(configParam)));
 		if (!result.success) return null;
-		parsed = result.data;
+
+		// Defaults fill anything the link omitted, so a config from an older build still opens
+		config = result.data.v === 1 ? { ...DEFAULT_CONFIGURATION, ...result.data.c } : expand(result.data.c);
 	} catch {
 		return null;
 	}
 
-	// Defaults fill anything the link omitted, so a config from an older build still opens
-	const config: ShareableConfiguration = { ...DEFAULT_CONFIGURATION, ...parsed.c };
 	const warnings: string[] = [];
 
 	// A hotend or material can leave the database between the link being made and being opened.

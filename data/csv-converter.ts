@@ -84,6 +84,17 @@ function optional(row: Record<string, string>, column: string): string | null {
 	return value ? value : null;
 }
 
+/** A blank cell means "nobody knows", which is different from zero and has to survive as `null` */
+function optionalNumber(row: Record<string, string>, column: string, context: string): number | null {
+	const raw = optional(row, column);
+	if (raw === null) return null;
+
+	const value = Number(raw);
+	if (!Number.isFinite(value)) throw new Error(`${context}: "${column}" is not a number`);
+
+	return value;
+}
+
 /** Single-quoted, because that is what the repo's prettier config emits */
 function str(value: string): string {
 	return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
@@ -141,7 +152,8 @@ async function generateHotends() {
 			mzeCompatible: required(row, 'MZE compatible', context).toUpperCase() === 'Y',
 			hfNozzleCompatible: required(row, 'HF nozzle compatible', context).toUpperCase() === 'Y',
 			blockOptions: parseBlockOptions(row, context),
-			meltZoneLength: requiredNumber(row, 'Melt zone', context)
+			meltZoneLength: requiredNumber(row, 'Melt zone', context),
+			price: optionalNumber(row, 'Price (USD)', context)
 		};
 	});
 
@@ -173,14 +185,15 @@ async function generateHotends() {
 					)
 					.join(',\n') +
 				`\n\t\t],\n` +
-				`\t\tmeltZoneLength: ${hotend.meltZoneLength} as Millimeter\n` +
+				`\t\tmeltZoneLength: ${hotend.meltZoneLength} as Millimeter,\n` +
+				`\t\tprice: ${hotend.price === null ? 'null' : `${hotend.price} as Dollars`}\n` +
 				`\t}`
 		)
 		.join(',\n');
 
 	await writeFile(
 		HOTEND_OUT,
-		`${GENERATED_HEADER('data/hotend data.csv')}\nimport type { HotendDefinition } from '@/lib/hotend';\nimport type { Celsius, Millimeter } from '@/lib/units';\n\nexport const HOTEND_DB: HotendDefinition[] = [\n${body}\n];\n`
+		`${GENERATED_HEADER('data/hotend data.csv')}\nimport type { HotendDefinition } from '@/lib/hotend';\nimport type { Celsius, Dollars, Millimeter } from '@/lib/units';\n\nexport const HOTEND_DB: HotendDefinition[] = [\n${body}\n];\n`
 	);
 
 	console.log(`wrote ${hotends.length} hotends -> ${path.relative(root, HOTEND_OUT)}`);

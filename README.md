@@ -22,6 +22,10 @@ the filament spends inside it, and what that costs in energy.
   hotend ships in more than one (copper is the reference; brass and steel derate flow 30%,
   aluminium 20%). A block that cannot hold the material's setpoint is greyed out in the picker.
 
+- **Cost per flow**: price divided by sustainable flow, and the whole database plotted as price
+  against what it buys. Prices are approximate, and the column may be left blank — unpriced hotends
+  are counted and left off these charts rather than ranked at a made-up number.
+
 The melt zone ceiling is the one empirical part of the model. There is no clean closed form for
 conduction into a moving plastic rod, so it is calibrated on the rule of thumb that a standard
 nozzle running PLA sustains about 1 mm³/s per mm of melt zone. That is converted to W/mm — about
@@ -39,6 +43,13 @@ everything at one start temperature when a like-for-like ΔT is what you actuall
 Run `pnpm data:update-db` after editing either; it regenerates `src/lib/hotend-db.ts` and
 `src/lib/material-db.ts`, which are committed. See [`data/README.md`](./data/README.md) for what the
 material numbers mean and how approximate they are.
+
+Share links carry the whole configuration in `?config=`, compressed by omission: anything equal to
+its default is left out, keys are one letter, and hotends travel as short hashes of their ids. A
+link that changes the material and the flow rate is about 80 characters; selecting every hotend in
+the database is about 590. Links made in the older verbose format still open — see
+`SHARE_FORMAT_VERSION` in [`src/lib/config-sharing.ts`](./src/lib/config-sharing.ts). Run
+`pnpm share:check` to round-trip a few configurations and print their lengths.
 
 ## Contribute
 

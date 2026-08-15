@@ -1,21 +1,15 @@
 import { decodeConfig } from '@/lib/config-sharing';
 import { hotendLabel, resolveHotends } from '@/lib/hotend';
-import { findMaterial } from '@/lib/material';
-import {
-	energyPerVolume,
-	type HotendPerformance, 
-	hotendPerformance,
-	specificPowerLimit,
-	volumetricFlow
-} from '@/lib/thermal';
-import type { CubicMillimetersPerSecond } from '@/lib/units';
+import { findMaterial, MATERIAL_DB } from '@/lib/material';
+import { energyPerVolume, hotendPerformance, specificPowerLimit, volumetricFlow } from '@/lib/thermal';
 
 /**
  * Everything the OpenGraph image and the OpenGraph meta tags need, derived from a `?config=`
  * parameter. One model for both so the picture and the text of an unfurl cannot disagree.
  *
- * It runs the same `@/lib/thermal` the app does, so a shared link and the page it opens can never
- * report different numbers.
+ * It runs the same `@/lib/thermal` the app does, and it follows the same `viewMode`: a link shared
+ * from the cost tab unfurls as a cost comparison, not as whatever the first tab happens to show.
+ * Someone posting a link has already chosen what they want people to look at.
  *
  * The parameter is attacker-controlled: every path here either produces a bounded model or the
  * generic card. Nothing throws.
@@ -25,14 +19,15 @@ import type { CubicMillimetersPerSecond } from '@/lib/units';
 const MAX_SERIES = 8;
 const MAX_LABEL_LENGTH = 30;
 
+/** How a bar is coloured: a judgement where the view makes one, plain emphasis where it does not */
+export type OgTone = 'good' | 'bad' | 'accent' | 'muted';
+
 export type OgSeries = {
 	label: string;
-	/** Name without the manufacturer, for the places a full label would not fit */
-	shortLabel: string;
-	/** Sustainable flow rate, mm³/s */
-	maxFlow: number;
-	/** `maxFlow / target`; below 1 the hotend cannot keep up */
-	headroom: number;
+	value: number;
+	/** Printed at the end of the bar, already formatted with its unit */
+	text: string;
+	tone: OgTone;
 };
 
 export type OgModel = {
@@ -44,10 +39,10 @@ export type OgModel = {
 	alt: string;
 	/** Label/value pairs printed under the title */
 	facts: { label: string; value: string }[];
-	/** Bars, longest first. Empty on the generic card */
+	/** Bars, in the order the view ranks them. Empty on the generic card */
 	series: OgSeries[];
-	/** The flow rate the print settings ask for, drawn as the threshold on the bars */
-	targetFlow: number;
+	/** The dashed line across the bars, for the views that have a threshold */
+	target: { value: number; label: string } | null;
 };
 
 const GENERIC_MODEL: OgModel = {
@@ -58,7 +53,7 @@ const GENERIC_MODEL: OgModel = {
 	alt: 'MeltCalc',
 	facts: [],
 	series: [],
-	targetFlow: 0
+	target: null
 };
 
 export function formatNumber(value: number, maxDecimals = 1): string {
@@ -86,7 +81,7 @@ export function buildOgModel(configParam: string | null | undefined): OgModel {
 	}
 	if (!imported) return GENERIC_MODEL;
 
-	const { printSettings, materialSettings, thermalSettings, selectedHotends } = imported.config;
+	const { printSettings, materialSettings, thermalSettings, selectedHotends, viewMode } = imported.config;
 
 	const material = findMaterial(materialSettings.materialId);
 	if (!material) return GENERIC_MODEL;
@@ -102,8 +97,12 @@ export function buildOgModel(configParam: string | null | undefined): OgModel {
 			: volumetricFlow(printSettings.lineWidth, printSettings.layerHeight, printSettings.printSpeed);
 	if (!Number.isFinite(flowRate)) return GENERIC_MODEL;
 
+	if (viewMode === 'energy') {
+		return buildEnergyModel(material.id, startTemperature, imported.config.energyPerMaterialStart);
+	}
+
 	const { hotends } = resolveHotends(selectedHotends);
-	const performance: HotendPerformance[] = hotends.slice(0, MAX_SERIES).map((hotend) =>
+	const performance = hotends.slice(0, MAX_SERIES).map((hotend) =>
 		hotendPerformance(hotend, {
 			meltEnergy: energy.toMelt,
 			printEnergy: energy.toPrint,
@@ -116,48 +115,151 @@ export function buildOgModel(configParam: string | null | undefined): OgModel {
 		})
 	);
 
+	const common = {
+		materialName: material.name,
+		meltTemperature: material.meltTemperature,
+		flowRate,
+		meltEnergy: energy.toMelt
+	};
+
+	return viewMode === 'cost' ? buildCostModel(performance, common) : buildFlowModel(performance, common);
+}
+
+type CommonInput = {
+	materialName: string;
+	meltTemperature: number;
+	flowRate: number;
+	meltEnergy: number;
+};
+
+type Performance = ReturnType<typeof hotendPerformance>;
+
+/** The default: what each hotend sustains, against what the print settings ask for */
+function buildFlowModel(performance: Performance[], common: CommonInput): OgModel {
 	const series: OgSeries[] = performance
 		.map((entry) => ({
 			label: truncate(hotendLabel(entry.hotend)),
-			/** The manufacturer is dropped in the title, where a long name would be cut off */
-			shortLabel: truncate(entry.hotend.name, 24),
-			maxFlow: Number.isFinite(entry.maxFlow) ? entry.maxFlow : 0,
-			headroom: entry.headroom
+			value: Number.isFinite(entry.maxFlow) ? entry.maxFlow : 0,
+			text: `${formatNumber(entry.maxFlow, 1)} mm³/s`,
+			tone: (entry.headroom >= 1 ? 'good' : 'bad') as OgTone
 		}))
-		.sort((a, b) => b.maxFlow - a.maxFlow);
+		.sort((a, b) => b.value - a.value);
 
-	const clearing = series.filter((entry) => entry.headroom >= 1).length;
+	const clearing = performance.filter((entry) => entry.headroom >= 1).length;
+	const leader = performance.slice().sort((a, b) => b.maxFlow - a.maxFlow)[0];
 	const subtitle = [
-		material.name,
-		`melts at ${formatNumber(material.meltTemperature, 0)} °C`,
-		`${formatNumber(flowRate, 1)} mm³/s target`,
-		`${formatNumber(energy.toMelt, 3)} J/mm³`
+		common.materialName,
+		`melts at ${formatNumber(common.meltTemperature, 0)} °C`,
+		`${formatNumber(common.flowRate, 1)} mm³/s target`,
+		`${formatNumber(common.meltEnergy, 3)} J/mm³`
 	].join(' · ');
-
-	const title =
-		series.length === 0
-			? `${material.name} at ${formatNumber(flowRate, 1)} mm³/s`
-			: `${series[0].shortLabel} leads at ${formatNumber(series[0].maxFlow, 1)} mm³/s`;
 
 	return {
 		variant: 'config',
-		title,
+		title: leader
+			? `${truncate(leader.hotend.name, 24)} leads at ${formatNumber(leader.maxFlow, 1)} mm³/s`
+			: `${common.materialName} at ${formatNumber(common.flowRate, 1)} mm³/s`,
 		subtitle,
-		description:
-			series.length === 0
-				? `${subtitle}.`
-				: `${subtitle}. ${clearing} of ${series.length} hotends sustain the target flow.`,
+		description: leader
+			? `${subtitle}. ${clearing} of ${series.length} hotends sustain the target flow.`
+			: `${subtitle}.`,
 		alt:
 			series.length === 0
-				? `MeltCalc configuration for ${material.name}`
-				: `Sustainable flow rate in ${material.name} for ${series.map((entry) => entry.label).join(', ')}`,
+				? `MeltCalc configuration for ${common.materialName}`
+				: `Sustainable flow rate in ${common.materialName} for ${series.map((entry) => entry.label).join(', ')}`,
 		facts: [
-			{ label: 'Material', value: truncate(material.name) },
-			{ label: 'Target flow', value: `${formatNumber(flowRate, 1)} mm³/s` },
-			{ label: 'Energy to melt', value: `${formatNumber(energy.toMelt, 3)} J/mm³` },
+			{ label: 'Material', value: truncate(common.materialName) },
+			{ label: 'Target flow', value: `${formatNumber(common.flowRate, 1)} mm³/s` },
+			{ label: 'Energy to melt', value: `${formatNumber(common.meltEnergy, 3)} J/mm³` },
 			{ label: 'Hotends clearing it', value: `${clearing}/${series.length}` }
 		],
 		series,
-		targetFlow: flowRate as CubicMillimetersPerSecond
+		target: { value: common.flowRate, label: `target ${formatNumber(common.flowRate, 1)} mm³/s` }
+	};
+}
+
+/** The cost tab: what a mm³/s of flow costs on each hotend, cheapest first */
+function buildCostModel(performance: Performance[], common: CommonInput): OgModel {
+	const priced = performance.filter((entry) => entry.hotend.price !== null && entry.costPerFlow !== null);
+
+	if (priced.length === 0) return buildFlowModel(performance, common);
+
+	const series: OgSeries[] = priced
+		.map((entry) => ({
+			label: truncate(hotendLabel(entry.hotend)),
+			value: entry.costPerFlow as number,
+			text: `$${formatNumber(entry.costPerFlow as number, 2)}`,
+			tone: 'accent' as OgTone
+		}))
+		.sort((a, b) => a.value - b.value);
+
+	const cheapest = priced.slice().sort((a, b) => (a.costPerFlow as number) - (b.costPerFlow as number))[0];
+	const subtitle = [
+		common.materialName,
+		`${formatNumber(common.flowRate, 1)} mm³/s target`,
+		`${priced.length} of ${performance.length} priced`
+	].join(' · ');
+
+	return {
+		variant: 'config',
+		title: `${truncate(cheapest.hotend.name, 22)} at $${formatNumber(cheapest.costPerFlow as number, 2)} per mm³/s`,
+		subtitle,
+		description: `${subtitle}. Cheapest flow in ${common.materialName} of the hotends compared.`,
+		alt: `Cost per mm³/s of flow in ${common.materialName} for ${series.map((entry) => entry.label).join(', ')}`,
+		facts: [
+			{ label: 'Material', value: truncate(common.materialName) },
+			{ label: 'Cheapest flow', value: `$${formatNumber(cheapest.costPerFlow as number, 2)} per mm³/s` },
+			{ label: 'On', value: truncate(cheapest.hotend.name, 18) },
+			{ label: 'Priced', value: `${priced.length}/${performance.length}` }
+		],
+		series,
+		target: null
+	};
+}
+
+/** The energy tab compares materials rather than hotends, so the card does too */
+function buildEnergyModel(selectedId: string, configuredStart: number, perMaterialStart: boolean): OgModel {
+	const rows = MATERIAL_DB.map((entry) => {
+		const start = perMaterialStart ? entry.startTemperature : configuredStart;
+		const breakdown = energyPerVolume(entry, start as never, entry.printTemperature);
+
+		return { entry, total: breakdown.toPrint, toMelt: breakdown.toMelt };
+	}).sort((a, b) => b.total - a.total);
+
+	const selected = rows.find((row) => row.entry.id === selectedId);
+	// The selected material is the reason the link was shared, so it is always on the card even
+	// when it is not one of the most demanding
+	const top = rows.slice(0, MAX_SERIES);
+	if (selected && !top.includes(selected)) top.splice(MAX_SERIES - 1, 1, selected);
+
+	const series: OgSeries[] = top.map((row) => ({
+		label: truncate(row.entry.name),
+		value: row.total,
+		text: `${formatNumber(row.total, 3)} J/mm³`,
+		tone: (row.entry.id === selectedId ? 'accent' : 'muted') as OgTone
+	}));
+
+	const material = selected?.entry ?? rows[0].entry;
+	const start = perMaterialStart ? material.startTemperature : configuredStart;
+	const subtitle = [
+		material.name,
+		`${formatNumber(start, 0)} → ${formatNumber(material.printTemperature, 0)} °C`,
+		`melts at ${formatNumber(material.meltTemperature, 0)} °C`
+	].join(' · ');
+
+	return {
+		variant: 'config',
+		title: `${truncate(material.name, 22)} costs ${formatNumber(selected?.total ?? 0, 3)} J/mm³ to print`,
+		subtitle,
+		description: `${subtitle}. Energy per mm³ compared across ${series.length} filaments.`,
+		alt: `Energy per mm³ for ${series.map((entry) => entry.label).join(', ')}`,
+		facts: [
+			{ label: 'Material', value: truncate(material.name) },
+			{ label: 'To melting point', value: `${formatNumber(selected?.toMelt ?? 0, 3)} J/mm³` },
+			{ label: 'To setpoint', value: `${formatNumber(selected?.total ?? 0, 3)} J/mm³` },
+			{ label: 'Filament starts at', value: `${formatNumber(start, 0)} °C` }
+		],
+		series,
+		target: null
 	};
 }

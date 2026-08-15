@@ -10,7 +10,8 @@
 		"preview": "node .output/server/index.mjs",
 		"lint": "biome check .",
 		"format": "prettier --write .",
-		"data:update-db": "tsx data/csv-converter.ts"
+		"data:update-db": "tsx data/csv-converter.ts",
+		"share:check": "tsx --tsconfig tsconfig.scripts.json scripts/share-check.ts"
 	},
 	"dependencies": {
 		"@radix-ui/react-checkbox": "^1.3.11",

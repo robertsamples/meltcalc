@@ -13,6 +13,7 @@ import type {
 	CubicMillimeter,
 	CubicMillimetersPerSecond,
 	CubicMillimetersPerSecondPerMillimeter,
+	DollarsPerFlow,
 	JoulesPerCubicMillimeter,
 	Kelvin,
 	Millimeter,
@@ -229,6 +230,11 @@ export type HotendPerformance = {
 	specificPower: WattsPerMillimeter;
 	/** `maxFlow / flowRate`: below 1 the hotend cannot keep up with what is being asked of it */
 	headroom: number;
+	/**
+	 * What a mm³/s of sustainable flow costs on this hotend, or `null` when its price is unknown.
+	 * A missing price is not a cheap one, so it stays missing rather than becoming a number.
+	 */
+	costPerFlow: DollarsPerFlow | null;
 };
 
 export type PerformanceInput = {
@@ -275,6 +281,8 @@ export function hotendPerformance(
 		limitedBy,
 		residenceTime: residenceTime(meltZoneLength, flowRate),
 		specificPower: specificMeltPower(meltPower(meltEnergy, flowRate), meltZoneLength),
-		headroom: flowRate > 0 ? maxFlow / flowRate : Number.POSITIVE_INFINITY
+		headroom: flowRate > 0 ? maxFlow / flowRate : Number.POSITIVE_INFINITY,
+		costPerFlow:
+			hotend.price !== null && maxFlow > 0 ? ((hotend.price / maxFlow) as DollarsPerFlow) : null
 	};
 }
