@@ -16,7 +16,8 @@ const COLORS = {
 	foreground: '#fafafa',
 	muted: '#a1a1aa',
 	dim: '#71717a',
-	accent: '#3987e5',
+	/** Slot 0 of the app's series palette, kept in step with `@/lib/series` by hand */
+	accent: '#005dc9',
 	/** The same status pair the app uses: clears the target flow, or does not */
 	good: '#0ca30c',
 	critical: '#d03b3b'

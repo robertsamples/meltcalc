@@ -4,6 +4,7 @@ import { AboutCard } from '@/components/about';
 import { CostPerFlowChart, PriceVsFlowScatter } from '@/components/charts/cost-charts';
 import { EnergyChart } from '@/components/charts/energy-chart';
 import { HeaterChart } from '@/components/charts/heater-chart';
+import { MaterialFlowChart } from '@/components/charts/material-flow-chart';
 import { MaxFlowChart } from '@/components/charts/max-flow-chart';
 import { MeltZoneLandscape, SpecificPowerChart } from '@/components/charts/melt-zone-charts';
 import { ResidenceByHotendChart, ResidenceCurveChart } from '@/components/charts/residence-charts';
@@ -13,7 +14,7 @@ import { MaterialSettingsCard, ModelSettingsCard, PrintSettingsCard } from '@/co
 import { ShareConfigButton } from '@/components/share-config';
 import { SummaryTiles } from '@/components/summary';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { VIEW_GROUPS, type ViewMode } from '@/lib/configuration';
+import { comparesMaterials, VIEW_GROUPS, type ViewMode } from '@/lib/configuration';
 import { clearUrlConfig, parseConfigFromUrl } from '@/lib/share-url';
 import { currentViewModeAtom, importWarningsAtom, loadImportedConfigurationAtom } from '@/state/atoms';
 
@@ -84,6 +85,7 @@ export function App() {
 					) : null}
 					{viewMode === 'energy' ? <EnergyChart /> : null}
 					{viewMode === 'heater' ? <HeaterChart /> : null}
+					{viewMode === 'materialFlow' ? <MaterialFlowChart /> : null}
 					{viewMode === 'cost' ? (
 						<>
 							<CostPerFlowChart />
@@ -100,8 +102,14 @@ export function App() {
 
 				<div className="flex flex-col gap-2 w-full lg:w-1/3">
 					<PrintSettingsCard />
-					<MaterialSettingsCard />
-					<ModelSettingsCard />
+					{/* The material views compare every material at its own temperatures, so the one
+					    selected here changes nothing they show */}
+					{comparesMaterials(viewMode) ? null : (
+						<>
+							<MaterialSettingsCard />
+							<ModelSettingsCard />
+						</>
+					)}
 					<AboutCard className="max-lg:hidden" />
 				</div>
 			</div>

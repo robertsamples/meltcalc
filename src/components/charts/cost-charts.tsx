@@ -8,7 +8,7 @@ import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/
 import { HF_NOZZLE_FOOTNOTE, hasHfNozzleSeries, performanceLabel } from '@/lib/chart-labels';
 import { formatFlow, formatNumber } from '@/lib/format';
 import { hotendLabel } from '@/lib/hotend';
-import { AXIS_LINE, STATUS_COLORS, seriesMarker } from '@/lib/series';
+import { AXIS_LINE, STATUS_COLORS, seriesColor, seriesMarker } from '@/lib/series';
 import { allPerformanceAtom, currentSelectedHotendsAtom, performanceAtom } from '@/state/atoms';
 
 /**
@@ -144,7 +144,7 @@ const SCATTER_CONFIG = { maxFlow: { label: 'Max flow' } } satisfies ChartConfig;
 
 /** Bands of equal value-for-money behind the points, and how strongly each is tinted */
 const BAND_COUNT = 8;
-const BAND_HUE = '#3987e5';
+const BAND_HUE = seriesColor(0);
 /**
  * The tint runs across a wider range than the band count alone would need, so that finer
  * divisions do not mean fainter differences between neighbours — the step between adjacent bands

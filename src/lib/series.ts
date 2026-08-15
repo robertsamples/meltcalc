@@ -7,17 +7,24 @@
  * comparison is capped at `MAX_COMPARED_HOTENDS`.
  *
  * The steps below are the dark-surface set; they were validated as a group against this app's
- * background (zinc 950) for lightness band, chroma, colour-vision separation and contrast.
+ * background (zinc 950) for lightness band, chroma, colour-vision separation and contrast — as
+ * *every* pair, not just neighbouring ones, because all eight can be on screen at once.
+ *
+ * They alternate light and dark down the list on purpose. Red-green colour blindness collapses
+ * most of the hue circle onto one axis, so hue alone cannot separate eight things; lightness
+ * survives it, and pairing each hue with a lightness that its neighbours in hue do not share is
+ * what keeps the set apart. It is also why the warm half is a rust, a gold and a pink rather than
+ * three shades of orange — those differ in lightness as well as hue.
  */
 export const SERIES_COLORS = [
-	'#3987e5',
-	'#d95926',
-	'#199e70',
-	'#c98500',
-	'#d55181',
-	'#008300',
-	'#9085e9',
-	'#e66767'
+	'#005dc9',
+	'#af3c03',
+	'#0b764d',
+	'#e7578e',
+	'#07a0c5',
+	'#a48b08',
+	'#9676f6',
+	'#933497'
 ] as const;
 
 export function seriesColor(index: number): string {

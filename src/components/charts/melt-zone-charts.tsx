@@ -15,6 +15,7 @@ import {
 } from 'recharts';
 import { pointTooltip } from '@/components/charts/chart-tooltip';
 import { SeriesMarker, shapePath } from '@/components/series-marker';
+import { Term } from '@/components/term';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
 import { HF_NOZZLE_FOOTNOTE, hasHfNozzleSeries, performanceLabel } from '@/lib/chart-labels';
@@ -23,12 +24,12 @@ import { AXIS_LINE, STATUS_COLORS, seriesMarker, THRESHOLD_LINE } from '@/lib/se
 import { requiredMeltZoneLength } from '@/lib/thermal';
 import {
 	allPerformanceAtom,
+	availablePowerLimitAtom,
 	currentSelectedHotendsAtom,
 	energyAtom,
 	flowRateAtom,
 	materialAtom,
-	performanceAtom,
-	specificPowerLimitAtom
+	performanceAtom
 } from '@/state/atoms';
 
 /**
@@ -45,7 +46,7 @@ type PowerRow = { id: string; label: string; meltZone: number; specificPower: nu
 
 export function SpecificPowerChart() {
 	const performance = useAtomValue(performanceAtom);
-	const limit = useAtomValue(specificPowerLimitAtom);
+	const limit = useAtomValue(availablePowerLimitAtom);
 	const flowRate = useAtomValue(flowRateAtom);
 	const material = useAtomValue(materialAtom);
 
@@ -63,10 +64,9 @@ export function SpecificPowerChart() {
 			<CardHeader>
 				<CardTitle className="text-base">Power per mm of effective melt zone</CardTitle>
 				<CardDescription>
-					Bringing {material.name} to its {formatNumber(material.meltTemperature, 0)} °C melting point at{' '}
-					{formatFlow(flowRate)} takes a fixed amount of power; a longer melt zone spreads it over more
-					heated length. The dashed line is what a millimetre of melt zone can actually couple into the
-					filament — bars past it are asking for more than conduction through the plastic will give.
+					Power needed to bring {material.name} to its {formatNumber(material.meltTemperature, 0)} °C{' '}
+					<Term term="melting point" /> at {formatFlow(flowRate)}, spread over the heated length. Bars past
+					the line ask more of a millimetre than conduction through the plastic will give.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-3">
@@ -192,7 +192,7 @@ export function MeltZoneLandscape() {
 	const selected = useAtomValue(currentSelectedHotendsAtom);
 	const flowRate = useAtomValue(flowRateAtom);
 	const energy = useAtomValue(energyAtom);
-	const limit = useAtomValue(specificPowerLimitAtom);
+	const limit = useAtomValue(availablePowerLimitAtom);
 	const material = useAtomValue(materialAtom);
 
 	const required = requiredMeltZoneLength(flowRate, energy.toMelt, limit);
@@ -241,11 +241,10 @@ export function MeltZoneLandscape() {
 			<CardHeader>
 				<CardTitle className="text-base">Every hotend in the database</CardTitle>
 				<CardDescription>
-					All {points.length} of them by effective melt zone length, grouped by ecosystem, so it is visible
-					what else exists and which families reach far enough. Anything left of the line cannot sustain{' '}
-					{formatFlow(flowRate)} in {material.name}: that flow needs {formatNumber(required, 1)} mm at the
-					calibrated {formatNumber(limit, 2)} W/mm, which assumes a copper block — brass, steel or
-					aluminium needs proportionally more.
+					All {points.length} by effective <Term term="melt zone" /> length, grouped by ecosystem. Left of
+					the line is short of the {formatNumber(required, 1)} mm that {formatFlow(flowRate)} in{' '}
+					{material.name} needs at {formatNumber(limit, 2)} W/mm. That assumes a copper block; brass,
+					steel and aluminium need proportionally more.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-3">

@@ -168,6 +168,62 @@ export function specificPowerLimit(
 	return (referenceEnergy.toMelt * referenceFlowPerMeltZoneMm) as WattsPerMillimeter;
 }
 
+/**
+ * How much of the theoretical gain from a hotter nozzle actually shows up as flow.
+ *
+ * Conduction into the filament scales with the temperature difference driving it, so running the
+ * nozzle further above the melting point should buy proportionally more flow. In practice it buys
+ * less than that: the extra heat has to cross the same badly-conducting plastic, the film nearest
+ * the wall thins out and carries more of the drop, and viscosity falls faster than the melt front
+ * advances. Damping the proportional term is a blunt way to say so, but it is the right direction
+ * and the magnitude matches what people report.
+ */
+export const SUPERHEAT_AT_DOUBLE = 1.5;
+
+/**
+ * The curve is anchored on each material's own setpoint and has no business extrapolating far past
+ * it: up here the polymer is degrading and nozzle pressure is the real limit. Reached at about
+ * 3.3× a material's normal superheat.
+ */
+export const MAX_SUPERHEAT_FACTOR = 2;
+
+/**
+ * Exponent that turns "twice the superheat is worth 1.5× the flow" into a curve.
+ *
+ * A power law rather than a straight line because three things have to hold at once: no flow at the
+ * melting point, exactly the calibrated flow at the material's normal setpoint, and less than
+ * proportional gain above it. No straight line passes through all three — one through (0, 0) and
+ * (1, 1) is forced to give 2× at twice the superheat, undamped.
+ */
+const SUPERHEAT_EXPONENT = Math.log2(SUPERHEAT_AT_DOUBLE);
+
+/**
+ * What the chosen nozzle setpoint is worth, as a multiplier on what a millimetre of melt zone can
+ * couple into the filament.
+ *
+ * Heat crosses into the filament in proportion to the temperature difference driving it, so the
+ * superheat above the melting point — not the setpoint itself — is the quantity that matters. It is
+ * measured against the material's *own* normal setpoint rather than a global reference, so the
+ * factor is exactly 1 wherever the database is left alone and only an override moves it.
+ *
+ * Zero at or below the melting point. There is no driving temperature difference there and the
+ * plastic is not melting at all, so the honest answer is no flow rather than a small number.
+ */
+export function superheatFactor(
+	meltTemperature: Celsius,
+	referenceTemperature: Celsius,
+	printTemperature: Celsius
+): number {
+	const reference = referenceTemperature - meltTemperature;
+	// A material with no superheat in its own defaults gives nothing to measure against
+	if (!(reference > 0)) return 1;
+
+	const available = printTemperature - meltTemperature;
+	if (!(available > 0)) return 0;
+
+	return Math.min((available / reference) ** SUPERHEAT_EXPONENT, MAX_SUPERHEAT_FACTOR);
+}
+
 /** Flow the melt zone can sustain before the plastic stops being fully molten */
 export function meltZoneLimitedFlow(
 	meltZoneLength: Millimeter,
@@ -275,6 +331,7 @@ export type PerformanceInput = {
 	/** Energy up to the nozzle setpoint: the heater's side of it */
 	printEnergy: JoulesPerCubicMillimeter;
 	flowRate: CubicMillimetersPerSecond;
+	/** Already carrying the superheat factor for the chosen setpoint; see `superheatFactor` */
 	limit: WattsPerMillimeter;
 	/** The temperature the block has to hold, i.e. the nozzle setpoint */
 	printTemperature: Celsius;

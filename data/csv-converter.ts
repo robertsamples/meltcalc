@@ -106,6 +106,14 @@ function literal(value: string | null): string {
 
 const BLOCK_MATERIALS: Record<string, string> = { Cu: 'copper', Br: 'brass', Al: 'aluminium', St: 'steel' };
 
+/** A share of the melt zone's ceiling, so anything outside (0, 1] is a typo rather than an opinion */
+function factor(row: Record<string, string>, context: string): number {
+	const value = requiredNumber(row, 'Practical flow factor', context);
+	if (!(value > 0) || value > 1) throw new Error(`${context}: practical flow factor ${value} is not in (0, 1]`);
+
+	return value;
+}
+
 /**
  * Block material and max temperature are slash-separated lists, paired positionally, with the
  * first entry the stock option: `Cu/Al` with `500/300` is a copper block rated to 500 °C and an
@@ -218,6 +226,7 @@ async function generateMaterials() {
 			meltTemperature: requiredNumber(row, 'Melt temp (C)', context),
 			printTemperature: requiredNumber(row, 'Print temp (C)', context),
 			startTemperature: requiredNumber(row, 'Start temp (C)', context),
+			practicalFlowFactor: factor(row, context),
 			notes: optional(row, 'Notes')
 		};
 	});
@@ -241,6 +250,7 @@ async function generateMaterials() {
 				`\t\tmeltTemperature: ${material.meltTemperature} as Celsius,\n` +
 				`\t\tprintTemperature: ${material.printTemperature} as Celsius,\n` +
 				`\t\tstartTemperature: ${material.startTemperature} as Celsius,\n` +
+				`\t\tpracticalFlowFactor: ${material.practicalFlowFactor},\n` +
 				`\t\tnotes: ${literal(material.notes)}\n` +
 				`\t}`
 		)

@@ -14,6 +14,7 @@ import {
 } from 'recharts';
 import { pointTooltip, seriesTooltip } from '@/components/charts/chart-tooltip';
 import { SeriesMarker } from '@/components/series-marker';
+import { Term } from '@/components/term';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
 import { HF_NOZZLE_FOOTNOTE, hasHfNozzleSeries, performanceLabel } from '@/lib/chart-labels';
@@ -92,9 +93,10 @@ export function ResidenceByHotendChart() {
 			<CardHeader>
 				<CardTitle className="text-base">Residence time at {formatFlow(flowRate)}</CardTitle>
 				<CardDescription>
-					How long a given piece of {FILAMENT_DIAMETER} mm filament stays inside the melt zone: effective
-					melt zone volume divided by flow. Below the {formatSeconds(minimumResidenceTime)} floor the middle of the
-					filament is unlikely to reach temperature before it is extruded.
+					<Term term="residence time">How long</Term> a piece of {FILAMENT_DIAMETER} mm filament stays
+					inside the <Term term="melt zone" />: its volume divided by flow. Below the{' '}
+					{formatSeconds(minimumResidenceTime)} floor the middle of the filament is unlikely to reach
+					temperature before it is extruded.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-3">

@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { type ReactNode, useId } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
@@ -63,8 +63,19 @@ export function NumberField({
 	);
 }
 
-/** A read-only derived quantity, shown in the same rhythm as the inputs around it */
-export function ReadoutField({ label, value, hint }: { label: string; value: string; hint?: string }) {
+/**
+ * A read-only derived quantity, shown in the same rhythm as the inputs around it. Label and hint
+ * take nodes rather than strings so a technical term inside them can carry its own definition.
+ */
+export function ReadoutField({
+	label,
+	value,
+	hint
+}: {
+	label: ReactNode;
+	value: string;
+	hint?: ReactNode;
+}) {
 	return (
 		<div className="space-y-1.5">
 			<p className="text-xs text-muted-foreground">{label}</p>

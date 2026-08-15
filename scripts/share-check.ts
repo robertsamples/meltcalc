@@ -8,10 +8,23 @@ import type { Celsius, CubicMillimetersPerSecond } from '@/lib/units';
  * comes out. Run with `pnpm exec tsx --tsconfig tsconfig.scripts.json scripts/share-check.ts`.
  */
 
+/**
+ * Key order is not part of the configuration, but `JSON.stringify` preserves it — so a new field
+ * inserted at a different point in `expand()` than in the type would fail a round-trip that is
+ * in fact perfect. Sorting keys compares the values, which is the only thing that matters.
+ */
+function stable(value: unknown): string {
+	return JSON.stringify(value, (_key, entry) =>
+		entry && typeof entry === 'object' && !Array.isArray(entry)
+			? Object.fromEntries(Object.entries(entry as Record<string, unknown>).sort(([a], [b]) => a.localeCompare(b)))
+			: entry
+	);
+}
+
 function check(name: string, config: ShareableConfiguration) {
 	const encoded = encodeConfig(config);
 	const decoded = decodeConfig(encoded);
-	const same = JSON.stringify(decoded?.config) === JSON.stringify(config);
+	const same = stable(decoded?.config) === stable(config);
 
 	console.log(`${same ? 'OK  ' : 'FAIL'} ${name.padEnd(28)} ${String(encoded.length).padStart(4)} chars`);
 	if (!same) {
@@ -58,6 +71,13 @@ check('a full comparison', {
 	...DEFAULT_CONFIGURATION,
 	selectedHotends: HOTEND_DB.slice(0, MAX_COMPARED_HOTENDS).map((hotend) => hotend.id),
 	viewMode: 'heater'
+});
+
+check('material flow, pinned hotend', {
+	...DEFAULT_CONFIGURATION,
+	viewMode: 'materialFlow',
+	materialFlowHotend: 'Phaetus|Rapido UHF',
+	materialFlowAsSpeed: true
 });
 
 const legacy = Buffer.from(

@@ -1,11 +1,13 @@
 import { useAtom, useAtomValue } from 'jotai';
 import { useMemo } from 'react';
 import { NumberField, ReadoutField } from '@/components/field';
+import { Term } from '@/components/term';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { formatFlow, formatNumber } from '@/lib/format';
+import { POLYMER_NAMES } from '@/lib/glossary';
 import { MATERIAL_DB } from '@/lib/material';
 import { extrusionCrossSection, filamentFeedRate, volumetricFlow } from '@/lib/thermal';
 import type {
@@ -24,7 +26,8 @@ import {
 	materialAtom,
 	printTemperatureAtom,
 	specificPowerLimitAtom,
-	startTemperatureAtom
+	startTemperatureAtom,
+	superheatFactorAtom
 } from '@/state/atoms';
 
 export function PrintSettingsCard() {
@@ -121,6 +124,7 @@ export function MaterialSettingsCard() {
 	const material = useAtomValue(materialAtom);
 	const printTemperature = useAtomValue(printTemperatureAtom);
 	const startTemperature = useAtomValue(startTemperatureAtom);
+	const superheat = useAtomValue(superheatFactorAtom);
 
 	// The picker is grouped by family so related grades sit together in a 23-entry list
 	const families = useMemo(() => {
@@ -146,8 +150,10 @@ export function MaterialSettingsCard() {
 				<Select
 					value={settings.materialId}
 					onValueChange={(materialId) =>
-						// Temperatures follow the new material unless the user pinned them
-						setSettings({ ...settings, materialId })
+						// Both temperatures snap back to the new material's own defaults. Carrying a
+						// pinned 220 °C over to PEEK would silently produce a configuration that cannot
+						// melt it, and the answer would look like a hotend problem
+						setSettings({ ...settings, materialId, printTemperature: null, startTemperature: null })
 					}
 				>
 					<SelectTrigger className="w-full h-8">
@@ -158,7 +164,7 @@ export function MaterialSettingsCard() {
 							<SelectGroup key={family}>
 								<SelectLabel>{family}</SelectLabel>
 								{entries.map((entry) => (
-									<SelectItem key={entry.id} value={entry.id}>
+									<SelectItem key={entry.id} value={entry.id} title={POLYMER_NAMES[entry.name]}>
 										{entry.name}
 									</SelectItem>
 								))}
@@ -201,25 +207,42 @@ export function MaterialSettingsCard() {
 
 				<div className="grid grid-cols-2 gap-3 pt-1 border-t">
 					<ReadoutField
-						label="Melting point"
+						label={<Term term="melting point">Melting point</Term>}
 						value={`${formatNumber(material.meltTemperature, 0)} °C`}
 						hint={
-							material.heatOfFusion > 0
-								? 'What the melt zone has to reach'
-								: 'Amorphous: lowest temperature it flows at'
+							material.heatOfFusion > 0 ? (
+								'What the melt zone has to reach'
+							) : (
+								<>
+									<Term term="amorphous" />: lowest temperature it flows at
+								</>
+							)
 						}
 					/>
 					<ReadoutField
-						label="Superheat"
+						label={<Term term="superheat">Superheat</Term>}
 						value={`${formatNumber(Math.max(printTemperature - material.meltTemperature, 0), 0)} K`}
-						hint="Above melting, at the setpoint"
+						hint={
+							superheat === 1
+								? 'Above melting, at the setpoint'
+								: `Above melting · ${formatNumber(superheat, 2)}× melt zone flow`
+						}
 					/>
 				</div>
 
 				<div className="grid grid-cols-3 gap-3">
-					<ReadoutField label="Density" value={`${formatNumber(material.density, 2)} g/cm³`} />
-					<ReadoutField label="Heat capacity" value={`${formatNumber(material.specificHeatCapacity, 2)} J/g·K`} />
-					<ReadoutField label="Heat of fusion" value={`${formatNumber(material.heatOfFusion, 0)} J/g`} />
+					<ReadoutField
+						label={<Term term="density">Density</Term>}
+						value={`${formatNumber(material.density, 2)} g/cm³`}
+					/>
+					<ReadoutField
+						label={<Term term="specific heat capacity">Heat capacity</Term>}
+						value={`${formatNumber(material.specificHeatCapacity, 2)} J/g·K`}
+					/>
+					<ReadoutField
+						label={<Term term="heat of fusion">Heat of fusion</Term>}
+						value={`${formatNumber(material.heatOfFusion, 0)} J/g`}
+					/>
 				</div>
 
 				{material.notes ? <p className="text-[11px] text-muted-foreground leading-snug">{material.notes}</p> : null}

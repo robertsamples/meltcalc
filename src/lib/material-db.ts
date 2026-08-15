@@ -12,49 +12,53 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 	{
 		id: 'pla',
 		name: 'PLA',
-		family: 'Aliphatic polyester',
+		family: 'Polyester',
 		density: 1.24 as GramsPerCubicCentimeter,
 		specificHeatCapacity: 1.8 as JoulesPerGramKelvin,
 		heatOfFusion: 45 as JoulesPerGram,
 		meltTemperature: 160 as Celsius,
 		printTemperature: 220 as Celsius,
 		startTemperature: 25 as Celsius,
+		practicalFlowFactor: 1,
 		notes: 'Tm 155-170; ~35-40% crystallinity of the 93 J/g fully crystalline value'
 	},
 	{
 		id: 'pet',
 		name: 'PET',
-		family: 'Aromatic polyester',
+		family: 'Polyester',
 		density: 1.38 as GramsPerCubicCentimeter,
 		specificHeatCapacity: 1.55 as JoulesPerGramKelvin,
 		heatOfFusion: 50 as JoulesPerGram,
 		meltTemperature: 250 as Celsius,
 		printTemperature: 275 as Celsius,
 		startTemperature: 60 as Celsius,
+		practicalFlowFactor: 0.8,
 		notes: 'Tm 250 °C; crystallises readily, unlike its glycol-modified cousins'
 	},
 	{
 		id: 'petg',
 		name: 'PETG',
-		family: 'Aromatic polyester',
+		family: 'Polyester',
 		density: 1.27 as GramsPerCubicCentimeter,
 		specificHeatCapacity: 1.7 as JoulesPerGramKelvin,
 		heatOfFusion: 0 as JoulesPerGram,
 		meltTemperature: 210 as Celsius,
 		printTemperature: 240 as Celsius,
 		startTemperature: 25 as Celsius,
+		practicalFlowFactor: 1,
 		notes: 'Amorphous - no Tm. Tg 80 °C; 210 °C is where it flows well enough to extrude'
 	},
 	{
 		id: 'pctg',
 		name: 'PCTG',
-		family: 'Aromatic polyester',
+		family: 'Polyester',
 		density: 1.23 as GramsPerCubicCentimeter,
 		specificHeatCapacity: 1.75 as JoulesPerGramKelvin,
 		heatOfFusion: 0 as JoulesPerGram,
 		meltTemperature: 220 as Celsius,
 		printTemperature: 250 as Celsius,
 		startTemperature: 25 as Celsius,
+		practicalFlowFactor: 1,
 		notes: 'Amorphous copolyester, tougher than PETG'
 	},
 	{
@@ -67,6 +71,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 		meltTemperature: 215 as Celsius,
 		printTemperature: 260 as Celsius,
 		startTemperature: 60 as Celsius,
+		practicalFlowFactor: 1,
 		notes: 'Amorphous, Tg ~105 °C. Start temp assumes a warm enclosure'
 	},
 	{
@@ -79,6 +84,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 		meltTemperature: 220 as Celsius,
 		printTemperature: 260 as Celsius,
 		startTemperature: 60 as Celsius,
+		practicalFlowFactor: 1,
 		notes: 'Amorphous, Tg ~108 °C. Start temp assumes a warm enclosure'
 	},
 	{
@@ -91,6 +97,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 		meltTemperature: 210 as Celsius,
 		printTemperature: 240 as Celsius,
 		startTemperature: 50 as Celsius,
+		practicalFlowFactor: 1,
 		notes: 'Amorphous, Tg ~100 °C'
 	},
 	{
@@ -103,6 +110,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 		meltTemperature: 220 as Celsius,
 		printTemperature: 265 as Celsius,
 		startTemperature: 70 as Celsius,
+		practicalFlowFactor: 0.8,
 		notes: 'Tm 220 °C; ~30% crystallinity of the 230 J/g fully crystalline value'
 	},
 	{
@@ -115,6 +123,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 		meltTemperature: 178 as Celsius,
 		printTemperature: 250 as Celsius,
 		startTemperature: 60 as Celsius,
+		practicalFlowFactor: 0.8,
 		notes: 'Tm 178 °C, higher crystallinity than PA6'
 	},
 	{
@@ -127,6 +136,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 		meltTemperature: 295 as Celsius,
 		printTemperature: 320 as Celsius,
 		startTemperature: 80 as Celsius,
+		practicalFlowFactor: 0.6,
 		notes: 'Semi-aromatic polyamide (PA6T/66 family); Tm ~290-300 °C'
 	},
 	{
@@ -139,6 +149,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 		meltTemperature: 165 as Celsius,
 		printTemperature: 235 as Celsius,
 		startTemperature: 40 as Celsius,
+		practicalFlowFactor: 0.8,
 		notes: 'Tm 165 °C, ~50% crystallinity: cheap to heat but expensive to melt'
 	},
 	{
@@ -151,6 +162,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 		meltTemperature: 130 as Celsius,
 		printTemperature: 220 as Celsius,
 		startTemperature: 50 as Celsius,
+		practicalFlowFactor: 0.6,
 		notes: 'Lowest Tm of the set but the highest fusion enthalpy'
 	},
 	{
@@ -163,6 +175,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 		meltTemperature: 175 as Celsius,
 		printTemperature: 235 as Celsius,
 		startTemperature: 40 as Celsius,
+		practicalFlowFactor: 0.5,
 		notes: 'Hard-segment domains melt over a broad range around 165-190 °C'
 	},
 	{
@@ -175,6 +188,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 		meltTemperature: 260 as Celsius,
 		printTemperature: 290 as Celsius,
 		startTemperature: 80 as Celsius,
+		practicalFlowFactor: 0.8,
 		notes: 'Amorphous, Tg 147 °C; needs ~260 °C before it flows, and a hot chamber'
 	},
 	{
@@ -187,6 +201,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 		meltTemperature: 165 as Celsius,
 		printTemperature: 215 as Celsius,
 		startTemperature: 50 as Celsius,
+		practicalFlowFactor: 0.6,
 		notes: 'Tm 165 °C and highly crystalline; dense and fusion-heavy'
 	},
 	{
@@ -199,18 +214,20 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 		meltTemperature: 172 as Celsius,
 		printTemperature: 250 as Celsius,
 		startTemperature: 60 as Celsius,
+		practicalFlowFactor: 0.6,
 		notes: 'Tm 172 °C. Very dense; low cp partly offsets it'
 	},
 	{
 		id: 'pvb',
 		name: 'PVB',
-		family: 'Engineering',
+		family: 'Vinyl',
 		density: 1.1 as GramsPerCubicCentimeter,
 		specificHeatCapacity: 1.6 as JoulesPerGramKelvin,
 		heatOfFusion: 0 as JoulesPerGram,
 		meltTemperature: 190 as Celsius,
 		printTemperature: 215 as Celsius,
 		startTemperature: 25 as Celsius,
+		practicalFlowFactor: 1,
 		notes: 'Amorphous, Tg ~70 °C; solvent-smoothable'
 	},
 	{
@@ -223,6 +240,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 		meltTemperature: 280 as Celsius,
 		printTemperature: 320 as Celsius,
 		startTemperature: 65 as Celsius,
+		practicalFlowFactor: 0.3,
 		notes: 'Tm 280 °C. Start temp is the spool, not the chamber: printed in a hot chamber it stays semi-crystalline rather than annealing on the plate'
 	},
 	{
@@ -235,6 +253,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 		meltTemperature: 305 as Celsius,
 		printTemperature: 360 as Celsius,
 		startTemperature: 130 as Celsius,
+		practicalFlowFactor: 0.3,
 		notes: 'Tm ~305 °C; slower-crystallising than PEEK'
 	},
 	{
@@ -247,6 +266,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 		meltTemperature: 343 as Celsius,
 		printTemperature: 400 as Celsius,
 		startTemperature: 150 as Celsius,
+		practicalFlowFactor: 0.3,
 		notes: 'Tm 343 °C, ~35% crystallinity. Chamber at 150 °C+ is what makes it printable'
 	},
 	{
@@ -259,6 +279,7 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 		meltTemperature: 330 as Celsius,
 		printTemperature: 380 as Celsius,
 		startTemperature: 150 as Celsius,
+		practicalFlowFactor: 0.6,
 		notes: 'Amorphous, Tg 186 °C; flows around 330 °C. Hot chamber assumed'
 	},
 	{
@@ -271,6 +292,189 @@ export const MATERIAL_DB: MaterialDefinition[] = [
 		meltTemperature: 330 as Celsius,
 		printTemperature: 370 as Celsius,
 		startTemperature: 150 as Celsius,
+		practicalFlowFactor: 0.6,
 		notes: 'Amorphous polysulfone, Tg 220 °C. Hot chamber assumed'
+	},
+	{
+		id: 'pva',
+		name: 'PVA',
+		family: 'Vinyl',
+		density: 1.23 as GramsPerCubicCentimeter,
+		specificHeatCapacity: 1.7 as JoulesPerGramKelvin,
+		heatOfFusion: 0 as JoulesPerGram,
+		meltTemperature: 165 as Celsius,
+		printTemperature: 200 as Celsius,
+		startTemperature: 25 as Celsius,
+		practicalFlowFactor: 1,
+		notes: 'Amorphous, Tg ~80 °C; water-soluble. Printing grades are partially hydrolysed and plasticised, so there is no lattice to melt'
+	},
+	{
+		id: 'pha',
+		name: 'PHA',
+		family: 'Polyester',
+		density: 1.25 as GramsPerCubicCentimeter,
+		specificHeatCapacity: 1.8 as JoulesPerGramKelvin,
+		heatOfFusion: 80 as JoulesPerGram,
+		meltTemperature: 160 as Celsius,
+		printTemperature: 205 as Celsius,
+		startTemperature: 25 as Celsius,
+		practicalFlowFactor: 0.6,
+		notes: 'Tm 155-175; ~55% crystallinity of the 146 J/g fully crystalline value. Narrow window - degrades near 200 °C'
+	},
+	{
+		id: 'pcl',
+		name: 'PCL',
+		family: 'Polyester',
+		density: 1.15 as GramsPerCubicCentimeter,
+		specificHeatCapacity: 2 as JoulesPerGramKelvin,
+		heatOfFusion: 65 as JoulesPerGram,
+		meltTemperature: 60 as Celsius,
+		printTemperature: 120 as Celsius,
+		startTemperature: 25 as Celsius,
+		practicalFlowFactor: 1,
+		notes: 'Tm 60 °C, the low-melt outlier; ~50% crystallinity of the 139 J/g fully crystalline value'
+	},
+	{
+		id: 'pmma-acrylic',
+		name: 'PMMA (acrylic)',
+		family: 'Vinyl',
+		density: 1.185 as GramsPerCubicCentimeter,
+		specificHeatCapacity: 1.47 as JoulesPerGramKelvin,
+		heatOfFusion: 0 as JoulesPerGram,
+		meltTemperature: 215 as Celsius,
+		printTemperature: 250 as Celsius,
+		startTemperature: 60 as Celsius,
+		practicalFlowFactor: 1,
+		notes: 'Amorphous, Tg 105 °C; flows around 215 °C, much like ABS at the same Tg'
+	},
+	{
+		id: 'pa66',
+		name: 'PA66',
+		family: 'Polyamide',
+		density: 1.14 as GramsPerCubicCentimeter,
+		specificHeatCapacity: 1.9 as JoulesPerGramKelvin,
+		heatOfFusion: 75 as JoulesPerGram,
+		meltTemperature: 260 as Celsius,
+		printTemperature: 285 as Celsius,
+		startTemperature: 70 as Celsius,
+		practicalFlowFactor: 0.8,
+		notes: 'Tm 260 °C; ~30% crystallinity of the 255 J/g fully crystalline value. Hotter and faster-crystallising than PA6'
+	},
+	{
+		id: 'peba',
+		name: 'PEBA',
+		family: 'Polyamide',
+		density: 1.01 as GramsPerCubicCentimeter,
+		specificHeatCapacity: 2 as JoulesPerGramKelvin,
+		heatOfFusion: 30 as JoulesPerGram,
+		meltTemperature: 170 as Celsius,
+		printTemperature: 235 as Celsius,
+		startTemperature: 40 as Celsius,
+		practicalFlowFactor: 0.8,
+		notes: 'Polyether block amide (Pebax). Only the polyamide hard blocks melt, so fusion stays small like TPU\'s'
+	},
+	{
+		id: 'pbt',
+		name: 'PBT',
+		family: 'Polyester',
+		density: 1.31 as GramsPerCubicCentimeter,
+		specificHeatCapacity: 1.7 as JoulesPerGramKelvin,
+		heatOfFusion: 50 as JoulesPerGram,
+		meltTemperature: 225 as Celsius,
+		printTemperature: 255 as Celsius,
+		startTemperature: 60 as Celsius,
+		practicalFlowFactor: 0.8,
+		notes: 'Tm 225 °C; ~35% crystallinity of the 140 J/g fully crystalline value. Crystallises fast, so it warps'
+	},
+	{
+		id: 'psu',
+		name: 'PSU',
+		family: 'Superpolymer',
+		density: 1.24 as GramsPerCubicCentimeter,
+		specificHeatCapacity: 1.3 as JoulesPerGramKelvin,
+		heatOfFusion: 0 as JoulesPerGram,
+		meltTemperature: 300 as Celsius,
+		printTemperature: 360 as Celsius,
+		startTemperature: 120 as Celsius,
+		practicalFlowFactor: 0.6,
+		notes: 'Amorphous polysulfone, Tg 185 °C - the mildest of the sulfone family'
+	},
+	{
+		id: 'pes',
+		name: 'PES',
+		family: 'Superpolymer',
+		density: 1.37 as GramsPerCubicCentimeter,
+		specificHeatCapacity: 1.3 as JoulesPerGramKelvin,
+		heatOfFusion: 0 as JoulesPerGram,
+		meltTemperature: 335 as Celsius,
+		printTemperature: 375 as Celsius,
+		startTemperature: 150 as Celsius,
+		practicalFlowFactor: 0.6,
+		notes: 'Amorphous polyethersulfone, Tg 225 °C. Hot chamber assumed'
+	},
+	{
+		id: 'pei-ultem-1010',
+		name: 'PEI (ULTEM 1010)',
+		family: 'Superpolymer',
+		density: 1.27 as GramsPerCubicCentimeter,
+		specificHeatCapacity: 1.9 as JoulesPerGramKelvin,
+		heatOfFusion: 0 as JoulesPerGram,
+		meltTemperature: 350 as Celsius,
+		printTemperature: 390 as Celsius,
+		startTemperature: 150 as Celsius,
+		practicalFlowFactor: 0.6,
+		notes: 'Amorphous, Tg 217 °C. Unblended PEI: stiffer and ~20 K hotter to run than 9085'
+	},
+	{
+		id: 'tpi',
+		name: 'TPI',
+		family: 'Superpolymer',
+		density: 1.33 as GramsPerCubicCentimeter,
+		specificHeatCapacity: 2 as JoulesPerGramKelvin,
+		heatOfFusion: 15 as JoulesPerGram,
+		meltTemperature: 388 as Celsius,
+		printTemperature: 420 as Celsius,
+		startTemperature: 160 as Celsius,
+		practicalFlowFactor: 0.3,
+		notes: 'Thermoplastic polyimide (AURUM PL450C). Tg 249 °C and Tm 388 °C - the highest melting point here'
+	},
+	{
+		id: 'lcp',
+		name: 'LCP',
+		family: 'Superpolymer',
+		density: 1.4 as GramsPerCubicCentimeter,
+		specificHeatCapacity: 1.4 as JoulesPerGramKelvin,
+		heatOfFusion: 5 as JoulesPerGram,
+		meltTemperature: 280 as Celsius,
+		printTemperature: 300 as Celsius,
+		startTemperature: 80 as Celsius,
+		practicalFlowFactor: 0.3,
+		notes: 'Thermotropic LCP (Vectra-type). The melt keeps its nematic order, so there is almost no lattice to break down and fusion is near zero'
+	},
+	{
+		id: 'ppe-ps',
+		name: 'PPE+PS',
+		family: 'Styrenic',
+		density: 1.06 as GramsPerCubicCentimeter,
+		specificHeatCapacity: 1.8 as JoulesPerGramKelvin,
+		heatOfFusion: 0 as JoulesPerGram,
+		meltTemperature: 240 as Celsius,
+		printTemperature: 275 as Celsius,
+		startTemperature: 80 as Celsius,
+		practicalFlowFactor: 1,
+		notes: 'Noryl-type PPE/PS blend, Tg ~145 °C. Amorphous; the polyphenylene ether is what carries the heat resistance'
+	},
+	{
+		id: 'bvoh',
+		name: 'BVOH',
+		family: 'Vinyl',
+		density: 1.25 as GramsPerCubicCentimeter,
+		specificHeatCapacity: 1.7 as JoulesPerGramKelvin,
+		heatOfFusion: 0 as JoulesPerGram,
+		meltTemperature: 170 as Celsius,
+		printTemperature: 200 as Celsius,
+		startTemperature: 25 as Celsius,
+		practicalFlowFactor: 1,
+		notes: 'Butenediol vinyl alcohol copolymer: an amorphous water-soluble support that dissolves faster and takes a wider window than PVA'
 	}
 ];

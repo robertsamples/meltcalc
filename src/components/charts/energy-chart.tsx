@@ -2,11 +2,13 @@ import { useAtom, useAtomValue } from 'jotai';
 import { useMemo } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
 import { pointTooltip } from '@/components/charts/chart-tooltip';
+import { Term } from '@/components/term';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { formatFlow, formatNumber } from '@/lib/format';
+import { POLYMER_NAMES } from '@/lib/glossary';
 import { familyIndex, MATERIAL_DB, PRESENT_FAMILIES } from '@/lib/material';
 import { AXIS_LINE, seriesColor } from '@/lib/series';
 import { energyPerVolume } from '@/lib/thermal';
@@ -83,6 +85,9 @@ function FamilyTick({
 			// through a class, and a CSS rule of any specificity beats a presentation attribute
 			style={{ fill: seriesColor(familyIndex(families.get(label) ?? '')) }}
 		>
+			{/* Native SVG tooltip rather than the Radix one: 36 rows of portalled tooltips is a lot
+			    of machinery for a label that only ever needs to spell out an abbreviation */}
+			{POLYMER_NAMES[label] ? <title>{POLYMER_NAMES[label]}</title> : null}
 			{label}
 		</text>
 	);
@@ -143,9 +148,9 @@ export function EnergyChart() {
 			<CardHeader>
 				<CardTitle className="text-base">Energy to melt each material</CardTitle>
 				<CardDescription>
-					Each material from its own filament start temperature, through its melting point, up to its own
-					print temperature. Amorphous polymers (PETG, ABS, PC, PEI) pay nothing for the middle block —
-					they have no crystal lattice to break down, which is a large part of why they melt so easily.
+					Each material from its start temperature to its print temperature.{' '}
+					<Term term="amorphous">Amorphous</Term> polymers skip the middle block: no ordered structure,
+					no <Term term="heat of fusion" /> to pay.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-3">
@@ -283,15 +288,15 @@ export function EnergyChart() {
 				<div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
 					<span className="flex items-center gap-1.5">
 						<span className="size-2 rounded-full" style={{ background: SENSIBLE_COLOR }} />
-						To melting point (ρ · cp · ΔT)
+						To <Term term="melting point" /> (ρ · cp · ΔT)
 					</span>
 					<span className="flex items-center gap-1.5">
 						<span className="size-2 rounded-full" style={{ background: FUSION_COLOR }} />
-						Heat of fusion (ρ · h<sub>f</sub>)
+						<Term term="heat of fusion">Heat of fusion</Term> (ρ · h<sub>f</sub>)
 					</span>
 					<span className="flex items-center gap-1.5">
 						<span className="size-2 rounded-full" style={{ background: SUPERHEAT_COLOR }} />
-						Superheat to the setpoint
+						<Term term="superheat">Superheat</Term> to the setpoint
 					</span>
 					<span className="opacity-70">{selectedMaterial.name} is shown solid; click a bar to switch to it</span>
 				</div>

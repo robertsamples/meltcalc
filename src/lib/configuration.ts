@@ -68,7 +68,7 @@ export const DEFAULT_THERMAL_SETTINGS: ThermalSettings = {
 };
 
 /** Which analysis is on screen */
-export type ViewMode = 'flow' | 'residence' | 'energy' | 'meltZone' | 'cost' | 'heater';
+export type ViewMode = 'flow' | 'residence' | 'energy' | 'meltZone' | 'cost' | 'heater' | 'materialFlow';
 
 /**
  * The views, in two groups, because they answer two different questions: three of them hold the
@@ -89,11 +89,26 @@ export const VIEW_GROUPS: { label: string; modes: { value: ViewMode; label: stri
 	},
 	{
 		label: 'Compare materials',
-		modes: [{ value: 'energy', label: 'Energy' }]
+		modes: [
+			{ value: 'energy', label: 'Energy' },
+			{ value: 'materialFlow', label: 'Max flow' }
+		]
 	}
 ];
 
 export const VIEW_MODES = VIEW_GROUPS.flatMap((group) => group.modes);
+
+const MATERIAL_GROUP = 'Compare materials';
+
+/**
+ * Whether a view holds the machine fixed and ranks materials, rather than the other way round.
+ *
+ * Derived from the grouping above so the two cannot drift: a view added to that group is a material
+ * view everywhere without a second list to remember.
+ */
+export function comparesMaterials(mode: ViewMode): boolean {
+	return VIEW_GROUPS.some((group) => group.label === MATERIAL_GROUP && group.modes.some((m) => m.value === mode));
+}
 
 export const DEFAULT_VIEW_MODE: ViewMode = 'flow';
 
@@ -131,6 +146,15 @@ export const DEFAULT_ENERGY_PER_SECOND = false;
  */
 export const DEFAULT_ENERGY_PER_MATERIAL_START = true;
 
+/**
+ * Which hotend the per-material flow view holds fixed. Empty means "whichever is first in the
+ * comparison", so the view works before anything is chosen and survives that hotend being dropped.
+ */
+export const DEFAULT_MATERIAL_FLOW_HOTEND = '';
+
+/** Whether that view reads in mm/s at the current layer height and line width, or in mm³/s */
+export const DEFAULT_MATERIAL_FLOW_AS_SPEED = false;
+
 export const DEFAULT_DEBUG = false;
 
 /** Everything a share link carries. Keep it serialisable: it round-trips through JSON */
@@ -144,6 +168,9 @@ export type ShareableConfiguration = {
 	viewMode: ViewMode;
 	energyPerSecond: boolean;
 	energyPerMaterialStart: boolean;
+	/** Hotend id the per-material flow view is pinned to; `''` follows the comparison */
+	materialFlowHotend: string;
+	materialFlowAsSpeed: boolean;
 	debug: boolean;
 };
 
@@ -156,5 +183,7 @@ export const DEFAULT_CONFIGURATION: ShareableConfiguration = {
 	viewMode: DEFAULT_VIEW_MODE,
 	energyPerSecond: DEFAULT_ENERGY_PER_SECOND,
 	energyPerMaterialStart: DEFAULT_ENERGY_PER_MATERIAL_START,
+	materialFlowHotend: DEFAULT_MATERIAL_FLOW_HOTEND,
+	materialFlowAsSpeed: DEFAULT_MATERIAL_FLOW_AS_SPEED,
 	debug: DEFAULT_DEBUG
 };

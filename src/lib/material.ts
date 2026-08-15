@@ -31,6 +31,19 @@ export const MaterialDefinition = z.object({
 	printTemperature: Celsius,
 	/** Ambient, chamber or dryer temperature the filament enters the hotend at */
 	startTemperature: Celsius,
+	/**
+	 * The share of the melt zone's ceiling this material is actually run at, `1` where the hotend
+	 * is the binding constraint.
+	 *
+	 * Deliberately not part of the flow model. Everything else here is a heat-transfer calculation,
+	 * and what holds PEEK to 20-40 mm/s is not heat transfer: it is interlayer bonding against a
+	 * chamber 200 K below its melting point, crystallisation kinetics, warping and melt viscosity
+	 * against the extruder. A longer melt zone fixes none of those, so folding this into `maxFlow`
+	 * would make the hotend comparison answer a question it is not measuring.
+	 *
+	 * These are editorial readings of published recommendations, not measurements.
+	 */
+	practicalFlowFactor: z.number().positive().max(1),
 	notes: z.string().nullable()
 });
 export type MaterialDefinition = z.infer<typeof MaterialDefinition>;
@@ -57,15 +70,20 @@ export function defaultMaterial(): MaterialDefinition {
  * Grades of one base polymer are deliberately not split out — a carbon-filled nylon is a nylon,
  * and its filler changes the numbers by less than the spread between brands does.
  */
+/**
+ * Exactly eight, because the tint has no second channel the way a chart series does: eight is the
+ * whole palette, and a ninth family would have to reuse a colour that already means another one.
+ * Aliphatic and aromatic polyesters share a slot for that reason, as do the vinyls and acrylics.
+ */
 export const MATERIAL_FAMILIES = [
-	'Aliphatic polyester',
-	'Aromatic polyester',
+	'Polyester',
 	'Styrenic',
 	'Polyamide',
 	'Polyolefin',
 	'Polyurethane',
 	'Engineering',
-	'Superpolymer'
+	'Superpolymer',
+	'Vinyl'
 ] as const;
 
 export type MaterialFamily = (typeof MATERIAL_FAMILIES)[number];

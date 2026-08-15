@@ -1,13 +1,17 @@
 import { decodeConfig } from '@/lib/config-sharing';
-import { hotendLabel, resolveHotends } from '@/lib/hotend';
+import { blockMaterialFactor, hotendLabel, resolveHotends } from '@/lib/hotend';
 import { findMaterial, MATERIAL_DB } from '@/lib/material';
 import {
 	energyPerVolume,
+	extrusionCrossSection,
 	HEATER_EFFICIENCY,
 	hotendPerformance,
+	meltZoneLimitedFlow,
 	specificPowerLimit,
+	superheatFactor,
 	volumetricFlow
 } from '@/lib/thermal';
+import type { Celsius, CubicMillimetersPerSecondPerMillimeter, WattsPerMillimeter } from '@/lib/units';
 
 /**
  * Everything the OpenGraph image and the OpenGraph meta tags need, derived from a `?config=`
@@ -107,13 +111,17 @@ export function buildOgModel(configParam: string | null | undefined): OgModel {
 		return buildEnergyModel(material.id, startTemperature, imported.config.energyPerMaterialStart);
 	}
 
+	// The calibration with the chosen setpoint's superheat already folded in, exactly as the app does
+	const availableLimit = (specificPowerLimit(thermalSettings.referenceFlowPerMeltZoneMm) *
+		superheatFactor(material.meltTemperature, material.printTemperature, printTemperature)) as WattsPerMillimeter;
+
 	const { hotends } = resolveHotends(selectedHotends);
 	const performance = hotends.slice(0, MAX_SERIES).map((hotend) =>
 		hotendPerformance(hotend, {
 			meltEnergy: energy.toMelt,
 			printEnergy: energy.toPrint,
 			flowRate,
-			limit: specificPowerLimit(thermalSettings.referenceFlowPerMeltZoneMm),
+			limit: availableLimit,
 			printTemperature,
 			options: imported.config.hotendOptions
 		})
@@ -128,6 +136,23 @@ export function buildOgModel(configParam: string | null | undefined): OgModel {
 
 	if (viewMode === 'cost') return buildCostModel(performance, common);
 	if (viewMode === 'heater') return buildHeaterModel(performance, common);
+	if (viewMode === 'materialFlow') {
+		const pinned = performance.find((entry) => entry.hotend.id === imported.config.materialFlowHotend);
+
+		// The card has to read in whatever unit the sharer was looking at, or the picture and the
+		// numbers they are talking about disagree
+		const crossSection = extrusionCrossSection(printSettings.lineWidth, printSettings.layerHeight);
+		const asSpeed = imported.config.materialFlowAsSpeed && crossSection > 0;
+
+		return buildMaterialFlowModel(pinned ?? performance[0], common, {
+			referenceFlow: thermalSettings.referenceFlowPerMeltZoneMm,
+			perMaterialStart: imported.config.energyPerMaterialStart,
+			configuredStart: startTemperature,
+			scale: asSpeed ? 1 / crossSection : 1,
+			unit: asSpeed ? 'mm/s' : 'mm³/s',
+			decimals: asSpeed ? 0 : 1
+		});
+	}
 
 	return buildFlowModel(performance, common);
 }
@@ -268,6 +293,87 @@ function buildHeaterModel(performance: Performance[], common: CommonInput): OgMo
 		],
 		series,
 		target: null
+	};
+}
+
+/** One hotend against every material: what its melt zone is worth in each of them */
+function buildMaterialFlowModel(
+	entry: Performance | undefined,
+	common: CommonInput,
+	{
+		referenceFlow,
+		perMaterialStart,
+		configuredStart,
+		scale,
+		unit,
+		decimals
+	}: {
+		referenceFlow: CubicMillimetersPerSecondPerMillimeter;
+		perMaterialStart: boolean;
+		configuredStart: Celsius;
+		scale: number;
+		unit: string;
+		decimals: number;
+	}
+): OgModel {
+	if (!entry) return GENERIC_MODEL;
+
+	const blockLimit = (specificPowerLimit(referenceFlow) *
+		blockMaterialFactor(entry.block.material)) as WattsPerMillimeter;
+
+	const rows = MATERIAL_DB.map((material) => {
+		const start = perMaterialStart ? material.startTemperature : configuredStart;
+		const energy = energyPerVolume(material, start, material.printTemperature);
+		const compatible = material.printTemperature <= entry.block.maxTemperature;
+
+		return {
+			material,
+			compatible,
+			maxFlow: compatible ? meltZoneLimitedFlow(entry.meltZoneLength, energy.toMelt, blockLimit) * scale : 0
+		};
+		// Same order as the chart: by what the material is actually run at, not its ceiling
+	}).sort((a, b) => b.maxFlow * b.material.practicalFlowFactor - a.maxFlow * a.material.practicalFlowFactor);
+
+	const blocked = rows.filter((row) => !row.compatible).length;
+	const series: OgSeries[] = rows.slice(0, MAX_SERIES).map((row) => ({
+		label: truncate(row.material.name),
+		value: row.maxFlow,
+		text: row.compatible
+			? row.material.practicalFlowFactor < 1
+				? `${formatNumber(row.maxFlow * row.material.practicalFlowFactor, decimals)} of ${formatNumber(row.maxFlow, decimals)} ${unit}`
+				: `${formatNumber(row.maxFlow, decimals)} ${unit}`
+			: `needs ${formatNumber(row.material.printTemperature, 0)} °C`,
+		tone: (row.compatible ? 'accent' : 'bad') as OgTone
+	}));
+
+	const name = hotendLabel(entry.hotend);
+	const leader = rows[0];
+	const subtitle = [
+		`${formatNumber(entry.meltZoneLength, 1)} mm effective melt zone`,
+		`${entry.block.material} block to ${formatNumber(entry.block.maxTemperature, 0)} °C`,
+		`${MATERIAL_DB.length - blocked} of ${MATERIAL_DB.length} materials in range`
+	].join(' · ');
+
+	return {
+		variant: 'config',
+		title: `${truncate(entry.hotend.name, 22)}: ${formatNumber(leader.maxFlow, decimals)} ${unit} in ${truncate(leader.material.name, 12)}`,
+		subtitle,
+		description: `${subtitle}. Maximum flow rate for every material on one hotend.`,
+		alt: `Maximum flow rate by material on ${truncate(name, 40)}`,
+		facts: [
+			{ label: 'Hotend', value: truncate(name, 22) },
+			{ label: 'Effective melt zone', value: `${formatNumber(entry.meltZoneLength, 1)} mm` },
+			{ label: 'Block limit', value: `${formatNumber(entry.block.maxTemperature, 0)} °C` },
+			{ label: 'Out of range', value: `${blocked}/${MATERIAL_DB.length}` }
+		],
+		series,
+		target:
+			common.flowRate > 0
+				? {
+						value: common.flowRate * scale,
+						label: `target ${formatNumber(common.flowRate * scale, decimals)} ${unit}`
+					}
+				: null
 	};
 }
 

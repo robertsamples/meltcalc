@@ -2,7 +2,9 @@ import { atom, type PrimitiveAtom, type WritableAtom } from 'jotai';
 import {
 	DEFAULT_DEBUG,
 	DEFAULT_ENERGY_PER_MATERIAL_START,
-	DEFAULT_ENERGY_PER_SECOND,DEFAULT_HOTEND_IDS, 
+	DEFAULT_ENERGY_PER_SECOND,DEFAULT_HOTEND_IDS,
+	DEFAULT_MATERIAL_FLOW_AS_SPEED,
+	DEFAULT_MATERIAL_FLOW_HOTEND,
 	DEFAULT_MATERIAL_SETTINGS,
 	DEFAULT_PRINT_SETTINGS,
 	DEFAULT_THERMAL_SETTINGS,
@@ -22,6 +24,7 @@ import {
 	hotendPerformance,
 	meltPower,
 	specificPowerLimit,
+	superheatFactor,
 	volumetricFlow
 } from '@/lib/thermal';
 import type { Celsius, CubicMillimetersPerSecond, Watts, WattsPerMillimeter } from '@/lib/units';
@@ -111,6 +114,11 @@ const energyPerMaterialStartAtom = atomWithLocalStorage<boolean>(
 	'energyPerMaterialStart',
 	DEFAULT_ENERGY_PER_MATERIAL_START
 );
+const materialFlowHotendAtom = atomWithLocalStorage<string>('materialFlowHotend', DEFAULT_MATERIAL_FLOW_HOTEND);
+const materialFlowAsSpeedAtom = atomWithLocalStorage<boolean>(
+	'materialFlowAsSpeed',
+	DEFAULT_MATERIAL_FLOW_AS_SPEED
+);
 const debugAtom = atomWithLocalStorage<boolean>('debug', DEFAULT_DEBUG);
 
 const tempPrintSettingsAtom = atom<PrintSettings | null>(null);
@@ -121,6 +129,8 @@ const tempHotendOptionsAtom = atom<Record<string, HotendOptions> | null>(null);
 const tempViewModeAtom = atom<ViewMode | null>(null);
 const tempEnergyPerSecondAtom = atom<boolean | null>(null);
 const tempEnergyPerMaterialStartAtom = atom<boolean | null>(null);
+const tempMaterialFlowHotendAtom = atom<string | null>(null);
+const tempMaterialFlowAsSpeedAtom = atom<boolean | null>(null);
 const tempDebugAtom = atom<boolean | null>(null);
 
 export const currentPrintSettingsAtom = overridableAtom(printSettingsAtom, tempPrintSettingsAtom);
@@ -133,6 +143,11 @@ export const currentEnergyPerSecondAtom = overridableAtom(energyPerSecondAtom, t
 export const currentEnergyPerMaterialStartAtom = overridableAtom(
 	energyPerMaterialStartAtom,
 	tempEnergyPerMaterialStartAtom
+);
+export const currentMaterialFlowHotendAtom = overridableAtom(materialFlowHotendAtom, tempMaterialFlowHotendAtom);
+export const currentMaterialFlowAsSpeedAtom = overridableAtom(
+	materialFlowAsSpeedAtom,
+	tempMaterialFlowAsSpeedAtom
 );
 export const currentDebugAtom = overridableAtom(debugAtom, tempDebugAtom);
 
@@ -174,6 +189,27 @@ export const specificPowerLimitAtom = atom<WattsPerMillimeter>((get) =>
 	specificPowerLimit(get(currentThermalSettingsAtom).referenceFlowPerMeltZoneMm)
 );
 
+/**
+ * What the chosen nozzle setpoint is worth against the material's own default one. Exactly 1 until
+ * the print temperature is overridden, so the calibration is untouched everywhere else.
+ */
+export const superheatFactorAtom = atom<number>((get) => {
+	const material = get(materialAtom);
+
+	return superheatFactor(material.meltTemperature, material.printTemperature, get(printTemperatureAtom));
+});
+
+/**
+ * What a millimetre of melt zone can actually couple into the filament at the chosen setpoint: the
+ * calibration with the superheat factor already in it.
+ *
+ * Everything that measures against the limit reads this rather than the raw calibration, so the
+ * flow charts and the W/mm charts cannot disagree about what the ceiling is.
+ */
+export const availablePowerLimitAtom = atom<WattsPerMillimeter>(
+	(get) => (get(specificPowerLimitAtom) * get(superheatFactorAtom)) as WattsPerMillimeter
+);
+
 export const selectedHotendDefinitionsAtom = atom<HotendDefinition[]>(
 	(get) => resolveHotends(get(currentSelectedHotendsAtom)).hotends
 );
@@ -186,7 +222,7 @@ const performanceInputAtom = atom((get) => {
 		meltEnergy: energy.toMelt,
 		printEnergy: energy.toPrint,
 		flowRate: get(flowRateAtom),
-		limit: get(specificPowerLimitAtom),
+		limit: get(availablePowerLimitAtom),
 		printTemperature: get(printTemperatureAtom),
 		options: get(currentHotendOptionsAtom)
 	};
@@ -217,6 +253,8 @@ export const currentConfigurationAtom = atom<ShareableConfiguration>((get) => ({
 	viewMode: get(currentViewModeAtom),
 	energyPerSecond: get(currentEnergyPerSecondAtom),
 	energyPerMaterialStart: get(currentEnergyPerMaterialStartAtom),
+	materialFlowHotend: get(currentMaterialFlowHotendAtom),
+	materialFlowAsSpeed: get(currentMaterialFlowAsSpeedAtom),
 	debug: get(currentDebugAtom)
 }));
 
@@ -229,6 +267,8 @@ export const loadImportedConfigurationAtom = atom(null, (_get, set, config: Shar
 	set(tempViewModeAtom, config.viewMode);
 	set(tempEnergyPerSecondAtom, config.energyPerSecond);
 	set(tempEnergyPerMaterialStartAtom, config.energyPerMaterialStart);
+	set(tempMaterialFlowHotendAtom, config.materialFlowHotend);
+	set(tempMaterialFlowAsSpeedAtom, config.materialFlowAsSpeed);
 	set(tempDebugAtom, config.debug);
 
 	set(isImportedConfigAtom, true);
@@ -245,6 +285,8 @@ export const saveImportedConfigurationAtom = atom(null, (get, set) => {
 	const viewMode = get(tempViewModeAtom);
 	const energyPerSecond = get(tempEnergyPerSecondAtom);
 	const energyPerMaterialStart = get(tempEnergyPerMaterialStartAtom);
+	const materialFlowHotend = get(tempMaterialFlowHotendAtom);
+	const materialFlowAsSpeed = get(tempMaterialFlowAsSpeedAtom);
 	const debug = get(tempDebugAtom);
 
 	if (printSettings) set(printSettingsAtom, printSettings);
@@ -255,6 +297,8 @@ export const saveImportedConfigurationAtom = atom(null, (get, set) => {
 	if (viewMode) set(viewModeAtom, viewMode);
 	if (energyPerSecond !== null) set(energyPerSecondAtom, energyPerSecond);
 	if (energyPerMaterialStart !== null) set(energyPerMaterialStartAtom, energyPerMaterialStart);
+	if (materialFlowHotend !== null) set(materialFlowHotendAtom, materialFlowHotend);
+	if (materialFlowAsSpeed !== null) set(materialFlowAsSpeedAtom, materialFlowAsSpeed);
 	if (debug !== null) set(debugAtom, debug);
 
 	set(discardImportedConfigurationAtom);
@@ -270,6 +314,8 @@ export const discardImportedConfigurationAtom = atom(null, (_get, set) => {
 	set(tempViewModeAtom, null);
 	set(tempEnergyPerSecondAtom, null);
 	set(tempEnergyPerMaterialStartAtom, null);
+	set(tempMaterialFlowHotendAtom, null);
+	set(tempMaterialFlowAsSpeedAtom, null);
 	set(tempDebugAtom, null);
 
 	set(isImportedConfigAtom, false);

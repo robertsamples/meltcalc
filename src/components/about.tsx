@@ -1,9 +1,16 @@
 import { useAtomValue } from 'jotai';
 import { ChevronRightIcon } from 'lucide-react';
+import { Term } from '@/components/term';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { formatNumber } from '@/lib/format';
 import { HF_NOZZLE_EQUIVALENT_LENGTH } from '@/lib/hotend';
-import { FILAMENT_CROSS_SECTION, FILAMENT_DIAMETER, HEATER_EFFICIENCY } from '@/lib/thermal';
+import {
+	FILAMENT_CROSS_SECTION,
+	FILAMENT_DIAMETER,
+	HEATER_EFFICIENCY,
+	MAX_SUPERHEAT_FACTOR,
+	SUPERHEAT_AT_DOUBLE
+} from '@/lib/thermal';
 import { cn } from '@/lib/utils';
 import { currentThermalSettingsAtom, specificPowerLimitAtom } from '@/state/atoms';
 
@@ -29,57 +36,61 @@ export function AboutCard({ className }: { className?: string }) {
 				<CardContent className="space-y-2 pb-6 text-xs text-muted-foreground leading-relaxed">
 				<p>
 					<span className="text-foreground">Energy.</span> Melting a cubic millimetre costs{' '}
-					<code>ρ · (cp · ΔT + h_f)</code> — the temperature climb from the filament's starting
-					temperature plus, for semi-crystalline polymers, the enthalpy of breaking down the crystal
-					lattice. Multiply by flow rate and it becomes power.
+					<code>ρ · (cp · ΔT + h_f)</code>: the temperature climb from where the filament starts, plus
+					the <Term term="heat of fusion" /> for <Term term="semi-crystalline" /> polymers. Multiply by
+					flow rate for power.
 				</p>
 				<p>
-					<span className="text-foreground">Melting point, not setpoint.</span> That climb is measured to
-					the temperature the plastic has to <em>reach</em> — the crystalline melting point, or for
-					amorphous polymers the lowest temperature they flow at — not to the nozzle setpoint. The two
-					constraints are separate: the melt zone has to get the filament molten, so it is sized against
-					the melting point, while the heater has to supply the superheat above it as well. Running the
-					nozzle hotter therefore raises the wattage but not the melt zone a hotend needs.
+					<span className="text-foreground">Melting point, not setpoint.</span> The climb is measured to
+					the temperature the plastic must <em>reach</em> — the <Term term="melting point" />, or for{' '}
+					<Term term="amorphous" /> polymers the lowest temperature they flow at. The two constraints
+					are separate: the <Term term="melt zone" /> is sized to get the filament molten, while the
+					heater also supplies the <Term term="superheat" /> above that.
 				</p>
 				<p>
-					<span className="text-foreground">The heater is assumed adequate.</span> Every flow number here
-					is limited by the melt zone alone, on the basis that a cartridge is the cheap, swappable part
-					of a hotend and nobody is stuck with an undersized one. What adequate costs is a separate
-					question, answered by the heater view: the wattage that keeps each hotend fed at its own
-					maximum, at {formatNumber(HEATER_EFFICIENCY, 0)}% of rated output reaching the plastic — the
-					rest holds the block at temperature and leaks into the mount and the air.
+					<span className="text-foreground">Running hotter helps, but less than proportionally.</span>{' '}
+					Heat crosses into the filament in proportion to the temperature difference driving it, so{' '}
+					<Term term="superheat" /> is what matters, not the setpoint. Doubling a material's normal
+					superheat is taken as {formatNumber(SUPERHEAT_AT_DOUBLE, 2)}× the flow, capped at{' '}
+					{formatNumber(MAX_SUPERHEAT_FACTOR, 1)}×. Measured against each material's own setpoint, so
+					the factor is 1 until you override a temperature, and zero at the melting point.
+				</p>
+				<p>
+					<span className="text-foreground">The heater is assumed adequate.</span> Flow is limited by
+					the melt zone alone: a cartridge is the cheap, swappable part, so nobody is stuck with an
+					undersized one. What adequate costs is the heater view — the wattage to keep each hotend fed
+					at its maximum, at {formatNumber(HEATER_EFFICIENCY, 0)}% of rated output reaching the
+					plastic. The rest holds the block at temperature and leaks into the mount and the air.
 				</p>
 				<p>
 					<span className="text-foreground">Residence.</span> {FILAMENT_DIAMETER} mm filament has a
 					cross-section of {formatNumber(FILAMENT_CROSS_SECTION, 3)} mm², so a melt zone holds that much
-					plastic per millimetre of length. Divided by flow rate, that is how long the hotend has to get
-					heat into the middle of the filament.
+					plastic per millimetre. Divided by flow rate, that is the{' '}
+					<Term term="residence time" /> — how long the hotend has to get heat into the middle of the
+					filament.
 				</p>
 				<p>
 					<span className="text-foreground">The one empirical number.</span> How much power a millimetre
-					of melt zone can actually couple into the plastic has no clean closed form, so the model is
-					calibrated on the rule of thumb that a standard nozzle running PLA manages{' '}
-					{formatNumber(referenceFlowPerMeltZoneMm, 2)} mm³/s per mm of melt zone. That works out to{' '}
-					{formatNumber(limit, 2)} W/mm of melting power for a copper block, and every other material is
-					scaled by how much energy it demands to reach its own melting point. Brass and steel give up
-					30% of that and aluminium 20%, applied per hotend from its block material. Adjust the
-					calibration if your own measurements disagree.
+					of melt zone couples into the plastic has no clean closed form, so the model is calibrated on
+					the rule of thumb that a standard nozzle running PLA manages{' '}
+					{formatNumber(referenceFlowPerMeltZoneMm, 2)} mm³/s per mm. That is {formatNumber(limit, 2)}{' '}
+					W/mm for a copper block; every other material scales by the energy it demands to reach its own
+					melting point. Brass and steel give up 30% of that, aluminium 20%. Adjust the calibration if
+					your measurements disagree.
 				</p>
 				<p>
-					<span className="text-foreground">Effective melt zone.</span> A melt zone extender adds real
-					heated length. A high-flow (CHT-style) nozzle does not — it splits the flow into parallel
-					channels, so the plastic meets far more hot wall per millimetre — but it buys the same melting
-					capacity, and the model treats it as an equivalent {formatNumber(HF_NOZZLE_EQUIVALENT_LENGTH, 1)}{' '}
-					mm. That is why the charts say <em>effective</em> melt zone and mark those hotends with an
-					asterisk: their physical heated channel is shorter than the number plotted.
+					<span className="text-foreground">Effective melt zone.</span> An extender adds real heated
+					length. A high-flow (CHT-style) nozzle does not — it splits the flow into parallel channels,
+					so the plastic meets more hot wall per millimetre — but it buys the same melting capacity, and
+					the model counts it as {formatNumber(HF_NOZZLE_EQUIVALENT_LENGTH, 1)} mm. Hence{' '}
+					<em>effective</em>, and the asterisk: those hotends are physically shorter than plotted.
 				</p>
 				<p>
-					<span className="text-foreground">What it ignores.</span> Nozzle geometry and melt viscosity
-					(a hotend that can melt the plastic may still not be able to push it), thermal conductivity
-					differences between polymers, heat lost to the incoming filament acting as a cold sink, and
-					every difference between two hotends with the same melt zone length. Material properties are
-					typical published values, not brand data. Treat the output as a comparison between hotends,
-					not as a promise about any one of them.
+					<span className="text-foreground">What it ignores.</span> Nozzle geometry and melt viscosity —
+					a hotend that can melt the plastic may still not push it — differences in thermal
+					conductivity between polymers, heat lost to the incoming filament, and everything that
+					separates two hotends of the same melt zone length. Material properties are typical published
+					values, not brand data. It is a comparison between hotends, not a promise about one.
 					</p>
 				</CardContent>
 			</details>

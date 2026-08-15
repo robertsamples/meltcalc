@@ -4,6 +4,8 @@ import {
 	DEFAULT_DEBUG,
 	DEFAULT_ENERGY_PER_MATERIAL_START,
 	DEFAULT_ENERGY_PER_SECOND,
+	DEFAULT_MATERIAL_FLOW_AS_SPEED,
+	DEFAULT_MATERIAL_FLOW_HOTEND,
 	DEFAULT_MATERIAL_SETTINGS,
 	DEFAULT_PRINT_SETTINGS,
 	DEFAULT_THERMAL_SETTINGS,
@@ -54,7 +56,8 @@ const VIEW_MODE_CODES: Record<ViewMode, string> = {
 	energy: 'e',
 	meltZone: 'z',
 	cost: 'c',
-	heater: 'h'
+	heater: 'h',
+	materialFlow: 'a'
 };
 const VIEW_MODE_BY_CODE = Object.fromEntries(
 	Object.entries(VIEW_MODE_CODES).map(([mode, code]) => [code, mode as ViewMode])
@@ -99,9 +102,13 @@ const LegacyConfigurationSchema = z.object({
 			})
 		)
 		.default({}),
-	viewMode: z.enum(['flow', 'residence', 'energy', 'meltZone', 'cost', 'heater']).default(DEFAULT_VIEW_MODE),
+	viewMode: z
+		.enum(['flow', 'residence', 'energy', 'meltZone', 'cost', 'heater', 'materialFlow'])
+		.default(DEFAULT_VIEW_MODE),
 	energyPerSecond: z.boolean().default(DEFAULT_ENERGY_PER_SECOND),
 	energyPerMaterialStart: z.boolean().default(DEFAULT_ENERGY_PER_MATERIAL_START),
+	materialFlowHotend: z.string().default(DEFAULT_MATERIAL_FLOW_HOTEND),
+	materialFlowAsSpeed: z.boolean().default(DEFAULT_MATERIAL_FLOW_AS_SPEED),
 	debug: z.boolean().default(DEFAULT_DEBUG)
 });
 
@@ -147,9 +154,12 @@ const CompactSchema = z.object({
 		.optional(),
 	/** viewMode */
 	d: z.string().optional(),
-	/** energyPerSecond, energyPerMaterialStart, debug */
+	/** materialFlowHotend, as a short code */
+	k: z.string().optional(),
+	/** energyPerSecond, energyPerMaterialStart, materialFlowAsSpeed, debug */
 	x: Flag.optional(),
 	y: Flag.optional(),
+	v: Flag.optional(),
 	g: Flag.optional()
 });
 
@@ -214,8 +224,10 @@ function compact(config: ShareableConfiguration): Compact {
 		s: sameHotends(config.selectedHotends) ? undefined : config.selectedHotends.map(hotendCode),
 		o: options.length > 0 ? (Object.fromEntries(options) as Compact['o']) : undefined,
 		d: changed(VIEW_MODE_CODES[config.viewMode], VIEW_MODE_CODES[DEFAULT_VIEW_MODE]),
+		k: config.materialFlowHotend ? hotendCode(config.materialFlowHotend) : undefined,
 		x: flag(config.energyPerSecond, DEFAULT_ENERGY_PER_SECOND),
 		y: flag(config.energyPerMaterialStart, DEFAULT_ENERGY_PER_MATERIAL_START),
+		v: flag(config.materialFlowAsSpeed, DEFAULT_MATERIAL_FLOW_AS_SPEED),
 		g: flag(config.debug, DEFAULT_DEBUG)
 	};
 }
@@ -259,8 +271,10 @@ function expand(payload: Compact): ShareableConfiguration {
 		selectedHotends: payload.s ? payload.s.map(hotendFromCode) : DEFAULT_CONFIGURATION.selectedHotends,
 		hotendOptions,
 		viewMode: (payload.d && VIEW_MODE_BY_CODE[payload.d]) || DEFAULT_VIEW_MODE,
+		materialFlowHotend: payload.k ? hotendFromCode(payload.k) : DEFAULT_MATERIAL_FLOW_HOTEND,
 		energyPerSecond: payload.x === undefined ? DEFAULT_ENERGY_PER_SECOND : payload.x === 1,
 		energyPerMaterialStart: payload.y === undefined ? DEFAULT_ENERGY_PER_MATERIAL_START : payload.y === 1,
+		materialFlowAsSpeed: payload.v === undefined ? DEFAULT_MATERIAL_FLOW_AS_SPEED : payload.v === 1,
 		debug: payload.g === undefined ? DEFAULT_DEBUG : payload.g === 1
 	};
 }
