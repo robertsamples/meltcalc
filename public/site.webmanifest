@@ -1,0 +1,16 @@
+{
+	"name": "MeltCalc — hotend melt zone, flow rate and melt energy calculator",
+	"short_name": "MeltCalc",
+	"description": "Compare 3D printer hotends by melt zone length, sustainable volumetric flow rate, residence time, heater power and cost per mm³/s.",
+	"start_url": "/",
+	"scope": "/",
+	"display": "standalone",
+	"background_color": "#09090b",
+	"theme_color": "#09090b",
+	"categories": ["utilities", "productivity"],
+	"icons": [
+		{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+		{ "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+		{ "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+	]
+}

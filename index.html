@@ -4,6 +4,9 @@
 <head>
 	<meta charset="UTF-8" />
 	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+	<link rel="manifest" href="/site.webmanifest" />
+	<meta name="theme-color" content="#09090b" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 	<!-- Replaced per request by the server (server/og/meta.ts) so shared links unfurl with their own
@@ -34,7 +37,17 @@
 </head>
 
 <body>
-	<div id="root"></div>
+	<!-- Replaced per request by the server (server/seo.ts). React clears `#root` on mount, so a
+	     visitor never sees this — it is here for the crawlers that do not run JavaScript, and it
+	     says the same thing the app does. Keep the markers. -->
+	<div id="root">
+		<!--seo:start-->
+		<!--seo:end-->
+	</div>
+	<noscript>
+		MeltCalc compares 3D printer hotends by melt zone length, sustainable volumetric flow rate,
+		residence time, heater power and cost per mm³/s. It needs JavaScript to draw its charts.
+	</noscript>
 	<script type="module" src="/src/main.tsx"></script>
 </body>
 

@@ -1,3 +1,5 @@
+import { buildStructuredData } from '../seo';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../site';
 import { OG_HEIGHT, OG_WIDTH } from './card';
 import { buildOgModel } from './model';
 
@@ -31,12 +33,15 @@ function meta(kind: 'name' | 'property', key: string, content: string): string {
 export function buildOgTags({
 	configParam,
 	pageUrl,
+	canonicalUrl,
 	baseUrl,
 	siteName
 }: {
 	configParam: string | null | undefined;
 	/** The URL that was shared, tags and all */
 	pageUrl: string;
+	/** The same page without its query string; see the canonical tag below */
+	canonicalUrl: string;
 	/** Origin the image is served from */
 	baseUrl: string;
 	siteName: string;
@@ -47,12 +52,24 @@ export function buildOgTags({
 			? `${baseUrl}/og.png?v=${OG_IMAGE_VERSION}&config=${encodeURIComponent(configParam)}`
 			: `${baseUrl}/og.png?v=${OG_IMAGE_VERSION}`;
 
+	// The tab and the search result want the tool named and explained; the card wants a headline.
+	// A shared link's own title still leads, because that is what the reader asked about
+	const pageTitle = model.variant === 'config' ? `${model.title} · ${siteName}` : SITE_TITLE;
+
 	return [
-		`<title>${escapeAttribute(model.title)}</title>`,
+		`<title>${escapeAttribute(pageTitle)}</title>`,
+		/**
+		 * Every `?config=` is a distinct URL serving substantially the same page, and there is no
+		 * limit to how many of them exist. Without this, a crawler sees an unbounded set of
+		 * near-duplicates and splits the site's standing across all of them. Social crawlers ignore
+		 * canonicals, so unfurls keep their own titles and images.
+		 */
+		`<link rel="canonical" href="${escapeAttribute(canonicalUrl)}" />`,
 		meta('property', 'og:title', model.title),
 		meta('name', 'twitter:title', model.title),
 
-		meta('name', 'description', model.description),
+		// The search snippet wants the fuller sentence; the card's own description stays short
+		meta('name', 'description', model.variant === 'config' ? model.description : SITE_DESCRIPTION),
 		meta('property', 'og:description', model.description),
 		meta('name', 'twitter:description', model.description),
 
@@ -69,7 +86,9 @@ export function buildOgTags({
 
 		meta('name', 'twitter:card', 'summary_large_image'),
 		meta('name', 'twitter:image', imageUrl),
-		meta('name', 'twitter:image:alt', model.alt)
+		meta('name', 'twitter:image:alt', model.alt),
+
+		buildStructuredData(baseUrl)
 	].join('\n\t');
 }
 

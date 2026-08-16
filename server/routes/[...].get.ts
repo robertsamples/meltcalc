@@ -1,6 +1,8 @@
 import { defineEventHandler, getRequestURL, setResponseHeader, setResponseStatus } from 'h3';
 import { useStorage } from 'nitropack/runtime';
 import { buildOgTags, injectOgTags } from '../og/meta';
+import { buildOgModel } from '../og/model';
+import { buildSeoBody, injectSeoBody } from '../seo';
 import { resolveBaseUrl, SITE_NAME } from '../site';
 
 /**
@@ -29,14 +31,22 @@ export default defineEventHandler(async (event) => {
 	}
 
 	const baseUrl = resolveBaseUrl(event);
-	const html = injectOgTags(
-		template,
-		buildOgTags({
-			configParam: url.searchParams.get('config'),
-			pageUrl: `${baseUrl}${url.pathname}${url.search}`,
-			baseUrl,
-			siteName: SITE_NAME
-		})
+	const configParam = url.searchParams.get('config');
+	const model = buildOgModel(configParam);
+
+	const html = injectSeoBody(
+		injectOgTags(
+			template,
+			buildOgTags({
+				configParam,
+				pageUrl: `${baseUrl}${url.pathname}${url.search}`,
+				// Without the query, so the unbounded set of `?config=` URLs consolidates onto one page
+				canonicalUrl: `${baseUrl}${url.pathname}`,
+				baseUrl,
+				siteName: SITE_NAME
+			})
+		),
+		buildSeoBody(model)
 	);
 
 	setResponseHeader(event, 'content-type', 'text/html; charset=utf-8');
