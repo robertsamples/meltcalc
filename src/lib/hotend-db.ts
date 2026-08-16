@@ -20,7 +20,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 26 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 160 as Dollars
+		price: 160 as Dollars,
+		notes: null
 	},
 	{
 		id: 'A3DP|HE50',
@@ -38,7 +39,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 53 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 210 as Dollars
+		price: 210 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Bambulab|A1 Hotend',
@@ -56,7 +58,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 27.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 10 as Dollars
+		price: 10 as Dollars,
+		notes: 'Integrated nozzle'
 	},
 	{
 		id: 'Bambulab|H2 Hotend',
@@ -74,7 +77,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 33 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 18 as Dollars
+		price: 18 as Dollars,
+		notes: 'Integrated nozzle'
 	},
 	{
 		id: 'Bambulab|X1C OEM Hotend',
@@ -92,7 +96,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 24.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 20 as Dollars
+		price: 20 as Dollars,
+		notes: 'Integrated nozzle'
 	},
 	{
 		id: 'Bondtech|INDX',
@@ -110,7 +115,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 28 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 45 as Dollars
+		price: 45 as Dollars,
+		notes: 'Integrated nozzle'
 	},
 	{
 		id: 'Brumpo Tungus|Brumpo Hotend',
@@ -128,7 +134,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 74.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: null
+		price: null,
+		notes: 'DIY SLM hotend'
 	},
 	{
 		id: 'Brumpo Tungus|Brumpo WC Hotend',
@@ -146,7 +153,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 50 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: null
+		price: null,
+		notes: 'DIY SLM hotend'
 	},
 	{
 		id: 'Causality Manufacturing|Vesivius',
@@ -164,7 +172,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 92 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: null
+		price: null,
+		notes: 'Unreleased'
 	},
 	{
 		id: 'Dyze|Typhoon',
@@ -182,7 +191,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 114 as Millimeter,
 		filamentDiameter: 2.85 as Millimeter,
 		filamentPaths: 1,
-		price: 2700 as Dollars
+		price: 2700 as Dollars,
+		notes: 'Proprietary nozzle'
 	},
 	{
 		id: 'E3D|Revo',
@@ -200,7 +210,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 19.6 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 95 as Dollars
+		price: 95 as Dollars,
+		notes: 'Proprietary Revo nozzle'
 	},
 	{
 		id: 'E3D|Supervolcano',
@@ -219,7 +230,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 57.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 30 as Dollars
+		price: 30 as Dollars,
+		notes: null
 	},
 	{
 		id: 'E3D|V6',
@@ -238,7 +250,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 17.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 8 as Dollars
+		price: 8 as Dollars,
+		notes: null
 	},
 	{
 		id: 'E3D|V6 Volcano',
@@ -257,7 +270,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 26 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 12 as Dollars
+		price: 12 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Elegoo|Centauri Carbon',
@@ -275,7 +289,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 35.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 9 as Dollars
+		price: 9 as Dollars,
+		notes: 'Proprietary nozzle'
 	},
 	{
 		id: 'Generic|TZ HF (MZE+V6)',
@@ -293,7 +308,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 34.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 22 as Dollars
+		price: 22 as Dollars,
+		notes: 'MZE+V6 nozzle addition'
 	},
 	{
 		id: 'Generic|TZ Hotends',
@@ -311,7 +327,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 24.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 12 as Dollars
+		price: 12 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Generic|TZ2.0-V6',
@@ -329,7 +346,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 25.35 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 12 as Dollars
+		price: 12 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Generic|TZ2.0-V6 HF (MZE+V6)',
@@ -347,7 +365,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 35.65 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 22 as Dollars
+		price: 22 as Dollars,
+		notes: 'MZE+V6 nozzle addition'
 	},
 	{
 		id: 'Lukes Lab|Chube Air',
@@ -365,7 +384,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 46 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 260 as Dollars
+		price: 260 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Lukes Lab|Chube Compact',
@@ -383,7 +403,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 38.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 165 as Dollars
+		price: 165 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Lukes Lab|Chube Conduction',
@@ -401,7 +422,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 56 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 320 as Dollars
+		price: 320 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Lukes Lab|Pika',
@@ -419,7 +441,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 33 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 125 as Dollars
+		price: 125 as Dollars,
+		notes: 'Fin nozzle'
 	},
 	{
 		id: 'Mellow|ALPS',
@@ -437,7 +460,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 38.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 45 as Dollars
+		price: 45 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Mellow|Dual Velo',
@@ -455,7 +479,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 51.8 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 2,
-		price: 143 as Dollars
+		price: 143 as Dollars,
+		notes: 'Proprietary nozzle (brass only) · 2 filaments'
 	},
 	{
 		id: 'Mellow|Fluxheat',
@@ -473,7 +498,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 34.3 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 35 as Dollars
+		price: 35 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Mellow|Goliath',
@@ -491,7 +517,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 51.15 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 120 as Dollars
+		price: 120 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Mellow|NF Crazy',
@@ -510,7 +537,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 18.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 41 as Dollars
+		price: 41 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Mellow|NF Crazy HF',
@@ -529,7 +557,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 25 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 44 as Dollars
+		price: 44 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Mellow|NF Crazy HF Volcano',
@@ -548,7 +577,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 34.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 50 as Dollars
+		price: 50 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Mellow|NF Crazy Volcano',
@@ -567,7 +597,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 28 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 48 as Dollars
+		price: 48 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Metaform|Pico Hotend',
@@ -586,7 +617,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 20.55 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 100 as Dollars
+		price: 100 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Microswiss|Flowtech',
@@ -604,7 +636,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 28.6 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 80 as Dollars
+		price: 80 as Dollars,
+		notes: 'Proprietary nozzle'
 	},
 	{
 		id: 'Monika McWuff|Pawsitron Hotend',
@@ -622,7 +655,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 51.3 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 4,
-		price: null
+		price: null,
+		notes: '4 filaments · DIY SLM hotend'
 	},
 	{
 		id: 'Peopoly|Lancer Long',
@@ -640,7 +674,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 45 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 37.5 as Dollars
+		price: 37.5 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Peopoly|Lancer Short',
@@ -658,7 +693,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 28 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 22.5 as Dollars
+		price: 22.5 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Peopoly|Lancer Standard',
@@ -676,7 +712,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 36.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 30 as Dollars
+		price: 30 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Phaetus|Dragon',
@@ -695,7 +732,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 26 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 55 as Dollars
+		price: 55 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Phaetus|Dragon HF',
@@ -714,7 +752,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 33.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 60 as Dollars
+		price: 60 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Phaetus|Dragon Volcano',
@@ -733,7 +772,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 34.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 65 as Dollars
+		price: 65 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Phaetus|Dragon Volcano UHF',
@@ -752,7 +792,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 35.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 70 as Dollars
+		price: 70 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Phaetus|Dragon Volcano UUHF',
@@ -771,7 +812,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 43 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 75 as Dollars
+		price: 75 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Phaetus|Dragonfly BMS',
@@ -789,7 +831,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 35 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 37.6 as Dollars
+		price: 37.6 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Phaetus|Rapido UHF',
@@ -807,7 +850,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 34 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 90 as Dollars
+		price: 90 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Plasmics|INo Trident',
@@ -825,7 +869,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 17.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 450 as Dollars
+		price: 450 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Qidi|Xmax 3',
@@ -843,7 +888,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 23.7 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 35 as Dollars
+		price: 35 as Dollars,
+		notes: 'Proprietary nozzle'
 	},
 	{
 		id: 'Slice Engineering|Mosquito',
@@ -861,7 +907,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 18.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 150 as Dollars
+		price: 150 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Slice Engineering|Mosquito Magnum',
@@ -879,7 +926,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 25 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 175 as Dollars
+		price: 175 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Slice Engineering|Mosquito Magnum+',
@@ -897,7 +945,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 38.7 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 369 as Dollars
+		price: 369 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Slice Engineering|Mosquito Magnum+ HF',
@@ -915,7 +964,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 45.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 423 as Dollars
+		price: 423 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Slice Engineering|Mosquito Prime',
@@ -933,7 +983,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 66.7 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 1577 as Dollars
+		price: 1577 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Trianglelab|CHC XL',
@@ -951,7 +1002,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 51.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 67 as Dollars
+		price: 67 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Trianglelab|CHC XP1',
@@ -969,7 +1021,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 35 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 44 as Dollars
+		price: 44 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Trianglelab|Dragon Ace',
@@ -987,7 +1040,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 36.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 80 as Dollars
+		price: 80 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Trianglelab|Dragon Ace Volcano',
@@ -1005,7 +1059,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 44.7 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 85 as Dollars
+		price: 85 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Trianglelab|STD6-LC',
@@ -1023,7 +1078,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 51.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 116.5 as Dollars
+		price: 116.5 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Unknown|Lattice Hotend',
@@ -1041,7 +1097,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 57.9 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: null
+		price: null,
+		notes: 'DIY SLM hotend'
 	},
 	{
 		id: 'Unknown|MK8',
@@ -1060,7 +1117,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 18.8 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 8 as Dollars
+		price: 8 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Unknown|Tricorn',
@@ -1078,7 +1136,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 53 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 200 as Dollars
+		price: 200 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Unknown|V9',
@@ -1096,6 +1155,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 39.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		price: 220 as Dollars
+		price: 220 as Dollars,
+		notes: null
 	}
 ];

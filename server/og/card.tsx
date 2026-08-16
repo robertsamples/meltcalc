@@ -180,6 +180,9 @@ const SCATTER_LABEL_SIZE = 13;
 /** Room at the edges so a marker or its name never touches the border */
 const SCATTER_INSET = { left: 20, right: 24, top: 150, bottom: 48 };
 
+/** Room below the heading for the topmost marker and the label that may sit above it */
+const LABEL_CLEARANCE = 28;
+
 function renderScatter(scatter: NonNullable<OgModel['scatter']>, model: OgModel, siteName: string): string {
 	const points = scatter.points.filter((point) => point.x > 0 && Number.isFinite(point.y));
 	if (points.length === 0) return '';
@@ -192,7 +195,15 @@ function renderScatter(scatter: NonNullable<OgModel['scatter']>, model: OgModel,
 	const minX = dataMinX - 0.12;
 	const maxX = dataMaxX + 0.12;
 	const dataMaxY = Math.max(...points.map((point) => point.y));
-	const maxY = dataMaxY * 1.06;
+	/**
+	 * Enough headroom that the fastest hotend clears the heading.
+	 *
+	 * The plot is full-bleed — the bands run to every edge, and `toY` maps into the whole card — so
+	 * a flat 6% put the topmost marker at y≈36, behind the title. Padding the domain instead of
+	 * insetting the pixels keeps the bands reaching the top edge while placing that marker below the
+	 * subtitle, whatever the data happens to be.
+	 */
+	const maxY = dataMaxY / (1 - (SCATTER_INSET.top + LABEL_CLEARANCE) / OG_HEIGHT);
 	const spanX = maxX - minX || 1;
 
 	const toX = (price: number) => ((Math.log(price) - minX) / spanX) * OG_WIDTH;

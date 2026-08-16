@@ -13,7 +13,6 @@ import { HotendTable } from '@/components/hotend-table';
 import { ImportWarning } from '@/components/import-warning';
 import { MaterialSettingsCard, ModelSettingsCard, PrintSettingsCard } from '@/components/settings';
 import { ShareConfigButton } from '@/components/share-config';
-import { SummaryTiles } from '@/components/summary';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { comparesMaterials, VIEW_GROUPS, type ViewMode } from '@/lib/configuration';
 import { clearUrlConfig, parseConfigFromUrl } from '@/lib/share-url';
@@ -38,12 +37,17 @@ export function App() {
 	return (
 		<div className="max-w-7xl mx-auto p-2 space-y-2">
 			<header className="flex flex-wrap items-center justify-between gap-2 px-1 pt-1">
-				<h1 className="text-lg font-semibold leading-tight">MeltCalc</h1>
+				<div>
+					<h1 className="text-lg font-semibold leading-tight">MeltCalc</h1>
+					{/* What the tool does*/}
+					<p className="text-xs text-muted-foreground leading-snug">
+						Hotend and Material comparisons for max flow rate, print speed, heater requriements, and value.
+					</p>
+				</div>
 				<ShareConfigButton />
 			</header>
 
 			<ImportWarning />
-			<SummaryTiles />
 			{/* The build of each hotend is set here, above everything it changes */}
 			<HotendTable />
 

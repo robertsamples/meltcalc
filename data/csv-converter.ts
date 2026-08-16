@@ -166,7 +166,10 @@ async function generateHotends() {
 			filamentDiameter: optionalNumber(row, 'Filament (mm)', context) ?? 1.75,
 			// Blank means one bore, which is nearly every hotend ever made
 			filamentPaths: optionalNumber(row, 'Filament paths', context) ?? 1,
-			price: optionalNumber(row, 'Price (USD)', context)
+			price: optionalNumber(row, 'Price (USD)', context),
+			// ` · ` separates independent notes; a parenthetical renders in the warning colour. Quote
+			// the cell if it ever needs a comma, or every column after it shifts
+			notes: optional(row, 'Notes')
 		};
 	});
 
@@ -202,7 +205,8 @@ async function generateHotends() {
 				`\t\tmeltZoneLength: ${hotend.meltZoneLength} as Millimeter,\n` +
 				`\t\tfilamentDiameter: ${hotend.filamentDiameter} as Millimeter,\n` +
 				`\t\tfilamentPaths: ${hotend.filamentPaths},\n` +
-				`\t\tprice: ${hotend.price === null ? 'null' : `${hotend.price} as Dollars`}\n` +
+				`\t\tprice: ${hotend.price === null ? 'null' : `${hotend.price} as Dollars`},\n` +
+				`\t\tnotes: ${literal(hotend.notes)}\n` +
 				`\t}`
 		)
 		.join(',\n');

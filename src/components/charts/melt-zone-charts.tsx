@@ -62,7 +62,7 @@ export function SpecificPowerChart() {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle className="text-base">Power per mm of effective melt zone</CardTitle>
+				<CardTitle className="text-base">Power dissipation required per mm of melt zone</CardTitle>
 				<CardDescription>
 					Power needed to bring {material.name} to its {formatNumber(material.meltTemperature, 0)} °C{' '}
 					<Term term="melting point" /> at {formatFlow(flowRate)}, spread over the heated length. Bars past

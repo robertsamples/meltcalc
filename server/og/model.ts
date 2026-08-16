@@ -1,6 +1,6 @@
 import { performanceLabel, shortPerformanceLabel } from '@/lib/chart-labels';
 import { decodeConfig } from '@/lib/config-sharing';
-import type { CostBandMode } from '@/lib/configuration';
+import { type CostBandMode, DEFAULT_CONFIGURATION, type ShareableConfiguration } from '@/lib/configuration';
 import { type BandSpec, costBands, valueBands } from '@/lib/cost-bands';
 import { blockMaterialFactor, HOTEND_DB, resolveHotends } from '@/lib/hotend';
 import { findMaterial, MATERIAL_DB } from '@/lib/material';
@@ -82,7 +82,8 @@ export type OgModel = {
 	scatter?: OgScatter;
 };
 
-const GENERIC_MODEL: OgModel = {
+/** The last resort: a card with no picture, for when even the default configuration will not draw */
+const GENERIC_CARD: OgModel = {
 	variant: 'generic',
 	title: 'MeltCalc',
 	subtitle: 'Hotend melt zone, flow rate and melt energy',
@@ -92,6 +93,52 @@ const GENERIC_MODEL: OgModel = {
 	series: [],
 	target: null
 };
+
+/**
+ * What the bare URL unfurls as: every priced hotend in the database against the price/flow trend.
+ *
+ * A link with no `?config=` is the one most likely to be posted somewhere public, and a card with
+ * no picture is the one least likely to be clicked. The scatter is the right choice because it is
+ * the only view that says something without the reader having chosen anything first — it is the
+ * whole database at once, and the value bands are what make it a claim rather than a plot.
+ *
+ * Selecting everything here does **not** select everything in the app. This configuration is built
+ * for the renderer and thrown away; `DEFAULT_CONFIGURATION` is untouched, so opening the link still
+ * lands on the default comparison rather than on sixty hotends at once.
+ */
+const GENERIC_SCATTER_CONFIG: ShareableConfiguration = {
+	...DEFAULT_CONFIGURATION,
+	viewMode: 'cost',
+	costBandMode: 'value',
+	selectedHotends: HOTEND_DB.map((hotend) => hotend.id)
+};
+
+/** Depends only on the databases, so it is worth computing once rather than per unfurl */
+let genericCard: OgModel | null = null;
+
+function genericModel(): OgModel {
+	if (genericCard) return genericCard;
+
+	let scatter: OgScatter | undefined;
+	try {
+		scatter = buildFromConfiguration(GENERIC_SCATTER_CONFIG)?.scatter;
+	} catch {
+		scatter = undefined;
+	}
+
+	genericCard = scatter
+		? {
+				...GENERIC_CARD,
+				// The generic card's own words, not the cost view's: this is the site being shared,
+				// and the picture is the argument for opening it rather than the subject itself
+				subtitle: `Price against sustainable flow · ${scatter.points.length} hotends · ${MATERIAL_DB.length} filament materials`,
+				alt: `Price against maximum flow rate for ${scatter.points.length} hotends`,
+				scatter
+			}
+		: GENERIC_CARD;
+
+	return genericCard;
+}
 
 export function formatNumber(value: number, maxDecimals = 1): string {
 	if (!Number.isFinite(value)) return '?';
@@ -108,38 +155,48 @@ export function truncate(value: string, max = MAX_LABEL_LENGTH): string {
  * decode into a configuration we can draw.
  */
 export function buildOgModel(configParam: string | null | undefined): OgModel {
-	if (!configParam) return GENERIC_MODEL;
+	if (!configParam) return genericModel();
 
 	let imported: ReturnType<typeof decodeConfig>;
 	try {
 		imported = decodeConfig(configParam);
 	} catch {
-		return GENERIC_MODEL;
+		return genericModel();
 	}
-	if (!imported) return GENERIC_MODEL;
+	if (!imported) return genericModel();
 
-	const { printSettings, materialSettings, thermalSettings, selectedHotends, viewMode } = imported.config;
+	return buildFromConfiguration(imported.config) ?? genericModel();
+}
+
+/**
+ * The model for one configuration, or `null` where it does not describe something drawable.
+ *
+ * Split from `buildOgModel` so the generic card can run the same pipeline on a configuration it
+ * makes up, rather than a second implementation of the same chart that could drift from it.
+ */
+function buildFromConfiguration(config: ShareableConfiguration): OgModel | null {
+	const { printSettings, materialSettings, thermalSettings, selectedHotends, viewMode } = config;
 
 	const material = findMaterial(materialSettings.materialId);
-	if (!material) return GENERIC_MODEL;
+	if (!material) return null;
 
 	// The material views can have whole polymer families switched off, and the card has to agree
 	// with what the person sharing it was looking at
-	const materials = MATERIAL_DB.filter((entry) => !imported.config.hiddenFamilies.includes(entry.family));
+	const materials = MATERIAL_DB.filter((entry) => !config.hiddenFamilies.includes(entry.family));
 
 	const startTemperature = materialSettings.startTemperature ?? material.startTemperature;
 	const printTemperature = materialSettings.printTemperature ?? material.printTemperature;
 	const energy = energyPerVolume(material, startTemperature, printTemperature);
-	if (!(energy.toMelt > 0)) return GENERIC_MODEL;
+	if (!(energy.toMelt > 0)) return null;
 
 	const flowRate =
 		printSettings.flowMode === 'manual'
 			? printSettings.manualFlowRate
 			: volumetricFlow(printSettings.lineWidth, printSettings.layerHeight, printSettings.printSpeed);
-	if (!Number.isFinite(flowRate)) return GENERIC_MODEL;
+	if (!Number.isFinite(flowRate)) return null;
 
 	if (viewMode === 'energy') {
-		return buildEnergyModel(material.id, startTemperature, imported.config.energyPerMaterialStart, materials);
+		return buildEnergyModel(material.id, startTemperature, config.energyPerMaterialStart, materials);
 	}
 
 	// The calibration with the chosen setpoint's superheat already folded in, exactly as the app does
@@ -152,7 +209,7 @@ export function buildOgModel(configParam: string | null | undefined): OgModel {
 		flowRate,
 		limit: availableLimit,
 		printTemperature,
-		options: imported.config.hotendOptions
+		options: config.hotendOptions
 	};
 
 	const { hotends } = resolveHotends(selectedHotends);
@@ -171,20 +228,20 @@ export function buildOgModel(configParam: string | null | undefined): OgModel {
 
 		// Every selected hotend, not the eight the bar cards cap at: a marker costs nothing on a
 		// scatter, and dropping the rest to anonymous grey loses the whole point of the picture
-		return buildCostModel(performance, common, everything, imported.config.costBandMode, hotends.map((hotend) => hotend.id));
+		return buildCostModel(performance, common, everything, config.costBandMode, hotends.map((hotend) => hotend.id));
 	}
 	if (viewMode === 'heater') return buildHeaterModel(performance, common);
 	if (viewMode === 'materialFlow') {
-		const pinned = performance.find((entry) => entry.hotend.id === imported.config.materialFlowHotend);
+		const pinned = performance.find((entry) => entry.hotend.id === config.materialFlowHotend);
 
 		// The card has to read in whatever unit the sharer was looking at, or the picture and the
 		// numbers they are talking about disagree
 		const crossSection = extrusionCrossSection(printSettings.lineWidth, printSettings.layerHeight);
-		const asSpeed = imported.config.materialFlowAsSpeed && crossSection > 0;
+		const asSpeed = config.materialFlowAsSpeed && crossSection > 0;
 
 		return buildMaterialFlowModel(pinned ?? performance[0], common, {
 			referenceFlow: thermalSettings.referenceFlowPerMeltZoneMm,
-			perMaterialStart: imported.config.energyPerMaterialStart,
+			perMaterialStart: config.energyPerMaterialStart,
 			configuredStart: startTemperature,
 			scale: asSpeed ? 1 / crossSection : 1,
 			unit: asSpeed ? 'mm/s' : 'mm³/s',
@@ -305,24 +362,38 @@ function buildCostModel(
 		}))
 		.sort((a, b) => a.value - b.value);
 
-	const cheapest = priced.slice().sort((a, b) => (a.costPerFlow as number) - (b.costPerFlow as number))[0];
 	const subtitle = [
 		common.materialName,
 		`${formatNumber(common.flowRate, 1)} mm³/s target`,
 		`${priced.length} of ${chosen.length} priced`
 	].join(' · ');
 
+	/**
+	 * Deliberately not "the cheapest hotend is X".
+	 *
+	 * Cost per mm³/s is dominated by price, so the cheapest hotend in the database wins this every
+	 * time no matter what the link is configured for — a headline that is the same on every card is
+	 * not a headline. What does change is the picture: which of the two backgrounds is on, and how
+	 * much of the database the reader is being shown against.
+	 */
+	const title =
+		mode === 'value'
+			? `Value against trend, ${cloud.length} hotends`
+			: `Price against flow, ${cloud.length} hotends`;
+
 	return {
 		variant: 'config',
-		title: `${truncate(cheapest.hotend.name, 22)} at $${formatNumber(cheapest.costPerFlow as number, 2)} per mm³/s`,
+		title,
 		subtitle,
-		description: `${subtitle}. Cheapest flow in ${common.materialName} of the hotends compared.`,
+		description:
+			`${subtitle}. Price against sustainable flow rate for every priced hotend in the database, ` +
+			`with the ${chosen.length} compared here picked out.`,
 		alt: `Price against maximum flow rate in ${common.materialName} for ${cloud.length} hotends`,
 		facts: [
 			{ label: 'Material', value: truncate(common.materialName) },
-			{ label: 'Cheapest flow', value: `$${formatNumber(cheapest.costPerFlow as number, 2)} per mm³/s` },
-			{ label: 'On', value: truncate(cheapest.hotend.name, 18) },
-			{ label: 'Plotted', value: `${cloud.length} hotends` }
+			{ label: 'Plotted', value: `${cloud.length} hotends` },
+			{ label: 'Compared', value: `${priced.length} of ${chosen.length} priced` },
+			{ label: 'Shaded by', value: mode === 'value' ? 'value against trend' : 'cost per mm³/s' }
 		],
 		series,
 		target: null,
@@ -399,7 +470,7 @@ function buildMaterialFlowModel(
 		materials: typeof MATERIAL_DB;
 	}
 ): OgModel {
-	if (!entry) return GENERIC_MODEL;
+	if (!entry) return GENERIC_CARD;
 
 	const blockLimit = (specificPowerLimit(referenceFlow) *
 		blockMaterialFactor(entry.block.material)) as WattsPerMillimeter;
@@ -430,16 +501,29 @@ function buildMaterialFlowModel(
 	}));
 
 	const name = performanceLabel(entry);
-	const leader = rows[0];
 	const subtitle = [
 		`${formatNumber(entry.meltZoneLength, 1)} mm effective melt zone`,
 		`${entry.block.material} block to ${formatNumber(entry.block.maxTemperature, 0)} °C`,
 		`${materials.length - blocked} of ${materials.length} materials in range`
 	].join(' · ');
 
+	/**
+	 * The span rather than the winner.
+	 *
+	 * Whichever material melts cheapest tops this chart on every hotend — naming it says nothing
+	 * about the link. How far the top and bottom of the range are apart is the actual finding: it is
+	 * how much the filament, rather than the hardware, decides what a machine can do.
+	 */
+	const reachable = rows.filter((row) => row.compatible && Number.isFinite(row.maxFlow) && row.maxFlow > 0);
+	const flows = reachable.map((row) => row.maxFlow);
+	const title =
+		flows.length > 1
+			? `${truncate(entry.hotend.name, 20)}: ${formatNumber(Math.min(...flows), decimals)}–${formatNumber(Math.max(...flows), decimals)} ${unit} by material`
+			: `${truncate(entry.hotend.name, 22)} across ${materials.length} filament materials`;
+
 	return {
 		variant: 'config',
-		title: `${truncate(entry.hotend.name, 22)}: ${formatNumber(leader.maxFlow, decimals)} ${unit} in ${truncate(leader.material.name, 12)}`,
+		title,
 		subtitle,
 		description: `${subtitle}. Maximum flow rate for every material on one hotend.`,
 		alt: `Maximum flow rate by material on ${truncate(name, 40)}`,
@@ -467,7 +551,7 @@ function buildEnergyModel(
 	perMaterialStart: boolean,
 	materials: typeof MATERIAL_DB
 ): OgModel {
-	if (materials.length === 0) return GENERIC_MODEL;
+	if (materials.length === 0) return GENERIC_CARD;
 
 	const rows = materials.map((entry) => {
 		const start = perMaterialStart ? entry.startTemperature : configuredStart;

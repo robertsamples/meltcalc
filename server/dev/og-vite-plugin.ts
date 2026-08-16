@@ -35,20 +35,32 @@ export function ogDevPlugin(): Plugin {
 			order: 'post',
 			async handler(html, ctx) {
 				const { buildOgTags, injectOgTags } = await ctx.server!.ssrLoadModule('/server/og/meta.ts');
+				const { buildSeoBody, injectSeoBody } = await ctx.server!.ssrLoadModule('/server/seo.ts');
+				const { buildOgModel } = await ctx.server!.ssrLoadModule('/server/og/model.ts');
+				const { packReadableQuery } = await ctx.server!.ssrLoadModule('/src/lib/config-query.ts');
 				const { SITE_NAME } = await ctx.server!.ssrLoadModule('/server/site.ts');
 
 				const port = ctx.server!.config.server.port ?? 5173;
 				const baseUrl = `http://localhost:${port}`;
 				const url = new URL(ctx.originalUrl ?? '/', baseUrl);
 
-				return injectOgTags(
-					html,
-					buildOgTags({
-						configParam: url.searchParams.get('config'),
-						pageUrl: url.href,
-						baseUrl,
-						siteName: SITE_NAME
-					})
+				// Everything below mirrors `server/routes/[...].ts`. It has to: the point of this
+				// plugin is that dev serves the same head and body the deployed site does, so a
+				// parameter added there and forgotten here is a bug that only shows up in production
+				const configParam = url.searchParams.get('config') ?? packReadableQuery(url.searchParams);
+
+				return injectSeoBody(
+					injectOgTags(
+						html,
+						buildOgTags({
+							configParam,
+							pageUrl: url.href,
+							canonicalUrl: `${url.origin}${url.pathname}`,
+							baseUrl,
+							siteName: SITE_NAME
+						})
+					),
+					buildSeoBody(buildOgModel(configParam))
 				);
 			}
 		}

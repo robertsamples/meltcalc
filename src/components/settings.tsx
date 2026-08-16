@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { formatFlow, formatNumber } from '@/lib/format';
 import { POLYMER_NAMES } from '@/lib/glossary';
 import { MATERIAL_DB } from '@/lib/material';
-import { extrusionCrossSection, filamentFeedRate, volumetricFlow } from '@/lib/thermal';
+import { extrusionCrossSection, filamentFeedRate, requiredMeltZoneLength, volumetricFlow } from '@/lib/thermal';
 import type {
 	Celsius,
 	CubicMillimetersPerSecond,
@@ -22,8 +22,10 @@ import {
 	currentMaterialSettingsAtom,
 	currentPrintSettingsAtom,
 	currentThermalSettingsAtom,
+	energyAtom,
 	flowRateAtom,
 	materialAtom,
+	performanceAtom,
 	printTemperatureAtom,
 	specificPowerLimitAtom,
 	startTemperatureAtom,
@@ -33,10 +35,15 @@ import {
 export function PrintSettingsCard() {
 	const [settings, setSettings] = useAtom(currentPrintSettingsAtom);
 	const flowRate = useAtomValue(flowRateAtom);
+	const energy = useAtomValue(energyAtom);
+	const limit = useAtomValue(specificPowerLimitAtom);
+	const performance = useAtomValue(performanceAtom);
 	const manual = settings.flowMode === 'manual';
 
 	const derivedFlow = volumetricFlow(settings.lineWidth, settings.layerHeight, settings.printSpeed);
 	const crossSection = extrusionCrossSection(settings.lineWidth, settings.layerHeight);
+	const requiredMeltZone = requiredMeltZoneLength(flowRate, energy.toMelt, limit);
+	const clearing = performance.filter((entry) => entry.headroom >= 1).length;
 
 	return (
 		<Card>
@@ -112,6 +119,14 @@ export function PrintSettingsCard() {
 					<ReadoutField
 						label="Filament feed rate"
 						value={`${formatNumber(filamentFeedRate(flowRate), 2)} mm/s`}
+					/>
+					{/* The one number from the old summary tiles worth keeping: it is what the whole
+					    comparison is measured against, and unlike the flow rate above it appears
+					    nowhere else on screen */}
+					<ReadoutField
+						label="Melt zone needed"
+						value={`${formatNumber(requiredMeltZone, 1)} mm`}
+						hint={`${clearing}/${performance.length} selected hotends at or above it`}
 					/>
 				</div>
 			</CardContent>

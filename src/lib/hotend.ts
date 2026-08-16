@@ -96,7 +96,16 @@ export const HotendDefinition = z.object({
 	 */
 	filamentPaths: z.number().int().positive(),
 	/** Approximate street price in USD, or `null` where nobody has found one */
-	price: Dollars.nullable()
+	price: Dollars.nullable(),
+	/**
+	 * Free text from the CSV: what a reader needs to know that no column carries — a nozzle only one
+	 * company sells, a hotend that exists only as a print file, how many filaments run through it.
+	 *
+	 * Written per hotend rather than derived, because the interesting ones are always the exception.
+	 * ` · ` separates independent notes, and a parenthetical is drawn in the warning colour, so a
+	 * restriction reads as one.
+	 */
+	notes: z.string().nullable()
 });
 export type HotendDefinition = z.infer<typeof HotendDefinition>;
 

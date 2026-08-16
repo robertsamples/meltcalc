@@ -1,5 +1,6 @@
 import { useAtom, useAtomValue } from 'jotai';
-import { ChevronRightIcon, CircleHelpIcon } from 'lucide-react';
+import { ChevronDownIcon, ChevronRightIcon, ChevronsUpDownIcon, ChevronUpIcon, CircleHelpIcon } from 'lucide-react';
+import { useState } from 'react';
 import { HotendSelection } from '@/components/hotend-selection';
 import { SeriesMarker } from '@/components/series-marker';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
@@ -7,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { formatNumber, formatSeconds } from '@/lib/format';
+import { formatNumber } from '@/lib/format';
 import {
 	BLOCK_MATERIAL_DERATE,
 	BLOCK_MATERIAL_LABELS,
@@ -19,7 +20,7 @@ import {
 	orderedBlockOptions
 } from '@/lib/hotend';
 import { headroomStatus, STATUS_COLORS, STATUS_LABELS } from '@/lib/series';
-import { extrusionCrossSection } from '@/lib/thermal';
+import { extrusionCrossSection, type HotendPerformance } from '@/lib/thermal';
 import {
 	currentHotendOptionsAtom,
 	currentPrintSettingsAtom,
@@ -29,25 +30,278 @@ import {
 } from '@/state/atoms';
 
 /**
- * A column header whose abbreviation carries its explanation.
+ * The explanation behind an abbreviated header.
  *
- * The trigger is a real button rather than a `title` attribute so the text is reachable by
- * keyboard, and so it survives on touch, where hover does not exist.
+ * A real button rather than a `title` attribute, so the text is reachable by keyboard and survives
+ * on touch, where hover does not exist. It sits beside the sort control rather than inside it: one
+ * button cannot contain another, and the two do different things.
  */
 function HeaderHelp({ label, children }: { label: string; children: React.ReactNode }) {
 	return (
-		<span className="inline-flex items-center gap-1">
-			{label}
-			<Tooltip>
-				<TooltipTrigger
-					className="text-muted-foreground hover:text-foreground focus-visible:text-foreground"
-					aria-label={`What ${label} means`}
-				>
-					<CircleHelpIcon className="size-3" />
-				</TooltipTrigger>
-				<TooltipContent className="font-normal">{children}</TooltipContent>
-			</Tooltip>
+		<Tooltip>
+			<TooltipTrigger
+				className="text-muted-foreground hover:text-foreground focus-visible:text-foreground"
+				aria-label={`What ${label} means`}
+			>
+				<CircleHelpIcon className="size-3" />
+			</TooltipTrigger>
+			<TooltipContent className="font-normal">{children}</TooltipContent>
+		</Tooltip>
+	);
+}
+
+/**
+ * A hotend's note, straight from the CSV.
+ *
+ * The one piece of formatting it gets is that a parenthetical is drawn in the warning colour — the
+ * notes use them for restrictions ("(brass only)"), and that is worth seeing down a long column.
+ * Everything else is the text as written.
+ */
+function HotendNotes({ notes }: { notes: string | null }) {
+	if (!notes) return null;
+
+	// Kept in the split, so the parentheses land in the odd-numbered pieces and the text around
+	// them stays in order
+	const pieces = notes.split(/(\([^)]*\))/g);
+
+	return (
+		<>
+			{pieces.map((piece, index) =>
+				index % 2 === 1 ? (
+					// biome-ignore lint/suspicious/noArrayIndexKey: position is the only identity a text run has
+					<span key={index} className="text-destructive-foreground">
+						{piece}
+					</span>
+				) : (
+					piece
+				)
+			)}
+		</>
+	);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Sorting
+
+/**
+ * Only the columns worth ordering the table by.
+ *
+ * The build columns — block, max temp, MZE, CHT, heatbreak — are deliberately not sortable. Each is
+ * a fact about the hotend rather than a result, three of them are two-valued so sorting them only
+ * groups, and every control dropped is width this table needs to fit without scrolling sideways.
+ */
+type SortKey = 'name' | 'price' | 'meltZone' | 'flow' | 'speed' | 'status';
+
+type SortDirection = 'asc' | 'desc';
+
+/** `null` is the natural order: the order hotends were selected in, which is the chart's colour order */
+type Sort = { key: SortKey; direction: SortDirection } | null;
+
+type Column = {
+	key: SortKey | null;
+	label: string;
+	align?: 'right' | 'center';
+	/** Which way the first click sorts. Names read A–Z; a measurement is asked about biggest-first */
+	first?: SortDirection;
+	title?: string;
+	help?: React.ReactNode;
+	className?: string;
+};
+
+const COLUMNS: Column[] = [
+	{ key: 'name', label: 'Hotend', first: 'asc' },
+	{ key: 'price', label: 'Price', align: 'center' },
+	{ key: null, label: 'Block', align: 'center' },
+	{ key: null, label: 'Max temp', align: 'center' },
+	{
+		key: null,
+		label: 'MZE',
+		align: 'center',
+		help: (
+			<>
+				A melt zone extender: typically an adapter that lengthens the melt zone by {MZE_LENGTH} mm, or a nut
+				that lets a standard V6 hotend take V6 Volcano nozzles.
+			</>
+		)
+	},
+	{
+		key: null,
+		label: 'CHT',
+		align: 'center',
+		help: (
+			<>
+				High-flow internal geometry, such as a Core Heat Technology nozzle: the bore splits into parallel
+				channels, so the filament sees far more hot wall per millimetre. Counted here as +
+				{HF_NOZZLE_EQUIVALENT_LENGTH} mm of effective melt zone.
+			</>
+		)
+	},
+	{
+		key: null,
+		label: 'NS heatbreak',
+		align: 'center',
+		help: (
+			<>
+				A structural heatbreak is the load-bearing part holding the hot and cold sides together, so every
+				knock to the nozzle goes through it — far more vulnerable to damage than a nonstructural one, where
+				something else carries the load.
+			</>
+		)
+	},
+	{ key: 'meltZone', label: 'Effective melt zone', align: 'center' },
+	{ key: 'flow', label: 'Max flow', align: 'center' },
+	{ key: 'speed', label: 'Max speed', align: 'center', title: 'At the current layer height and line width' },
+	{ key: 'status', label: 'Status' },
+	// Prose, and every hotend's is about something different: there is no order to put it in.
+	// A floor, because a table full of numbers will otherwise give this column whatever is left
+	{ key: null, label: 'Notes', className: 'min-w-[10.5rem]' }
+];
+
+/**
+ * What a column sorts on. Numbers where there is one, so the order matches what the column shows
+ * rather than how it is spelled.
+ */
+function sortValue(entry: HotendPerformance, key: SortKey, crossSection: number): number | string {
+	switch (key) {
+		case 'name':
+			return hotendLabel(entry.hotend);
+		// Unpriced hotends group at the bottom of a descending sort rather than reading as free
+		case 'price':
+			return entry.hotend.price ?? Number.NEGATIVE_INFINITY;
+		case 'meltZone':
+			return entry.meltZoneLength;
+		case 'flow':
+			return entry.maxFlow;
+		case 'speed':
+			return crossSection > 0 ? entry.maxFlow / crossSection : 0;
+		// Over temp is worse than any headroom, so it sorts below all of them
+		case 'status':
+			return entry.withinTemperature ? entry.headroom : Number.NEGATIVE_INFINITY;
+	}
+}
+
+function sorted(entries: HotendPerformance[], sort: Sort, crossSection: number): HotendPerformance[] {
+	if (!sort) return entries;
+
+	const direction = sort.direction === 'asc' ? 1 : -1;
+
+	return [...entries].sort((a, b) => {
+		const left = sortValue(a, sort.key, crossSection);
+		const right = sortValue(b, sort.key, crossSection);
+		const order =
+			typeof left === 'string' || typeof right === 'string'
+				? String(left).localeCompare(String(right))
+				: left - right;
+
+		return order * direction;
+	});
+}
+
+/**
+ * Cycles a column through its natural order, its default direction, and the reverse.
+ *
+ * Three states rather than two because the unsorted order is meaningful here — it is the order the
+ * hotends were picked in, and the order their colours run in every chart — so it has to be
+ * reachable again once a column has been clicked.
+ */
+function nextSort(sort: Sort, column: Column): Sort {
+	const first = column.first ?? 'desc';
+	if (!column.key) return sort;
+	if (sort?.key !== column.key) return { key: column.key, direction: first };
+	if (sort.direction === first) return { key: column.key, direction: first === 'asc' ? 'desc' : 'asc' };
+
+	return null;
+}
+
+/**
+ * A measurement and its unit, centred in the column but still aligned to each other.
+ *
+ * Flush-right numbers leave a widening gap under a long header like "Effective melt zone", which
+ * reads as a hole in the table. Centring the pair closes it without giving up what makes a column
+ * of figures scannable: both halves reserve the width of the widest entry, so every value meets its
+ * unit at the same point down the column.
+ *
+ * Widths are in `ch` against a tabular figure, so they are the count of digits the column can hold.
+ */
+function Measure({ value, unit, digits, unitWidth }: { value: string; unit?: string; digits: number; unitWidth?: number }) {
+	return (
+		<span className="flex items-baseline justify-center gap-1">
+			<span className="text-right tabular-nums" style={{ minWidth: `${digits}ch` }}>
+				{value}
+			</span>
+			{unit ? (
+				<span className="text-left" style={{ minWidth: unitWidth ? `${unitWidth}ch` : undefined }}>
+					{unit}
+				</span>
+			) : null}
 		</span>
+	);
+}
+
+/**
+ * What a hotend with only one block variant reads as.
+ *
+ * `Cu` and `Al` are the symbols already on the toggle beside them, and everyone reads them at a
+ * glance — so spelling those two out only costs width. `Br` and `St` are neither element symbols
+ * nor common shorthand, so brass and steel keep their words. Either way the full name is on hover.
+ */
+const FIXED_BLOCK_LABELS: Record<BlockMaterial, string> = {
+	Cu: 'Cu',
+	Al: 'Al',
+	Br: 'Brass',
+	St: 'Steel'
+};
+
+const ALIGNMENT = {
+	right: { head: 'text-right', content: 'justify-end' },
+	center: { head: 'text-center', content: 'justify-center' },
+	left: { head: '', content: '' }
+} as const;
+
+function SortableHeader({ column, sort, onSort }: { column: Column; sort: Sort; onSort: (next: Sort) => void }) {
+	const active = column.key !== null && sort?.key === column.key;
+	const alignment = ALIGNMENT[column.align ?? 'left'];
+
+	const label = (
+		<span className="inline-flex items-center gap-1">
+			{column.label}
+			{/* Faint rather than hidden until hover: a sortable column that does not look sortable
+			    is not, in practice, sortable — and hover does not exist on touch */}
+			{column.key === null ? null : (
+				<span className={active ? '' : 'opacity-30 transition-opacity group-hover/head:opacity-70'}>
+					{active && sort?.direction === 'asc' ? (
+						<ChevronUpIcon className="size-3" />
+					) : active ? (
+						<ChevronDownIcon className="size-3" />
+					) : (
+						<ChevronsUpDownIcon className="size-3" />
+					)}
+				</span>
+			)}
+		</span>
+	);
+
+	return (
+		<TableHead
+			className={`group/head ${alignment.head} ${column.className ?? ''} ${active ? 'text-foreground' : ''}`}
+			aria-sort={active ? (sort?.direction === 'asc' ? 'ascending' : 'descending') : 'none'}
+		>
+			<span className={`flex items-center gap-1 ${alignment.content}`}>
+				{column.key === null ? (
+					label
+				) : (
+					<button
+						type="button"
+						className="inline-flex cursor-pointer items-center hover:text-foreground"
+						onClick={() => onSort(nextSort(sort, column))}
+						title={column.title ?? `Sort by ${column.label.toLowerCase()}`}
+					>
+						{label}
+					</button>
+				)}
+				{column.help ? <HeaderHelp label={column.label}>{column.help}</HeaderHelp> : null}
+			</span>
+		</TableHead>
 	);
 }
 
@@ -67,9 +321,13 @@ export function HotendTable() {
 	const print = useAtomValue(currentPrintSettingsAtom);
 	const printTemperature = useAtomValue(printTemperatureAtom);
 	const [options, setOptions] = useAtom(currentHotendOptionsAtom);
+	// Deliberately not in the configuration: how a table is ordered is how it is being read right
+	// now, not part of the comparison a share link describes
+	const [sort, setSort] = useState<Sort>(null);
 
 	// The speed a hotend supports at the current layer height and line width
 	const crossSection = extrusionCrossSection(print.lineWidth, print.layerHeight);
+	const rows = sorted(performance, sort, crossSection);
 
 	function update(hotend: HotendDefinition, change: { block?: BlockMaterial; mze?: boolean; hfNozzle?: boolean }) {
 		setOptions({ ...options, [hotend.id]: { ...options[hotend.id], ...change } });
@@ -101,46 +359,21 @@ export function HotendTable() {
 					<Table className="text-xs leading-tight [&_th]:px-2 [&_th]:h-8 [&_td]:px-2 [&_td]:py-1">
 						<TableHeader>
 							<TableRow>
-								<TableHead>Hotend</TableHead>
-								<TableHead className="text-right">Price</TableHead>
-								<TableHead>Block</TableHead>
-								<TableHead className="text-right">Max temp</TableHead>
-								<TableHead className="text-center">
-									<HeaderHelp label="MZE">
-										A melt zone extender: typically an adapter that lengthens the melt zone by{' '}
-										{MZE_LENGTH} mm, or a nut that lets a standard V6 hotend take V6 Volcano
-										nozzles.
-									</HeaderHelp>
-								</TableHead>
-								<TableHead className="text-center">
-									<HeaderHelp label="CHT">
-										High-flow internal geometry, such as a Core Heat Technology nozzle: the bore
-										splits into parallel channels, so the filament sees far more hot wall per
-										millimetre. Counted here as +{HF_NOZZLE_EQUIVALENT_LENGTH} mm of effective
-										melt zone.
-									</HeaderHelp>
-								</TableHead>
-								<TableHead className="text-center">
-									<HeaderHelp label="NS heatbreak">
-										A structural heatbreak is the load-bearing part holding the hot and cold
-										sides together, so every knock to the nozzle goes through it — far more
-										vulnerable to damage than a nonstructural one, where something else carries
-										the load.
-									</HeaderHelp>
-								</TableHead>
-								<TableHead className="text-right">Effective melt zone</TableHead>
-								<TableHead className="text-right">Max flow</TableHead>
-								<TableHead className="text-right" title="At the current layer height and line width">
-									Max speed
-								</TableHead>
-								<TableHead className="text-right">Residence</TableHead>
-								<TableHead className="text-right">Power/mm</TableHead>
-								<TableHead>Status</TableHead>
+								{COLUMNS.map((column) => (
+									<SortableHeader
+										key={column.label}
+										column={column}
+										sort={sort}
+										onSort={setSort}
+									/>
+								))}
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{performance.map((entry) => {
+							{rows.map((entry) => {
 								const status = headroomStatus(entry.headroom);
+								// Off the selection, not the row: sorting the table must not repaint the
+								// markers, or a hotend's colour would stop meaning the same thing as in the charts
 								const colorIndex = selected.indexOf(entry.hotend.id);
 								const blockOptions = orderedBlockOptions(entry.hotend);
 								const derate = BLOCK_MATERIAL_DERATE[entry.block.material];
@@ -155,17 +388,18 @@ export function HotendTable() {
 										</TableCell>
 
 										<TableCell
-											className="text-right tabular-nums"
 											title={entry.hotend.price === null ? 'No price in the database yet' : undefined}
 										>
 											{entry.hotend.price === null ? (
-												<span className="text-muted-foreground">—</span>
+												<Measure value="—" digits={4} />
 											) : (
-												`$${formatNumber(entry.hotend.price, 0)}`
+												<Measure value={`$${formatNumber(entry.hotend.price, 0)}`} digits={4} />
 											)}
 										</TableCell>
 
-										<TableCell>
+										{/* The toggle is its own centred block, so a hotend with a choice and one
+										    without still line up down the column */}
+										<TableCell className="[&>*]:justify-center [&>*]:flex">
 											{blockOptions.length > 1 ? (
 												<ToggleGroup
 													type="single"
@@ -192,19 +426,25 @@ export function HotendTable() {
 													))}
 												</ToggleGroup>
 											) : (
-												<span className="text-muted-foreground">
-													{BLOCK_MATERIAL_LABELS[entry.block.material]}
+												<span
+													className="text-muted-foreground"
+													title={BLOCK_MATERIAL_LABELS[entry.block.material]}
+												>
+													{FIXED_BLOCK_LABELS[entry.block.material]}
 												</span>
 											)}
 										</TableCell>
 
 										<TableCell
-											className={`text-right tabular-nums ${
-												entry.withinTemperature ? '' : 'text-destructive-foreground'
-											}`}
+											className={entry.withinTemperature ? '' : 'text-destructive-foreground'}
 											title={derate > 0 ? `−${derate}% flow against a copper block` : undefined}
 										>
-											{formatNumber(entry.block.maxTemperature, 0)} °C
+											<Measure
+												value={formatNumber(entry.block.maxTemperature, 0)}
+												unit="°C"
+												digits={3}
+												unitWidth={2}
+											/>
 										</TableCell>
 
 										<TableCell className="text-center">
@@ -250,26 +490,38 @@ export function HotendTable() {
 										</TableCell>
 
 										<TableCell
-											className="text-right tabular-nums"
 											title={
 												entry.hfNozzle
 													? `${formatNumber(entry.hotend.meltZoneLength, 1)} mm physical channel`
 													: undefined
 											}
 										>
-											{formatNumber(entry.meltZoneLength, 1)} mm
+											<Measure
+												value={formatNumber(entry.meltZoneLength, 1)}
+												unit="mm"
+												digits={5}
+												unitWidth={2}
+											/>
 										</TableCell>
-										<TableCell className="text-right tabular-nums">
-											{formatNumber(entry.maxFlow, 1)} mm³/s
+										<TableCell>
+											<Measure
+												value={formatNumber(entry.maxFlow, 1)}
+												unit="mm³/s"
+												digits={5}
+												unitWidth={5}
+											/>
 										</TableCell>
-										<TableCell className="text-right tabular-nums">
-											{crossSection > 0 ? `${formatNumber(entry.maxFlow / crossSection, 0)} mm/s` : '—'}
-										</TableCell>
-										<TableCell className="text-right tabular-nums">
-											{formatSeconds(entry.residenceTime)}
-										</TableCell>
-										<TableCell className="text-right tabular-nums">
-											{formatNumber(entry.specificPower, 2)} W/mm
+										<TableCell>
+											{crossSection > 0 ? (
+												<Measure
+													value={formatNumber(entry.maxFlow / crossSection, 0)}
+													unit="mm/s"
+													digits={4}
+													unitWidth={4}
+												/>
+											) : (
+												<Measure value="—" digits={4} />
+											)}
 										</TableCell>
 										<TableCell>
 											{entry.withinTemperature ? (
@@ -293,12 +545,18 @@ export function HotendTable() {
 												</span>
 											)}
 										</TableCell>
+
+										{/* `whitespace-normal` undoes the table's own default, so a long note wraps
+										    inside the column rather than widening it for every row */}
+										<TableCell className="whitespace-normal text-muted-foreground">
+											<HotendNotes notes={entry.hotend.notes} />
+										</TableCell>
 									</TableRow>
 								);
 							})}
 							{performance.length === 0 ? (
 								<TableRow>
-									<TableCell colSpan={13} className="text-muted-foreground">
+									<TableCell colSpan={COLUMNS.length} className="text-muted-foreground">
 										No hotends selected.
 									</TableCell>
 								</TableRow>
