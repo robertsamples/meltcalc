@@ -1,4 +1,5 @@
 import { defineEventHandler, setResponseHeader } from 'h3';
+import { refuseNonRead } from '../http';
 import { resolveBaseUrl } from '../site';
 
 /**
@@ -54,6 +55,9 @@ const CONTENT_SIGNALS_NOTICE = `# As a condition of accessing this website, you 
 # DIGITAL SINGLE MARKET.`;
 
 export default defineEventHandler((event) => {
+	const refusal = refuseNonRead(event);
+	if (refusal) return refusal;
+
 	const baseUrl = resolveBaseUrl(event);
 
 	setResponseHeader(event, 'content-type', 'text/plain; charset=utf-8');

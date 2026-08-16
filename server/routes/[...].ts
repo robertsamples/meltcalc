@@ -1,5 +1,6 @@
 import { defineEventHandler, getRequestURL, setResponseHeader, setResponseStatus } from 'h3';
 import { useStorage } from 'nitropack/runtime';
+import { refuseNonRead } from '../http';
 import { buildOgTags, injectOgTags } from '../og/meta';
 import { buildOgModel } from '../og/model';
 import { buildSeoBody, injectSeoBody } from '../seo';
@@ -17,6 +18,9 @@ import { resolveBaseUrl, SITE_NAME } from '../site';
 const FILE_REQUEST = /\.[a-zA-Z0-9]+$/;
 
 export default defineEventHandler(async (event) => {
+	const refusal = refuseNonRead(event);
+	if (refusal) return refusal;
+
 	const url = getRequestURL(event);
 
 	if (FILE_REQUEST.test(url.pathname)) {

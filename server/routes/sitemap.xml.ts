@@ -1,4 +1,5 @@
 import { defineEventHandler, setResponseHeader } from 'h3';
+import { refuseNonRead } from '../http';
 import { resolveBaseUrl } from '../site';
 
 /**
@@ -9,6 +10,9 @@ import { resolveBaseUrl } from '../site';
  * an unbounded set of duplicates.
  */
 export default defineEventHandler((event) => {
+	const refusal = refuseNonRead(event);
+	if (refusal) return refusal;
+
 	const baseUrl = resolveBaseUrl(event);
 
 	setResponseHeader(event, 'content-type', 'application/xml; charset=utf-8');

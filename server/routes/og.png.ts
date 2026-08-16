@@ -1,4 +1,5 @@
 import { defineEventHandler, getQuery, getRequestHeader, setResponseHeader, setResponseStatus } from 'h3';
+import { refuseNonRead } from '../http';
 import { renderOgImage } from '../og/render';
 import { resolveBaseUrl } from '../site';
 
@@ -10,6 +11,9 @@ import { resolveBaseUrl } from '../site';
  * a 500 here drops the unfurl entirely.
  */
 export default defineEventHandler(async (event) => {
+	const refusal = refuseNonRead(event);
+	if (refusal) return refusal;
+
 	const query = getQuery(event);
 	const configParam = typeof query.config === 'string' ? query.config : null;
 	// Only a cache-buster (see OG_IMAGE_VERSION in og/meta.ts); it never changes what is drawn,
