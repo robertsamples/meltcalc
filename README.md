@@ -130,7 +130,7 @@ to the tip of the nozzle.
     pnpm data:update-db
     ```
 
-7. Run the development server
+6. Run the development server
 
     ```sh
     pnpm dev
@@ -143,7 +143,8 @@ per-link `<head>` tags behave as they do in production.
 `.output`; `pnpm preview` runs the built server. `pnpm lint` is Biome; formatting is Prettier via
 `pnpm format`.
 
-You can also open an issue with the information for a hotend or material you wish to add (see raw data that is needed
+You can also open an issue on github with the information for a hotend or material you wish to add (see raw data that is needed 
+in the CSV files in ./data.
 
 
 ## Layout
