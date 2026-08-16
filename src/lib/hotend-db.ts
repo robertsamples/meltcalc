@@ -445,7 +445,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		name: 'Dual Velo',
 		ecosystem: null,
 		mountingPattern: 'Dragon',
-		nozzle: 'V6',
+		nozzle: 'Proprietary',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
 		nonstructuralHeatbreak: true,

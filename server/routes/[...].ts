@@ -1,5 +1,6 @@
 import { defineEventHandler, getRequestURL, setResponseHeader, setResponseStatus } from 'h3';
 import { useStorage } from 'nitropack/runtime';
+import { packReadableQuery } from '@/lib/config-query';
 import { refuseNonRead } from '../http';
 import { buildOgTags, injectOgTags } from '../og/meta';
 import { buildOgModel } from '../og/model';
@@ -35,7 +36,9 @@ export default defineEventHandler(async (event) => {
 	}
 
 	const baseUrl = resolveBaseUrl(event);
-	const configParam = url.searchParams.get('config');
+	// A readable link (`?hotend=…&material=…`) is packed into the same parameter everything below
+	// already speaks, so it gets the same title, description, body and card as a shared one
+	const configParam = url.searchParams.get('config') ?? packReadableQuery(url.searchParams);
 	const model = buildOgModel(configParam);
 
 	const html = injectSeoBody(

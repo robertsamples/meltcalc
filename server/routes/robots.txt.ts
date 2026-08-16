@@ -70,6 +70,10 @@ export default defineEventHandler((event) => {
 		`Content-Signal: ${CONTENT_SIGNALS}`,
 		'Allow: /',
 		'',
+		// Not a robots.txt directive, so it is a comment: nothing discovers /llms.txt on its own, and
+		// this is the one file every crawler already asks for
+		`# ${baseUrl}/llms.txt describes this site, its data, and how to build a link to a configuration.`,
+		'',
 		`Sitemap: ${baseUrl}/sitemap.xml`,
 		''
 	].join('\n');

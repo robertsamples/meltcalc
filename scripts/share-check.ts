@@ -1,3 +1,4 @@
+import { hotendSlug, parseReadableQuery } from '@/lib/config-query';
 import { decodeConfig, encodeConfig } from '@/lib/config-sharing';
 import { DEFAULT_CONFIGURATION, MAX_COMPARED_HOTENDS, type ShareableConfiguration } from '@/lib/configuration';
 import { HOTEND_DB, hotendCode } from '@/lib/hotend';
@@ -111,3 +112,77 @@ console.log(
 		`       ${legacy.length} chars in the old format`
 );
 console.log(`${decodeConfig('not-base64-@@@') === null ? 'OK  ' : 'FAIL'} garbage rejected`);
+
+// ---------------------------------------------------------------------------------------------
+// The readable form. `/llms.txt` publishes these slugs as the way to link to a configuration, so
+// they are an interface: a slug that stops resolving, or starts resolving to a different hotend,
+// breaks links this site told people to make.
+
+function readable(name: string, query: string, expected: Partial<ShareableConfiguration>) {
+	const imported = parseReadableQuery(new URLSearchParams(query));
+	const failures = Object.entries(expected).filter(
+		([key]) =>
+			stable(imported?.config[key as keyof ShareableConfiguration]) !==
+			stable(expected[key as keyof ShareableConfiguration])
+	);
+
+	console.log(
+		`${failures.length === 0 ? 'OK  ' : 'FAIL'} ${name.padEnd(28)} ${String(query.length).padStart(4)} chars`
+	);
+	for (const [key] of failures) {
+		console.log(`  ${key}: expected`, expected[key as keyof ShareableConfiguration]);
+		console.log(`  ${key}: got     `, imported?.config[key as keyof ShareableConfiguration]);
+	}
+}
+
+readable('readable: two hotends', '?hotend=e3d-v6,phaetus-rapido-uhf&material=petg', {
+	selectedHotends: ['E3D|V6', 'Phaetus|Rapido UHF'],
+	materialSettings: { ...DEFAULT_CONFIGURATION.materialSettings, materialId: 'petg' }
+});
+
+readable('readable: view + pinned', '?view=material-flow&for=phaetus-rapido-uhf&as-speed=yes', {
+	viewMode: 'materialFlow',
+	materialFlowHotend: 'Phaetus|Rapido UHF',
+	materialFlowAsSpeed: true
+});
+
+readable('readable: hyphens optional', '?view=meltZone', { viewMode: 'meltZone' });
+
+readable('readable: flow implies manual', '?flow=25', {
+	printSettings: {
+		...DEFAULT_CONFIGURATION.printSettings,
+		flowMode: 'manual',
+		manualFlowRate: 25 as CubicMillimetersPerSecond
+	}
+});
+
+// Nonsense must degrade to the default rather than to an empty chart, and must say so
+{
+	const imported = parseReadableQuery(new URLSearchParams('?hotend=nope&material=nope&temp=9000'));
+	const survived =
+		stable(imported?.config.selectedHotends) === stable(DEFAULT_CONFIGURATION.selectedHotends) &&
+		imported?.warnings.length === 3;
+
+	console.log(`${survived ? 'OK  ' : 'FAIL'} readable: bad values warn      ${imported?.warnings.length} warnings`);
+	if (!survived) console.log('  got', imported?.warnings);
+}
+
+console.log(
+	`${parseReadableQuery(new URLSearchParams('?utm_source=reddit')) === null ? 'OK  ' : 'FAIL'} ` +
+		'readable: ignores tracking params'
+);
+
+// Every published slug has to name exactly one thing, or `/llms.txt` is documenting an ambiguity
+{
+	const slugs = new Map<string, string[]>();
+	for (const hotend of HOTEND_DB) {
+		const slug = hotendSlug(hotend.id) ?? '(none)';
+		slugs.set(slug, [...(slugs.get(slug) ?? []), hotend.id]);
+	}
+
+	const clashes = [...slugs].filter(([, ids]) => ids.length > 1);
+	console.log(
+		`${clashes.length === 0 ? 'OK  ' : 'FAIL'} readable: hotend slugs unique  ${slugs.size} of ${HOTEND_DB.length}`
+	);
+	for (const [slug, ids] of clashes) console.log(`  "${slug}" names ${ids.join(' and ')}`);
+}

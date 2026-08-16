@@ -1,3 +1,4 @@
+import { parseReadableQuery, READABLE_PARAMS } from '@/lib/config-query';
 import { decodeConfig, encodeConfig, type ImportedConfiguration } from '@/lib/config-sharing';
 import type { ShareableConfiguration } from '@/lib/configuration';
 
@@ -12,16 +13,19 @@ export function buildShareUrl(config: ShareableConfiguration): string {
 }
 
 export function parseConfigFromUrl(): ImportedConfiguration | null {
-	const configParam = new URLSearchParams(window.location.search).get('config');
-	if (!configParam) {
-		return null;
-	}
+	const params = new URLSearchParams(window.location.search);
+	const configParam = params.get('config');
 
-	return decodeConfig(configParam);
+	// `?config=` wins: it is exact, and a link carrying both was built by the share button and then
+	// had something appended to it
+	if (configParam) return decodeConfig(configParam);
+
+	return parseReadableQuery(params);
 }
 
 export function clearUrlConfig() {
 	const url = new URL(window.location.href);
 	url.searchParams.delete('config');
+	for (const key of READABLE_PARAMS) url.searchParams.delete(key);
 	window.history.replaceState({}, '', url.toString());
 }

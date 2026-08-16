@@ -56,6 +56,6 @@ Dragon,,Trianglelab,STD6-LC,V6,Y,Y,Al,300,Y,51.5,,,116.5
 Dyze,,Dyze,Typhoon,Proprietary,N,N,Cu,500,Y,114,2.85,,2700
 H2,H2,Bambulab,H2 Hotend,Integrated,N,Y,Cu,350,Y,33,,,18
 Dragon,,Mellow,ALPS,V6,Y,Y,Cu,400,Y,38.2,,,45
-Dragon,,Mellow,Dual Velo,V6,Y,Y,Cu,400,Y,51.8,,2,143
+Dragon,,Mellow,Dual Velo,Proprietary,Y,Y,Cu,400,Y,51.8,,2,143
 X1c,,Mellow,Fluxheat,V6,Y,Y,Cu,350,Y,34.3,,,35
 ,,Monika McWuff,Pawsitron Hotend,V6,Y,Y,St,500,Y,51.3,,4,
