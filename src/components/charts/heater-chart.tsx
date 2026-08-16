@@ -3,7 +3,7 @@ import { Bar, BarChart, Cell, LabelList, ReferenceLine, XAxis, YAxis } from 'rec
 import { pointTooltip } from '@/components/charts/chart-tooltip';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
-import { HF_NOZZLE_FOOTNOTE, hasHfNozzleSeries, performanceLabel } from '@/lib/chart-labels';
+import { chartFootnotes, performanceLabel } from '@/lib/chart-labels';
 import { formatNumber } from '@/lib/format';
 import { AXIS_LINE, STATUS_COLORS, seriesColor, THRESHOLD_LINE } from '@/lib/series';
 import { HEATER_EFFICIENCY, HEATER_SIZES } from '@/lib/thermal';
@@ -186,9 +186,11 @@ export function HeaterChart() {
 								ceiling, not buying a bigger heater.
 							</p>
 						) : null}
-						{hasHfNozzleSeries(performance) ? (
-							<p className="text-[11px] text-muted-foreground">{HF_NOZZLE_FOOTNOTE}</p>
-						) : null}
+						{chartFootnotes(performance).map((note) => (
+							<p key={note} className="text-[11px] text-muted-foreground">
+								{note}
+							</p>
+						))}
 					</>
 				)}
 			</CardContent>

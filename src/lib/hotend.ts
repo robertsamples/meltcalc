@@ -89,6 +89,12 @@ export const HotendDefinition = z.object({
 	 * residence time, and how much of the melt zone's heat reaches the middle of the filament.
 	 */
 	filamentDiameter: Millimeter,
+	/**
+	 * How many filament paths run through the block side by side. Almost always one; a couple of
+	 * designs put two or four bores in one heater, which is two or four melt zones rather than a
+	 * bigger one.
+	 */
+	filamentPaths: z.number().int().positive(),
 	/** Approximate street price in USD, or `null` where nobody has found one */
 	price: Dollars.nullable()
 });
@@ -140,9 +146,16 @@ export function hasHfNozzle(hotend: HotendDefinition, options: HotendOptions | u
  * longer than the hotend physically is — hence "effective" everywhere it is shown.
  */
 export function effectiveMeltZoneLength(hotend: HotendDefinition, options: HotendOptions | undefined): Millimeter {
-	return (hotend.meltZoneLength +
+	const perPath =
+		hotend.meltZoneLength +
 		(hasMze(hotend, options) ? MZE_LENGTH : 0) +
-		(hasHfNozzle(hotend, options) ? HF_NOZZLE_EQUIVALENT_LENGTH : 0)) as Millimeter;
+		(hasHfNozzle(hotend, options) ? HF_NOZZLE_EQUIVALENT_LENGTH : 0);
+
+	// Paths multiply the melt zone, and that one multiplication is the whole model for a multi-bore
+	// hotend. Flow is `limit × length ÷ energy`, so four paths give four times the flow, and the
+	// heater figure follows from flow. Residence falls out too: it is melt zone volume over flow,
+	// and both sides scale by the path count, leaving the time one path actually sees.
+	return (perPath * hotend.filamentPaths) as Millimeter;
 }
 
 /** The hottest any of its block variants will go; what decides whether a material is off the table */

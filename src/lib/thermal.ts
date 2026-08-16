@@ -395,7 +395,9 @@ export function hotendPerformance(
 		requiredHeaterPower: heaterPower,
 		recommendedHeater: recommendedHeater(heaterPower),
 		residenceTime: residenceTime(meltZoneLength, flowRate, hotend.filamentDiameter),
-		feedRate: filamentFeedRate(flowRate, hotend.filamentDiameter),
+		// Per path, since that is what an extruder feeding one of them actually turns at
+		feedRate: (filamentFeedRate(flowRate, hotend.filamentDiameter) /
+			hotend.filamentPaths) as MillimetersPerSecond,
 		specificPower: specificMeltPower(meltPower(meltEnergy, flowRate), meltZoneLength),
 		headroom: flowRate > 0 ? maxFlow / flowRate : Number.POSITIVE_INFINITY,
 		costPerFlow:

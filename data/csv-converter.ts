@@ -164,6 +164,8 @@ async function generateHotends() {
 			meltZoneLength: requiredNumber(row, 'Melt zone', context),
 			// Blank means the 1.75 mm nearly everything takes, so only the odd one out needs a value
 			filamentDiameter: optionalNumber(row, 'Filament (mm)', context) ?? 1.75,
+			// Blank means one bore, which is nearly every hotend ever made
+			filamentPaths: optionalNumber(row, 'Filament paths', context) ?? 1,
 			price: optionalNumber(row, 'Price (USD)', context)
 		};
 	});
@@ -199,6 +201,7 @@ async function generateHotends() {
 				`\n\t\t],\n` +
 				`\t\tmeltZoneLength: ${hotend.meltZoneLength} as Millimeter,\n` +
 				`\t\tfilamentDiameter: ${hotend.filamentDiameter} as Millimeter,\n` +
+				`\t\tfilamentPaths: ${hotend.filamentPaths},\n` +
 				`\t\tprice: ${hotend.price === null ? 'null' : `${hotend.price} as Dollars`}\n` +
 				`\t}`
 		)

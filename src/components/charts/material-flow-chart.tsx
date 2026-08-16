@@ -10,7 +10,7 @@ import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { HF_NOZZLE_FOOTNOTE, performanceLabel } from '@/lib/chart-labels';
+import { chartFootnotes, performanceLabel } from '@/lib/chart-labels';
 import { formatNumber } from '@/lib/format';
 import { blockMaterialFactor } from '@/lib/hotend';
 import { familyIndex } from '@/lib/material';
@@ -319,7 +319,11 @@ export function MaterialFlowChart() {
 						block variant exists, it is a column in the table above.
 					</p>
 				) : null}
-				{entry.hfNozzle ? <p className="text-[11px] text-muted-foreground">{HF_NOZZLE_FOOTNOTE}</p> : null}
+				{chartFootnotes([entry]).map((note) => (
+					<p key={note} className="text-[11px] text-muted-foreground">
+						{note}
+					</p>
+				))}
 
 				<p className="text-[11px] text-muted-foreground">
 					Solid is what the material is typically run at, faded the rest of what the{' '}

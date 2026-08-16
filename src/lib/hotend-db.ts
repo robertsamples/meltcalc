@@ -19,6 +19,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 26 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 160 as Dollars
 	},
 	{
@@ -36,6 +37,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 53 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 210 as Dollars
 	},
 	{
@@ -53,6 +55,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 27.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 10 as Dollars
 	},
 	{
@@ -70,6 +73,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 33 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 18 as Dollars
 	},
 	{
@@ -87,6 +91,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 24.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 20 as Dollars
 	},
 	{
@@ -104,6 +109,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 28 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 45 as Dollars
 	},
 	{
@@ -121,6 +127,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 74.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: null
 	},
 	{
@@ -138,6 +145,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 50 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: null
 	},
 	{
@@ -155,6 +163,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 92 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: null
 	},
 	{
@@ -172,6 +181,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 114 as Millimeter,
 		filamentDiameter: 2.85 as Millimeter,
+		filamentPaths: 1,
 		price: 2700 as Dollars
 	},
 	{
@@ -189,6 +199,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 19.6 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 95 as Dollars
 	},
 	{
@@ -207,6 +218,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 57.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 30 as Dollars
 	},
 	{
@@ -225,6 +237,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 17.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 8 as Dollars
 	},
 	{
@@ -243,6 +256,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 26 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 12 as Dollars
 	},
 	{
@@ -260,6 +274,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 35.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 9 as Dollars
 	},
 	{
@@ -277,6 +292,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 34.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 22 as Dollars
 	},
 	{
@@ -294,6 +310,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 24.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 12 as Dollars
 	},
 	{
@@ -311,6 +328,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 25.35 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 12 as Dollars
 	},
 	{
@@ -328,6 +346,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 35.65 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 22 as Dollars
 	},
 	{
@@ -345,6 +364,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 46 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 260 as Dollars
 	},
 	{
@@ -362,6 +382,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 38.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 165 as Dollars
 	},
 	{
@@ -379,6 +400,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 56 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 320 as Dollars
 	},
 	{
@@ -396,7 +418,62 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 33 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 125 as Dollars
+	},
+	{
+		id: 'Mellow|ALPS',
+		manufacturer: 'Mellow',
+		name: 'ALPS',
+		ecosystem: null,
+		mountingPattern: 'Dragon',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 400 as Celsius }
+		],
+		meltZoneLength: 38.2 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		price: 45 as Dollars
+	},
+	{
+		id: 'Mellow|Dual Velo',
+		manufacturer: 'Mellow',
+		name: 'Dual Velo',
+		ecosystem: null,
+		mountingPattern: 'Dragon',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 400 as Celsius }
+		],
+		meltZoneLength: 51.8 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 2,
+		price: 143 as Dollars
+	},
+	{
+		id: 'Mellow|Fluxheat',
+		manufacturer: 'Mellow',
+		name: 'Fluxheat',
+		ecosystem: null,
+		mountingPattern: 'X1c',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 350 as Celsius }
+		],
+		meltZoneLength: 34.3 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		price: 35 as Dollars
 	},
 	{
 		id: 'Mellow|Goliath',
@@ -413,6 +490,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 51.15 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 120 as Dollars
 	},
 	{
@@ -431,6 +509,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 18.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 41 as Dollars
 	},
 	{
@@ -449,6 +528,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 25 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 44 as Dollars
 	},
 	{
@@ -467,6 +547,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 34.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 50 as Dollars
 	},
 	{
@@ -485,6 +566,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 28 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 48 as Dollars
 	},
 	{
@@ -503,6 +585,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 20.55 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 100 as Dollars
 	},
 	{
@@ -520,7 +603,26 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 28.6 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 80 as Dollars
+	},
+	{
+		id: 'Monika McWuff|Pawsitron Hotend',
+		manufacturer: 'Monika McWuff',
+		name: 'Pawsitron Hotend',
+		ecosystem: null,
+		mountingPattern: null,
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'St', maxTemperature: 500 as Celsius }
+		],
+		meltZoneLength: 51.3 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 4,
+		price: null
 	},
 	{
 		id: 'Peopoly|Lancer Long',
@@ -537,6 +639,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 45 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 37.5 as Dollars
 	},
 	{
@@ -554,6 +657,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 28 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 22.5 as Dollars
 	},
 	{
@@ -571,6 +675,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 36.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 30 as Dollars
 	},
 	{
@@ -589,6 +694,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 26 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 55 as Dollars
 	},
 	{
@@ -607,6 +713,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 33.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 60 as Dollars
 	},
 	{
@@ -625,6 +732,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 34.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 65 as Dollars
 	},
 	{
@@ -643,6 +751,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 35.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 70 as Dollars
 	},
 	{
@@ -661,6 +770,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 43 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 75 as Dollars
 	},
 	{
@@ -678,6 +788,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 35 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 37.6 as Dollars
 	},
 	{
@@ -695,6 +806,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 34 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 90 as Dollars
 	},
 	{
@@ -712,6 +824,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 17.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 450 as Dollars
 	},
 	{
@@ -729,6 +842,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 23.7 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 35 as Dollars
 	},
 	{
@@ -746,6 +860,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 18.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 150 as Dollars
 	},
 	{
@@ -763,6 +878,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 25 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 175 as Dollars
 	},
 	{
@@ -780,6 +896,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 38.7 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 369 as Dollars
 	},
 	{
@@ -797,6 +914,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 45.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 423 as Dollars
 	},
 	{
@@ -814,6 +932,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 66.7 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 1577 as Dollars
 	},
 	{
@@ -831,6 +950,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 51.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 67 as Dollars
 	},
 	{
@@ -848,6 +968,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 35 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 44 as Dollars
 	},
 	{
@@ -865,6 +986,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 36.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 80 as Dollars
 	},
 	{
@@ -882,6 +1004,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 44.7 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 85 as Dollars
 	},
 	{
@@ -899,6 +1022,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 51.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 116.5 as Dollars
 	},
 	{
@@ -916,6 +1040,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 57.9 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: null
 	},
 	{
@@ -934,6 +1059,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 18.8 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 8 as Dollars
 	},
 	{
@@ -951,6 +1077,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 53 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 200 as Dollars
 	},
 	{
@@ -968,6 +1095,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		],
 		meltZoneLength: 39.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
 		price: 220 as Dollars
 	}
 ];

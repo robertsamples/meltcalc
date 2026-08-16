@@ -18,7 +18,7 @@ import { markerAttributes, SeriesMarker } from '@/components/series-marker';
 import { Term } from '@/components/term';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
-import { HF_NOZZLE_FOOTNOTE, hasHfNozzleSeries, performanceLabel } from '@/lib/chart-labels';
+import { chartFootnotes, performanceLabel } from '@/lib/chart-labels';
 import { formatFlow, formatNumber } from '@/lib/format';
 import { AXIS_LINE, STATUS_COLORS, seriesMarker, shapePath, THRESHOLD_LINE } from '@/lib/series';
 import { requiredMeltZoneLength } from '@/lib/thermal';
@@ -154,9 +154,11 @@ export function SpecificPowerChart() {
 								Beyond it
 							</span>
 						</div>
-						{hasHfNozzleSeries(performance) ? (
-							<p className="text-[11px] text-muted-foreground">{HF_NOZZLE_FOOTNOTE}</p>
-						) : null}
+						{chartFootnotes(performance).map((note) => (
+							<p key={note} className="text-[11px] text-muted-foreground">
+								{note}
+							</p>
+						))}
 					</>
 				)}
 			</CardContent>
@@ -348,7 +350,11 @@ export function MeltZoneLandscape() {
 						<SeriesMarker index={0} />
 						Selected for comparison
 					</span>
-					{hasHfNozzleSeries(all) ? <span className="basis-full">{HF_NOZZLE_FOOTNOTE}</span> : null}
+					{chartFootnotes(all).map((note) => (
+						<span key={note} className="basis-full">
+							{note}
+						</span>
+					))}
 				</div>
 			</CardContent>
 		</Card>

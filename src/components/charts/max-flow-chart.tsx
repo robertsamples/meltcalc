@@ -4,7 +4,7 @@ import { pointTooltip } from '@/components/charts/chart-tooltip';
 import { StatusLegend } from '@/components/charts/status-legend';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
-import { HF_NOZZLE_FOOTNOTE, hasHfNozzleSeries, performanceLabel } from '@/lib/chart-labels';
+import { chartFootnotes, performanceLabel } from '@/lib/chart-labels';
 import { formatNumber } from '@/lib/format';
 import { AXIS_LINE, headroomStatus, STATUS_COLORS, STATUS_LABELS, THRESHOLD_LINE } from '@/lib/series';
 import { flowRateAtom, performanceAtom } from '@/state/atoms';
@@ -97,9 +97,11 @@ export function MaxFlowChart() {
 							</BarChart>
 						</ChartContainer>
 						<StatusLegend />
-						{hasHfNozzleSeries(performance) ? (
-							<p className="text-[11px] text-muted-foreground">{HF_NOZZLE_FOOTNOTE}</p>
-						) : null}
+						{chartFootnotes(performance).map((note) => (
+							<p key={note} className="text-[11px] text-muted-foreground">
+								{note}
+							</p>
+						))}
 					</>
 				)}
 			</CardContent>

@@ -8,12 +8,7 @@ import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import {
-	HF_NOZZLE_FOOTNOTE,
-	hasHfNozzleSeries,
-	performanceLabel,
-	shortPerformanceLabel
-} from '@/lib/chart-labels';
+import { chartFootnotes, performanceLabel, shortPerformanceLabel } from '@/lib/chart-labels';
 import type { CostBandMode } from '@/lib/configuration';
 import { BAND_SAMPLES, type BandSpec, costBands, valueBands } from '@/lib/cost-bands';
 import { formatFlow, formatNumber } from '@/lib/format';
@@ -147,9 +142,11 @@ export function CostPerFlowChart() {
 								{unpriced === 1 ? 'it' : 'them'}.
 							</p>
 						) : null}
-						{hasHfNozzleSeries(performance) ? (
-							<p className="text-[11px] text-muted-foreground">{HF_NOZZLE_FOOTNOTE}</p>
-						) : null}
+						{chartFootnotes(performance).map((note) => (
+							<p key={note} className="text-[11px] text-muted-foreground">
+								{note}
+							</p>
+						))}
 					</>
 				)}
 			</CardContent>

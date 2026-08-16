@@ -17,7 +17,7 @@ import { SeriesMarker } from '@/components/series-marker';
 import { Term } from '@/components/term';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
-import { HF_NOZZLE_FOOTNOTE, hasHfNozzleSeries, performanceLabel } from '@/lib/chart-labels';
+import { chartFootnotes, performanceLabel } from '@/lib/chart-labels';
 import { formatFlow, formatNumber, formatSeconds } from '@/lib/format';
 import { AXIS_LINE, STATUS_COLORS, seriesColor, THRESHOLD_LINE } from '@/lib/series';
 import { meltZoneVolume, residenceTime } from '@/lib/thermal';
@@ -165,9 +165,11 @@ export function ResidenceByHotendChart() {
 								Below it
 							</span>
 						</div>
-						{hasHfNozzleSeries(performance) ? (
-							<p className="text-[11px] text-muted-foreground">{HF_NOZZLE_FOOTNOTE}</p>
-						) : null}
+						{chartFootnotes(performance).map((note) => (
+							<p key={note} className="text-[11px] text-muted-foreground">
+								{note}
+							</p>
+						))}
 					</>
 				)}
 			</CardContent>
@@ -370,9 +372,11 @@ export function ResidenceCurveChart() {
 								</span>
 							))}
 						</div>
-						{hasHfNozzleSeries(performance) ? (
-							<p className="text-[11px] text-muted-foreground">{HF_NOZZLE_FOOTNOTE}</p>
-						) : null}
+						{chartFootnotes(performance).map((note) => (
+							<p key={note} className="text-[11px] text-muted-foreground">
+								{note}
+							</p>
+						))}
 					</div>
 				) : null}
 			</CardContent>
