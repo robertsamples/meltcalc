@@ -119,7 +119,18 @@ Both forms render the same page and unfurl with a chart image drawn server-side.
     pnpm install
     ```
 
-3. Run the development server
+
+
+4. Edit CSV files in ./data with additional columns for new hotends or materials you would like to add, the fields are fairly
+self-explanatory. The convention for melt zone length is that it is measured from the top of hot part of the heatbreak or block
+to the tip of the nozzle.
+
+5. Write the updated data to the database
+    ```sh
+    pnpm data:update-db
+    ```
+
+7. Run the development server
 
     ```sh
     pnpm dev
@@ -131,6 +142,9 @@ per-link `<head>` tags behave as they do in production.
 `pnpm build` produces the SPA in `dist/public`, its shell in `dist/template` and a Nitro server in
 `.output`; `pnpm preview` runs the built server. `pnpm lint` is Biome; formatting is Prettier via
 `pnpm format`.
+
+You can also open an issue with the information for a hotend or material you wish to add (see raw data that is needed
+
 
 ## Layout
 
