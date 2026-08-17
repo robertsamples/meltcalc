@@ -205,7 +205,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		hfNozzleCompatible: true,
 		nonstructuralHeatbreak: false,
 		blockOptions: [
-			{ material: 'Br', maxTemperature: 300 as Celsius }
+			{ material: 'Br', maxTemperature: 300 as Celsius },
+			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 19.6 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
