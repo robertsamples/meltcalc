@@ -81,9 +81,9 @@ export const HOTEND_DB: HotendDefinition[] = [
 		notes: 'Integrated nozzle'
 	},
 	{
-		id: 'Bambulab|X1C OEM Hotend',
+		id: 'Bambulab|X1C OEM',
 		manufacturer: 'Bambulab',
-		name: 'X1C OEM Hotend',
+		name: 'X1C OEM',
 		ecosystem: 'X1C',
 		mountingPattern: 'X1C',
 		nozzle: 'Integrated',
@@ -426,9 +426,28 @@ export const HOTEND_DB: HotendDefinition[] = [
 		notes: null
 	},
 	{
-		id: 'Lukes Lab|Pika',
+		id: 'Lukes Lab|Pika (U1)',
 		manufacturer: 'Lukes Lab',
-		name: 'Pika',
+		name: 'Pika (U1)',
+		ecosystem: 'U1',
+		mountingPattern: 'U1',
+		nozzle: 'Fin',
+		mzeCompatible: false,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 350 as Celsius }
+		],
+		meltZoneLength: 35.6 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		price: 105 as Dollars,
+		notes: 'Fin nozzle'
+	},
+	{
+		id: 'Lukes Lab|Pika (X1C)',
+		manufacturer: 'Lukes Lab',
+		name: 'Pika (X1C)',
 		ecosystem: 'X1C',
 		mountingPattern: 'X1C',
 		nozzle: 'Fin',
@@ -984,6 +1003,25 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 1577 as Dollars,
+		notes: null
+	},
+	{
+		id: 'Snapmaker|U1 OEM',
+		manufacturer: 'Snapmaker',
+		name: 'U1 OEM',
+		ecosystem: 'U1',
+		mountingPattern: 'U1',
+		nozzle: 'Integrated',
+		mzeCompatible: false,
+		hfNozzleCompatible: false,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'St', maxTemperature: 300 as Celsius }
+		],
+		meltZoneLength: 24.2 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		price: 12.5 as Dollars,
 		notes: null
 	},
 	{

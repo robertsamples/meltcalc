@@ -34,9 +34,9 @@ Groove,V6,E3D,Supervolcano,V6 Supervolcano,N,Y,Al/Cu,300/500,N,57.5,,,30,
 Groove,V6,E3D,V6 Volcano,V6 Volcano,N,Y,Al/Cu,300/500,N,26,,,12,
 Groove,V6,Metaform,Pico Hotend,V6,Y,Y,Al/Cu,300/500,N,20.55,,,100,
 Dragon,Vzbot,Mellow,Goliath,V6,Y,Y,Cu,500,Y,51.15,,,120,
-X1C,X1C,Bambulab,X1C OEM Hotend,Integrated,N,N,Al,300,N,24.2,,,20,Integrated nozzle
+X1C,X1C,Bambulab,X1C OEM,Integrated,N,N,Al,300,N,24.2,,,20,Integrated nozzle
 X1C,X1C,Generic,TZ Hotends,TZ,Y,Y,Cu,350,Y,24.2,,,12,
-X1C,X1C,Lukes Lab,Pika,Fin,N,Y,Cu,350,Y,33,,,125,Fin nozzle
+X1C,X1C,Lukes Lab,Pika (X1C),Fin,N,Y,Cu,350,Y,33,,,125,Fin nozzle
 Various,Various,Microswiss,Flowtech,Proprietary,N,Y,Cu,300,Y,28.6,,,80,Proprietary nozzle
 ,,Brumpo Tungus,Brumpo WC Hotend,V6,Y,Y,Cu,500,Y,50,,,,DIY SLM hotend
 ,,Brumpo Tungus,Brumpo Hotend,V6,Y,Y,Cu,500,Y,74.5,,,,DIY SLM hotend
@@ -59,3 +59,5 @@ Dragon,,Mellow,ALPS,V6,Y,Y,Cu,400,Y,38.2,,,45,
 Dragon,,Mellow,Dual Velo,Proprietary,Y,Y,Cu,400,Y,51.8,,2,143,Proprietary nozzle (brass only) · 2 filaments
 X1c,,Mellow,Fluxheat,V6,Y,Y,Cu,350,Y,34.3,,,35,
 ,,Monika McWuff,Pawsitron Hotend,V6,Y,Y,St,500,Y,51.3,,4,,4 filaments · DIY SLM hotend
+U1,U1,Lukes Lab,Pika (U1),Fin,N,Y,Cu,350,Y,35.6,,,105,Fin nozzle
+U1,U1,Snapmaker,U1 OEM,Integrated,N,N,St,300,N,24.2,,,12.5,
