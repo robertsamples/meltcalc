@@ -113,6 +113,12 @@ every hotend, material and view slug, generated from the same databases so it ca
 
 Both forms render the same page and unfurl with a chart image drawn server-side.
 
+Either one also answers in markdown. A request sending `Accept: text/markdown` gets that link's
+results as text — the same model the chart and the meta tags are built from, rendered as tables
+instead of an app shell to execute. HTML stays the default, a wildcard `Accept` does not switch it,
+and both representations send `Vary: Accept`. Responses carry `x-markdown-tokens` so a caller can
+budget context before reading the body.
+
 ## Contribute
 
 0. Install Node.js v24, then corepack (`npm i -g corepack@latest`, `corepack enable`)

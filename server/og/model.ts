@@ -38,7 +38,10 @@ const MAX_LABEL_LENGTH = 30;
 export type OgTone = 'good' | 'bad' | 'accent' | 'muted';
 
 export type OgSeries = {
+	/** Trimmed to fit a bar on the card */
 	label: string;
+	/** The same thing untruncated, for representations with no width to run out of */
+	name: string;
 	value: number;
 	/** Printed at the end of the bar, already formatted with its unit */
 	text: string;
@@ -74,6 +77,8 @@ export type OgModel = {
 	alt: string;
 	/** Label/value pairs printed under the title */
 	facts: { label: string; value: string }[];
+	/** What `series` is a ranking of. Names the quantity, for the markdown representation */
+	heading: string;
 	/** Bars, in the order the view ranks them. Empty on the generic card */
 	series: OgSeries[];
 	/** The dashed line across the bars, for the views that have a threshold */
@@ -90,6 +95,7 @@ const GENERIC_CARD: OgModel = {
 	description: 'Compare hotend melt zones: sustainable flow rate, residence time and melt energy',
 	alt: 'MeltCalc',
 	facts: [],
+	heading: 'Price against sustainable flow',
 	series: [],
 	target: null
 };
@@ -267,6 +273,7 @@ function buildFlowModel(performance: Performance[], common: CommonInput): OgMode
 	const series: OgSeries[] = performance
 		.map((entry) => ({
 			label: truncate(performanceLabel(entry)),
+			name: performanceLabel(entry),
 			value: Number.isFinite(entry.maxFlow) ? entry.maxFlow : 0,
 			text: `${formatNumber(entry.maxFlow, 1)} mm³/s`,
 			tone: (entry.headroom >= 1 ? 'good' : 'bad') as OgTone
@@ -295,6 +302,7 @@ function buildFlowModel(performance: Performance[], common: CommonInput): OgMode
 			series.length === 0
 				? `MeltCalc configuration for ${common.materialName}`
 				: `Sustainable flow rate in ${common.materialName} for ${series.map((entry) => entry.label).join(', ')}`,
+		heading: `Sustainable flow rate in ${common.materialName}`,
 		facts: [
 			{ label: 'Material', value: truncate(common.materialName) },
 			{ label: 'Target flow', value: `${formatNumber(common.flowRate, 1)} mm³/s` },
@@ -356,6 +364,7 @@ function buildCostModel(
 	const series: OgSeries[] = priced
 		.map((entry) => ({
 			label: truncate(performanceLabel(entry)),
+			name: performanceLabel(entry),
 			value: entry.costPerFlow as number,
 			text: `$${formatNumber(entry.costPerFlow as number, 2)}`,
 			tone: 'accent' as OgTone
@@ -389,6 +398,7 @@ function buildCostModel(
 			`${subtitle}. Price against sustainable flow rate for every priced hotend in the database, ` +
 			`with the ${chosen.length} compared here picked out.`,
 		alt: `Price against maximum flow rate in ${common.materialName} for ${cloud.length} hotends`,
+		heading: `Cost per mm³/s of flow in ${common.materialName}`,
 		facts: [
 			{ label: 'Material', value: truncate(common.materialName) },
 			{ label: 'Plotted', value: `${cloud.length} hotends` },
@@ -407,6 +417,7 @@ function buildHeaterModel(performance: Performance[], common: CommonInput): OgMo
 		.filter((entry) => Number.isFinite(entry.requiredHeaterPower))
 		.map((entry) => ({
 			label: truncate(performanceLabel(entry)),
+			name: performanceLabel(entry),
 			value: entry.requiredHeaterPower,
 			text:
 				entry.recommendedHeater === null
@@ -434,6 +445,7 @@ function buildHeaterModel(performance: Performance[], common: CommonInput): OgMo
 		subtitle,
 		description: `${subtitle}. Heater power to sustain each hotend's maximum flow rate.`,
 		alt: `Heater power required in ${common.materialName} for ${series.map((entry) => entry.label).join(', ')}`,
+		heading: `Heater power at full flow in ${common.materialName}`,
 		facts: [
 			{ label: 'Material', value: truncate(common.materialName) },
 			{ label: 'Hungriest', value: `${formatNumber(hungriest.requiredHeaterPower, 0)} W` },
@@ -491,6 +503,7 @@ function buildMaterialFlowModel(
 	const blocked = rows.filter((row) => !row.compatible).length;
 	const series: OgSeries[] = rows.slice(0, MAX_SERIES).map((row) => ({
 		label: truncate(row.material.name),
+		name: row.material.name,
 		value: row.maxFlow,
 		text: row.compatible
 			? row.material.practicalFlowFactor < 1
@@ -527,6 +540,7 @@ function buildMaterialFlowModel(
 		subtitle,
 		description: `${subtitle}. Maximum flow rate for every material on one hotend.`,
 		alt: `Maximum flow rate by material on ${truncate(name, 40)}`,
+		heading: `Maximum flow rate by material on ${name}`,
 		facts: [
 			{ label: 'Hotend', value: truncate(name, 22) },
 			{ label: 'Effective melt zone', value: `${formatNumber(entry.meltZoneLength, 1)} mm` },
@@ -568,6 +582,7 @@ function buildEnergyModel(
 
 	const series: OgSeries[] = top.map((row) => ({
 		label: truncate(row.entry.name),
+		name: row.entry.name,
 		value: row.total,
 		text: `${formatNumber(row.total, 3)} J/mm³`,
 		tone: (row.entry.id === selectedId ? 'accent' : 'muted') as OgTone
@@ -587,6 +602,7 @@ function buildEnergyModel(
 		subtitle,
 		description: `${subtitle}. Energy per mm³ compared across ${series.length} filaments.`,
 		alt: `Energy per mm³ for ${series.map((entry) => entry.label).join(', ')}`,
+		heading: 'Energy per mm³ by material',
 		facts: [
 			{ label: 'Material', value: truncate(material.name) },
 			{ label: 'To melting point', value: `${formatNumber(selected?.toMelt ?? 0, 3)} J/mm³` },

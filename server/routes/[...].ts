@@ -1,7 +1,9 @@
-import { defineEventHandler, getRequestURL, setResponseHeader, setResponseStatus } from 'h3';
+import { defineEventHandler, getRequestHeader, getRequestURL, setResponseHeader, setResponseStatus } from 'h3';
 import { useStorage } from 'nitropack/runtime';
 import { packReadableQuery } from '@/lib/config-query';
 import { refuseNonRead } from '../http';
+import { buildMarkdown } from '../markdown';
+import { estimateTokens, prefersMarkdown } from '../negotiate';
 import { buildOgTags, injectOgTags } from '../og/meta';
 import { buildOgModel } from '../og/model';
 import { buildSeoBody, injectSeoBody } from '../seo';
@@ -29,17 +31,33 @@ export default defineEventHandler(async (event) => {
 		return 'Not found';
 	}
 
-	const template = await useStorage('assets:template').getItem<string>('index.html');
-	if (typeof template !== 'string') {
-		setResponseStatus(event, 500);
-		return 'Application template missing';
-	}
-
 	const baseUrl = resolveBaseUrl(event);
 	// A readable link (`?hotend=…&material=…`) is packed into the same parameter everything below
 	// already speaks, so it gets the same title, description, body and card as a shared one
 	const configParam = url.searchParams.get('config') ?? packReadableQuery(url.searchParams);
 	const model = buildOgModel(configParam);
+	const canonicalUrl = `${baseUrl}${url.pathname}`;
+
+	// Both representations carry it, or a cache that saw one would serve it to a client asking for
+	// the other
+	setResponseHeader(event, 'vary', 'accept');
+	setResponseHeader(event, 'cache-control', 'public, max-age=0, must-revalidate');
+
+	if (prefersMarkdown(getRequestHeader(event, 'accept'))) {
+		const markdown = buildMarkdown(model, { canonicalUrl, baseUrl });
+
+		setResponseHeader(event, 'content-type', 'text/markdown; charset=utf-8');
+		// So an agent can budget context before reading the body
+		setResponseHeader(event, 'x-markdown-tokens', String(estimateTokens(markdown)));
+
+		return markdown;
+	}
+
+	const template = await useStorage('assets:template').getItem<string>('index.html');
+	if (typeof template !== 'string') {
+		setResponseStatus(event, 500);
+		return 'Application template missing';
+	}
 
 	const html = injectSeoBody(
 		injectOgTags(
@@ -48,7 +66,7 @@ export default defineEventHandler(async (event) => {
 				configParam,
 				pageUrl: `${baseUrl}${url.pathname}${url.search}`,
 				// Without the query, so the unbounded set of `?config=` URLs consolidates onto one page
-				canonicalUrl: `${baseUrl}${url.pathname}`,
+				canonicalUrl,
 				baseUrl,
 				siteName: SITE_NAME
 			})
@@ -56,10 +74,9 @@ export default defineEventHandler(async (event) => {
 		buildSeoBody(model)
 	);
 
-	setResponseHeader(event, 'content-type', 'text/html; charset=utf-8');
 	// The shell is tiny and its tags depend on the query string; revalidating beats serving a
 	// cached unfurl for the wrong link
-	setResponseHeader(event, 'cache-control', 'public, max-age=0, must-revalidate');
+	setResponseHeader(event, 'content-type', 'text/html; charset=utf-8');
 
 	return html;
 });
