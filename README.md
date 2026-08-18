@@ -1,170 +1,151 @@
 # meltcalc
 
-Estimates how much plastic a hotend can melt: sustainable flow rate, residence time, heater power
-and cost per mm³/s, across 60 hotends and 36 filament materials.
+I assembled a spreadsheet and some models for predicting flow for different materials and hotend
+combinations so I could compare hotends and material flow predictions accurately. But I thought it
+might be useful for others, so I made a website for different visualizations for hotend and material
+comparisons.
+
+I found most manufacturers tend to give wildly optimistic flow measurements for their hotends. Most
+of the calculators for max print speed for different hotends just seem to take manufacturer
+advertising numbers, or pluck them out of thin air.
 
 Live at [meltcalc.baconmilkshake.com](https://meltcalc.baconmilkshake.com).
 
-## The model
+## Features
 
-Melting a cubic millimetre costs a fixed amount of energy, a melt zone couples only so much power
-into the filament per millimetre of heated length, and together those set a ceiling on volumetric
-flow. Everything the app shows follows from that.
+64 hotends and 36 different base polymers for comparisons.
 
-- **Melt enthalpy** per mm³ for each material: `E = ρ · (cp · ΔT + h_f)`, with `cp` averaged over
-  the solid-to-melt interval and `h_f` the heat of fusion, zero for amorphous polymers. `ΔT` runs
-  from the temperature the filament actually enters at — chamber or dryer, not room — up to the
-  temperature the polymer has to *reach* to extrude: the melting point, or for amorphous polymers
-  the lowest temperature at which they flow. The superheat from there to the nozzle setpoint is
-  accounted separately, because it costs heater watts without changing the melt zone needed.
+Max volumetric flow rate and print speed estimations with support for CHT/HF modifiers, different
+block types, and print temperatures.
 
-- **Sustainable flow rate** per hotend, bounded by `Q = q · L / E` for effective melt zone length
-  `L` and specific power `q`. The heater is *not* a second ceiling: a cartridge is the cheap,
-  swappable part, so it is assumed sized to the hotend.
+Heater power requirement estimations.
 
-- **Heater power** to sustain each hotend at its own maximum, reported as `P = Q · E_setpoint / η`
-  at η = 30%, alongside the smallest cartridge from the sizes people actually stock (30, 40, 60,
-  70, 80, 100, 120, 240 W). The recommendation is one size past the minimum.
+Hotend price/performance calculations, including the price of the extender or high flow nozzle when
+you tick those options.
 
-- **Superheat.** Running hotter raises `q`, less than proportionally: it scales as
-  `(ΔT_set / ΔT_ref)^n`, with `n` set so doubling a material's normal superheat gives 1.5× the
-  flow. Capped at 2×, equal to 1 at the material's own setpoint, and zero at or below the melting
-  point.
+Hotend comparisons for total power that needs to be dissipated on the melt surface, and how long
+filament spends in the melt zone for a given flow rate.
 
-- **Residence time**: melt zone volume over flow. The few hotends built for 2.85 mm filament hold
-  2.7× as much plastic per millimetre and are fed 2.7× slower, so the same melt zone buys them
-  proportionally longer.
+Comparisons of estimated max flow rate and melt energy for different materials with a given hotend.
+This is basically melt index, which is very useful but is sadly not used for head to head material
+comparisons with a particular hotend very often.
 
-- **Flow rate** from layer height, line width and print speed (rounded-rectangle extrusion
-  profile), or entered directly.
+## How it works
 
-- **Cost per flow**: price over sustainable flow, with the whole database plotted as price against
-  what it buys. The background reads either as what a mm³/s costs outright, or as each hotend's
-  standing against a regression of flow on log price — that second one is the only view that says
-  anything about value rather than price. Unpriced hotends are counted and left off rather than
-  ranked at a made-up number.
+Melting a cubic millimetre costs a fixed amount of energy, and a melt zone can only couple so much
+power into the filament per millimetre of heated length. Those two facts set a ceiling on volumetric
+flow, and everything on the site follows from it.
 
-### Per-hotend build options
+**Melt energy.** `E = ρ (cp ΔT + h_f)` per mm³, with `cp` averaged over the solid to melt interval
+and `h_f` the heat of fusion, which is zero for amorphous polymers. `ΔT` runs from the temperature
+the filament actually enters at, so a chamber or dryer rather than room temperature, up to the
+temperature the polymer has to reach to extrude. That is the melting point, or for amorphous
+polymers the lowest temperature at which they flow. The superheat from there up to the nozzle
+setpoint is counted separately, because it costs heater watts without changing the melt zone you
+need.
 
-A melt zone extender where one fits (+8.5 mm of real heated length), a high-flow (CHT-style) nozzle
-where one is available (+8.5 mm of *equivalent* melting capacity — it subdivides the bore rather
-than lengthening it, so those hotends are marked on every chart), and the block material where a
-hotend ships in more than one. Copper is the reference; aluminium derates flow 20%, brass and steel
-30%. A block that cannot hold the material's setpoint is greyed out. Multi-bore blocks — two
-designs here, with two and four filament paths — multiply the effective melt zone by their path
-count, which is the whole model for them: flow and heater scale, residence time does not.
+**Flow ceiling.** `Q = q L / E`, where `L` is the effective melt zone length and `q` is the power a
+millimetre of melt zone couples into the filament. There is no clean closed form for `q`, so it is
+calibrated on the rule of thumb that a standard nozzle running PLA sustains about 1 mm³/s per mm of
+melt zone. That works out to about 0.36 W/mm in copper, and every other material scales by the
+energy it demands to reach its own melting point. The calibration is editable on the site if your
+measurements disagree.
 
-Neither option is free, and both are charged for in the cost views: an extender adds a flat $9, and
-a high-flow nozzle adds whatever `CHT price (USD)` says for that hotend, over the nozzle it already
-ships with. On a cheap hotend that can outweigh the flow it buys, which is the point of showing it.
+**Build options.** An extender adds 8.5 mm of real heated length. A CHT style nozzle adds no length
+but splits the bore into parallel channels, so the plastic meets more hot wall per millimetre. It
+buys roughly the same melting capacity, so the model counts it as an equivalent 8.5 mm and marks
+those hotends on the charts. Copper is the reference block; aluminium gives up 20% of the flow,
+brass and steel 30%. The two multi bore hotends multiply the effective melt zone by their filament
+path count, so flow and heater power scale but residence time does not.
 
-### The one empirical number
+**Superheat.** Running hotter raises `q`, but less than proportionally. It scales as
+`(ΔT_set / ΔT_ref)^n`, with `n` picked so that doubling a material's normal superheat gives 1.5x the
+flow. It caps at 2x, sits at 1 when you are at the material's own setpoint, and drops to zero at the
+melting point.
 
-There is no clean closed form for conduction into a moving plastic rod, so `q` is calibrated on the
-rule of thumb that a standard nozzle running PLA sustains about 1 mm³/s per mm of melt zone. That
-works out to about 0.36 W/mm in copper, and every other material scales by the energy it demands to
-reach its own melting point. The calibration is editable in the app.
+**Heater power.** Reported as `P = Q E_setpoint / η` at 30% efficiency, next to the smallest
+cartridge from the sizes people actually stock. Heater power is not treated as a second ceiling on
+flow, because a cartridge is the cheap swappable part and nobody is stuck with an undersized one.
 
-### What it deliberately leaves out
+**Residence time.** Melt zone volume over flow. The few hotends built for 2.85 mm filament hold 2.7x
+as much plastic per millimetre and are fed 2.7x slower, so the same melt zone gives them
+proportionally longer.
 
-No pressure-drop or melt-viscosity model, so a hotend that can melt a polymer may still fail to
-push it. Radial conduction inside the filament is not resolved, and differences in thermal
-conductivity between polymers are neglected. Two hotends of equal effective melt zone length are
-indistinguishable here.
+## Obligatory notes
 
-The material database carries a *practical flow factor* — the share of the ceiling a polymer is
-really run at, 0.3 for the superpolymers — shown as a stacked bar in the material views and
-deliberately excluded from the flow model. What holds PEEK to 20–40 mm/s is not heat transfer; it
-is interlayer bonding against a chamber 200 K below its melting point, crystallisation kinetics,
-warping and viscosity. A longer melt zone fixes none of them, so folding that factor into the flow
-calculation would make the hotend comparison answer a question it is not measuring.
+The backend models are all my own work and are based on first principles: melt zone length, specific
+heat capacity, heat of fusion, and some approximations for the effects of CHT nozzles and material
+selection for heat blocks.
 
-Materials are compared from their own realistic start temperatures by default, because a shared one
-is the misleading option: PEEK comes out of a 150 °C chamber, not a 25 °C room, and charging it for
-that first 125 K roughly doubles its apparent melt cost. A switch in the energy view holds
-everything at one start temperature when a like-for-like ΔT is what you want.
+For the frontend UI and graphs, the TypeScript and CSS was written with AI assistance if that
+matters to you.
+
+There are a ton of caveats about heater placement and block geometry that this doesn't represent, so
+it can lead to flow being underestimated for some high performance hotends (Chube and Tricorn). I
+chose to go with the same base model for all hotends rather than bias results with a ton of
+correction factors.
+
+I have not added any provision for the effects of nozzle diameter, though I would like to in the
+future. For higher flow rate hotends, larger nozzle diameters are almost certainly going to be
+needed.
+
+There is no pressure drop or melt viscosity model, so a hotend that can melt a polymer may still
+fail to push it. Material properties are typical published values rather than brand specific
+measurements.
+
+The material database also carries a practical flow factor, which is the share of the ceiling a
+polymer actually gets run at. It is shown as a stacked bar in the material views and is deliberately
+left out of the flow model. What holds PEEK to 20-40 mm/s is not heat transfer, it is interlayer
+bonding against a chamber well below its melting point, crystallisation, warping and viscosity. A
+longer melt zone fixes none of that, so folding it into the flow number would make the hotend
+comparison answer a question it isn't measuring.
 
 ## Data
 
-`data/hotend data.csv` holds the hotends, `data/materials.csv` the thermal properties. Run
-`pnpm data:update-db` after editing either; it regenerates `src/lib/hotend-db.ts` and
-`src/lib/material-db.ts`, which are committed. A malformed row is a build failure rather than a
-blank screen. See [`data/README.md`](./data/README.md) for what the material numbers mean and how
-approximate they are.
+The project is open source, so if you want to contribute more hotends or materials that aren't
+already on the site, that is the most useful thing you can add.
 
-Corrections to the data are the most useful contribution. Melt zone lengths in particular are
-measured or inferred from drawings, and prices go stale.
+`data/hotend data.csv` holds the hotends and `data/materials.csv` holds the thermal properties. The
+convention for melt zone length is that it is measured from the top of the hot part of the heatbreak
+or block down to the tip of the nozzle. Run `pnpm data:update-db` after editing either file, which
+regenerates `src/lib/hotend-db.ts` and `src/lib/material-db.ts`. Both generated files are committed.
+A malformed row is a build failure rather than a blank page.
 
-## Links
+See [`data/README.md`](./data/README.md) for what the material numbers mean and how approximate they
+are. Prices go stale and melt zone lengths are measured or inferred from drawings, so corrections to
+either are welcome.
 
-A configuration can be addressed two ways.
+## Running it locally
 
-`?config=` carries the whole state, compressed by omission: anything equal to its default is left
-out, keys are one letter, and hotends are packed into a single run of four-character codes. A link
-changing the material and flow rate is about 78 characters; a comparison of every hotend the charts
-can colour is about 360. Older link formats still open — see `SHARE_FORMAT_VERSION` in
-[`src/lib/config-sharing.ts`](./src/lib/config-sharing.ts). `pnpm share:check` round-trips a set of
-configurations and prints their lengths.
+Install Node.js v24 and corepack:
 
-`?view=…&hotend=…&material=…` is the readable form, for links written by hand rather than by the
-share button. It covers less — no per-hotend build options — but every value is a name from the
-databases. [`/llms.txt`](https://meltcalc.baconmilkshake.com/llms.txt) publishes the grammar and
-every hotend, material and view slug, generated from the same databases so it cannot go stale.
+```sh
+npm i -g corepack@latest
+corepack enable
+```
 
-Both forms render the same page and unfurl with a chart image drawn server-side.
+Fork and clone the repository, then install the dependencies:
 
-## Contribute
+```sh
+pnpm install
+```
 
-0. Install Node.js v24, then corepack (`npm i -g corepack@latest`, `corepack enable`)
-1. Fork and clone the repository
-2. Install the dependencies
+Run the development server:
 
-    ```sh
-    pnpm install
-    ```
+```sh
+pnpm dev
+```
 
+If you edited the CSVs, write them to the database first:
 
+```sh
+pnpm data:update-db
+```
 
-4. Edit CSV files in ./data with additional columns for new hotends or materials you would like to add, the fields are fairly
-self-explanatory. The convention for melt zone length is that it is measured from the top of hot part of the heatbreak or block
-to the tip of the nozzle.
-
-5. Write the updated data to the database
-    ```sh
-    pnpm data:update-db
-    ```
-
-6. Run the development server
-
-    ```sh
-    pnpm dev
-    ```
-
-`pnpm dev` serves the app and the OpenGraph endpoints together, so `/og.png?config=…` and the
-per-link `<head>` tags behave as they do in production.
-
-`pnpm build` produces the SPA in `dist/public`, its shell in `dist/template` and a Nitro server in
-`.output`; `pnpm preview` runs the built server. `pnpm lint` is Biome; formatting is Prettier via
-`pnpm format`.
-
-You can also open an issue on github with the information for a hotend or material you wish to add (see raw data that is needed 
-in the CSV files in ./data.
-
-
-## Layout
-
-| Path              | What lives there                                                                          |
-| ----------------- | ----------------------------------------------------------------------------------------- |
-| `src/lib`         | The physics (`thermal.ts`), the databases and the configuration shape. No browser APIs     |
-| `src/state`       | Jotai atoms: the `localStorage` layer, the shared-link override, and the derived analysis  |
-| `src/components`  | The app's own components; `src/components/ui` is shadcn/ui                                 |
-| `server`          | Nitro app: per-request OpenGraph tags, `/og.png`, `/llms.txt`, `robots.txt`, the sitemap   |
-| `scripts`, `data` | Build steps and the CSV to TypeScript data generator                                       |
-
-The server exists only so crawlers and agents get per-link tags, a rendered card and a body they can
-read without running JavaScript — the app itself is a static SPA. Both halves import the same
-`src/lib/thermal.ts`, so an unfurled link can never report different numbers from the page it opens.
+`pnpm build` produces the site and a small server that renders the link previews, and `pnpm preview`
+runs the built version.
 
 ## License
 
-This project is licensed under the [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) license.
+This project is licensed under the
+[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) license.
