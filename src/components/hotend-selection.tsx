@@ -38,10 +38,12 @@ export function HotendSelection() {
 	const [minFlow, setMinFlow] = useState('');
 	const [minTemp, setMinTemp] = useState('');
 	const [heatbreakOnly, setHeatbreakOnly] = useState(false);
+	const [soldOnly, setSoldOnly] = useState(false);
 	const priceFilterId = useId();
 	const flowFilterId = useId();
 	const tempFilterId = useId();
 	const heatbreakFilterId = useId();
+	const soldFilterId = useId();
 
 	/**
 	 * Flow is per-hotend performance, not a database column: it depends on the material, the block
@@ -66,6 +68,7 @@ export function HotendSelection() {
 				// question about what the hotend is capable of, not how it happens to be configured
 				if (Number.isFinite(temperatureFloor) && highestTemperature(hotend) < temperatureFloor) return false;
 				if (heatbreakOnly && !hotend.nonstructuralHeatbreak) return false;
+				if (soldOnly && !hotend.stillSold) return false;
 				if (!needle) return true;
 
 				return `${hotend.manufacturer} ${hotend.name} ${hotend.ecosystem ?? ''}`
@@ -73,7 +76,7 @@ export function HotendSelection() {
 					.includes(needle);
 			})
 			.sort((a, b) => b.maxFlow - a.maxFlow);
-	}, [performance, search, ecosystem, maxPrice, minFlow, minTemp, heatbreakOnly]);
+	}, [performance, search, ecosystem, maxPrice, minFlow, minTemp, heatbreakOnly, soldOnly]);
 
 	const full = selected.length >= MAX_COMPARED_HOTENDS;
 	const tooCold = visible.filter((entry) => highestTemperature(entry.hotend) < printTemperature).length;
@@ -119,6 +122,7 @@ export function HotendSelection() {
 		setMinFlow('');
 		setMinTemp('');
 		setHeatbreakOnly(false);
+		setSoldOnly(false);
 	}
 
 	const filtered = visible.length !== performance.length;
@@ -223,6 +227,18 @@ export function HotendSelection() {
 							onCheckedChange={(checked) => setHeatbreakOnly(checked === true)}
 						/>
 						Nonstructural heatbreak
+					</Label>
+					<Label
+						htmlFor={soldFilterId}
+						className="gap-1.5 text-xs font-normal text-muted-foreground cursor-pointer"
+						title="Hide hotends that are discontinued, or were never sold as a product"
+					>
+						<Checkbox
+							id={soldFilterId}
+							checked={soldOnly}
+							onCheckedChange={(checked) => setSoldOnly(checked === true)}
+						/>
+						Still sold
 					</Label>
 					{filtered ? (
 						<Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={clearFilters}>

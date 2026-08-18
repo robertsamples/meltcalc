@@ -20,6 +20,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 26 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 160 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -40,6 +41,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 53 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 210 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -60,6 +62,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 27.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 10 as Dollars,
 		hfNozzlePrice: null,
 		notes: 'Integrated nozzle'
@@ -80,6 +83,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 33 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 18 as Dollars,
 		hfNozzlePrice: 32 as Dollars,
 		notes: 'Integrated nozzle'
@@ -100,6 +104,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 24.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 20 as Dollars,
 		hfNozzlePrice: null,
 		notes: 'Integrated nozzle'
@@ -120,6 +125,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 28 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 45 as Dollars,
 		hfNozzlePrice: 0 as Dollars,
 		notes: 'Integrated nozzle'
@@ -128,7 +134,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		id: 'Brumpo Tungus|Brumpo Hotend',
 		manufacturer: 'Brumpo Tungus',
 		name: 'Brumpo Hotend',
-		ecosystem: null,
+		ecosystem: 'DIY',
 		mountingPattern: null,
 		nozzle: 'V6',
 		mzeCompatible: true,
@@ -140,6 +146,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 74.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: false,
 		price: null,
 		hfNozzlePrice: 15 as Dollars,
 		notes: 'DIY SLM hotend'
@@ -148,7 +155,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		id: 'Brumpo Tungus|Brumpo WC Hotend',
 		manufacturer: 'Brumpo Tungus',
 		name: 'Brumpo WC Hotend',
-		ecosystem: null,
+		ecosystem: 'DIY',
 		mountingPattern: null,
 		nozzle: 'V6',
 		mzeCompatible: true,
@@ -160,6 +167,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 50 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: false,
 		price: null,
 		hfNozzlePrice: 15 as Dollars,
 		notes: 'DIY SLM hotend'
@@ -168,7 +176,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		id: 'Causality Manufacturing|Vesivius',
 		manufacturer: 'Causality Manufacturing',
 		name: 'Vesivius',
-		ecosystem: null,
+		ecosystem: 'Generic',
 		mountingPattern: null,
 		nozzle: 'V6',
 		mzeCompatible: true,
@@ -180,15 +188,142 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 92 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: false,
 		price: null,
 		hfNozzlePrice: 15 as Dollars,
 		notes: 'Unreleased'
 	},
 	{
+		id: 'Creality|K2 Plus',
+		manufacturer: 'Creality',
+		name: 'K2 Plus',
+		ecosystem: 'K series',
+		mountingPattern: 'K series',
+		nozzle: 'Integrated',
+		mzeCompatible: false,
+		hfNozzleCompatible: false,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Al', maxTemperature: 350 as Celsius }
+		],
+		meltZoneLength: 38 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 30 as Dollars,
+		hfNozzlePrice: null,
+		notes: 'Proprietary Integrated nozzle'
+	},
+	{
+		id: 'Creality|Spider Speedy',
+		manufacturer: 'Creality',
+		name: 'Spider Speedy',
+		ecosystem: 'MK8',
+		mountingPattern: 'MK8',
+		nozzle: 'MK8',
+		mzeCompatible: false,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 500 as Celsius }
+		],
+		meltZoneLength: 25 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 50 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: null
+	},
+	{
+		id: 'Creality|Spider V1',
+		manufacturer: 'Creality',
+		name: 'Spider V1',
+		ecosystem: 'MK8',
+		mountingPattern: 'MK8',
+		nozzle: 'MK8',
+		mzeCompatible: false,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Al', maxTemperature: 300 as Celsius }
+		],
+		meltZoneLength: 21.2 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: false,
+		price: 50 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: 'discontinued'
+	},
+	{
+		id: 'Creality|Spider V3',
+		manufacturer: 'Creality',
+		name: 'Spider V3',
+		ecosystem: 'MK8',
+		mountingPattern: 'MK8',
+		nozzle: 'MK8',
+		mzeCompatible: false,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Al', maxTemperature: 300 as Celsius }
+		],
+		meltZoneLength: 27.8 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: false,
+		price: 55 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: 'discontinued'
+	},
+	{
+		id: 'Dyze|DyzEnd Pro',
+		manufacturer: 'Dyze',
+		name: 'DyzEnd Pro',
+		ecosystem: 'Dyze',
+		mountingPattern: null,
+		nozzle: 'Proprietary',
+		mzeCompatible: false,
+		hfNozzleCompatible: false,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 500 as Celsius }
+		],
+		meltZoneLength: 19.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 90 as Dollars,
+		hfNozzlePrice: null,
+		notes: 'Proprietary nozzle'
+	},
+	{
+		id: 'Dyze|DyzEnd-X',
+		manufacturer: 'Dyze',
+		name: 'DyzEnd-X',
+		ecosystem: 'Dyze',
+		mountingPattern: null,
+		nozzle: 'Proprietary',
+		mzeCompatible: false,
+		hfNozzleCompatible: false,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 500 as Celsius }
+		],
+		meltZoneLength: 19.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 90 as Dollars,
+		hfNozzlePrice: null,
+		notes: 'Proprietary nozzle'
+	},
+	{
 		id: 'Dyze|Typhoon',
 		manufacturer: 'Dyze',
 		name: 'Typhoon',
-		ecosystem: null,
+		ecosystem: 'Dynze',
 		mountingPattern: 'Dyze',
 		nozzle: 'Proprietary',
 		mzeCompatible: false,
@@ -200,6 +335,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 114 as Millimeter,
 		filamentDiameter: 2.85 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 2700 as Dollars,
 		hfNozzlePrice: null,
 		notes: 'Proprietary nozzle'
@@ -220,6 +356,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 35.7 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 62 as Dollars,
 		hfNozzlePrice: null,
 		notes: 'Integrated nozzle, hardened, CHT'
@@ -241,6 +378,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 19.6 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 95 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: 'Proprietary Revo nozzle'
@@ -262,9 +400,10 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 57.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 30 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
-		notes: null
+		notes: 'Only clones available'
 	},
 	{
 		id: 'E3D|V6',
@@ -283,6 +422,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 17.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 8 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -304,6 +444,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 26 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 12 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -324,6 +465,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 35.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 9 as Dollars,
 		hfNozzlePrice: null,
 		notes: 'Proprietary nozzle'
@@ -344,6 +486,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 34.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 22 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: 'MZE+V6 nozzle addition'
@@ -364,6 +507,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 24.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 12 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -384,6 +528,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 25.35 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 12 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -404,6 +549,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 35.65 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 22 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: 'MZE+V6 nozzle addition'
@@ -424,6 +570,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 46 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 260 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -444,6 +591,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 38.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 165 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -464,6 +612,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 56 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 320 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -484,6 +633,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 35.6 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 105 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: 'Fin nozzle'
@@ -504,6 +654,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 33 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 125 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: 'Fin nozzle'
@@ -512,7 +663,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		id: 'Mellow|ALPS',
 		manufacturer: 'Mellow',
 		name: 'ALPS',
-		ecosystem: null,
+		ecosystem: 'Generic',
 		mountingPattern: 'Dragon',
 		nozzle: 'V6',
 		mzeCompatible: true,
@@ -524,6 +675,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 38.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 45 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -532,7 +684,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		id: 'Mellow|Dual Velo',
 		manufacturer: 'Mellow',
 		name: 'Dual Velo',
-		ecosystem: null,
+		ecosystem: 'Vzbot',
 		mountingPattern: 'Dragon',
 		nozzle: 'Proprietary',
 		mzeCompatible: true,
@@ -544,6 +696,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 51.8 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 2,
+		stillSold: true,
 		price: 143 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: 'Proprietary nozzle (brass only) · 2 filaments'
@@ -552,8 +705,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		id: 'Mellow|Fluxheat',
 		manufacturer: 'Mellow',
 		name: 'Fluxheat',
-		ecosystem: null,
-		mountingPattern: 'X1c',
+		ecosystem: 'X1C',
+		mountingPattern: 'X1C',
 		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
@@ -564,6 +717,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 34.3 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 35 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -584,6 +738,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 51.15 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 120 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -605,6 +760,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 18.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 41 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -626,6 +782,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 25 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 44 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -647,6 +804,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 34.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 50 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -668,6 +826,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 28 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 48 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -689,6 +848,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 20.55 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 100 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -709,6 +869,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 28.6 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 80 as Dollars,
 		hfNozzlePrice: 5 as Dollars,
 		notes: 'Proprietary nozzle'
@@ -729,6 +890,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 41.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 47 as Dollars,
 		hfNozzlePrice: null,
 		notes: 'Integrated nozzle, hardened, CHT'
@@ -737,7 +899,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		id: 'Monika McWuff|Pawsitron Hotend',
 		manufacturer: 'Monika McWuff',
 		name: 'Pawsitron Hotend',
-		ecosystem: null,
+		ecosystem: 'DIY',
 		mountingPattern: null,
 		nozzle: 'V6',
 		mzeCompatible: true,
@@ -749,6 +911,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 51.3 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 4,
+		stillSold: false,
 		price: null,
 		hfNozzlePrice: 15 as Dollars,
 		notes: '4 filaments · DIY SLM hotend'
@@ -769,6 +932,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 45 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 37.5 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -789,6 +953,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 28 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 22.5 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -809,6 +974,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 36.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 30 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -830,6 +996,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 26 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 55 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -851,6 +1018,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 33.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 60 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -872,6 +1040,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 34.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 65 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -893,6 +1062,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 35.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 70 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -914,15 +1084,37 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 43 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 75 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
+		id: 'Phaetus|Dragonfly BMO',
+		manufacturer: 'Phaetus',
+		name: 'Dragonfly BMO',
+		ecosystem: 'Dragonfly',
+		mountingPattern: 'Groove',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 500 as Celsius }
+		],
+		meltZoneLength: 19.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: false,
+		price: 52 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: 'discontinued'
+	},
+	{
 		id: 'Phaetus|Dragonfly BMS',
 		manufacturer: 'Phaetus',
 		name: 'Dragonfly BMS',
-		ecosystem: null,
+		ecosystem: 'Dragonfly',
 		mountingPattern: 'MK8',
 		nozzle: 'V6',
 		mzeCompatible: true,
@@ -934,7 +1126,92 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 35 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: false,
 		price: 37.6 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: null
+	},
+	{
+		id: 'Phaetus|Dragonfly HIC',
+		manufacturer: 'Phaetus',
+		name: 'Dragonfly HIC',
+		ecosystem: 'Dragonfly',
+		mountingPattern: 'MK8',
+		nozzle: 'Integrated',
+		mzeCompatible: false,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 350 as Celsius }
+		],
+		meltZoneLength: 26 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: false,
+		price: 66 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: 'discontinued'
+	},
+	{
+		id: 'Phaetus|Dropeffect neXtG',
+		manufacturer: 'Phaetus',
+		name: 'Dropeffect neXtG',
+		ecosystem: 'Dropeffect',
+		mountingPattern: 'Dragon',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 350 as Celsius }
+		],
+		meltZoneLength: 25 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 90 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: null
+	},
+	{
+		id: 'Phaetus|Dropeffect XG',
+		manufacturer: 'Phaetus',
+		name: 'Dropeffect XG',
+		ecosystem: 'Dropeffect',
+		mountingPattern: null,
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 300 as Celsius }
+		],
+		meltZoneLength: 18 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 79 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: null
+	},
+	{
+		id: 'Phaetus|Rapido HF',
+		manufacturer: 'Phaetus',
+		name: 'Rapido HF',
+		ecosystem: 'Rapido',
+		mountingPattern: 'Dragon',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 290 as Celsius }
+		],
+		meltZoneLength: 25.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 85 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
@@ -949,11 +1226,12 @@ export const HOTEND_DB: HotendDefinition[] = [
 		hfNozzleCompatible: true,
 		nonstructuralHeatbreak: true,
 		blockOptions: [
-			{ material: 'Cu', maxTemperature: 300 as Celsius }
+			{ material: 'Cu', maxTemperature: 290 as Celsius }
 		],
 		meltZoneLength: 34 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 90 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -962,7 +1240,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		id: 'Plasmics|INo Trident',
 		manufacturer: 'Plasmics',
 		name: 'INo Trident',
-		ecosystem: null,
+		ecosystem: 'Generic',
 		mountingPattern: null,
 		nozzle: 'V6',
 		mzeCompatible: false,
@@ -974,9 +1252,31 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 17.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: false,
 		price: 450 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
+	},
+	{
+		id: 'Prusa|Nextruder Hotend',
+		manufacturer: 'Prusa',
+		name: 'Nextruder Hotend',
+		ecosystem: 'Nextruder',
+		mountingPattern: 'Nextruder',
+		nozzle: 'Integrated',
+		mzeCompatible: false,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Al', maxTemperature: 290 as Celsius }
+		],
+		meltZoneLength: 20.9 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 56 as Dollars,
+		hfNozzlePrice: 5 as Dollars,
+		notes: 'Proprietary Integrated nozzle'
 	},
 	{
 		id: 'Qidi|Xmax 3',
@@ -994,9 +1294,31 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 23.7 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 35 as Dollars,
 		hfNozzlePrice: null,
 		notes: 'Proprietary nozzle'
+	},
+	{
+		id: 'Slice Engineering|Copperhead',
+		manufacturer: 'Slice Engineering',
+		name: 'Copperhead',
+		ecosystem: 'Generic',
+		mountingPattern: null,
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 500 as Celsius }
+		],
+		meltZoneLength: 19.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 125 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Slice Engineering|Mosquito',
@@ -1014,6 +1336,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 18.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 150 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -1034,6 +1357,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 25 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 175 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -1054,6 +1378,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 38.7 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 369 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -1074,6 +1399,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 45.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 423 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -1094,6 +1420,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 75.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 1577 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: 'Bult in HF geometry; true melt sone 66.7mm'
@@ -1114,15 +1441,58 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 24.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 12.5 as Dollars,
 		hfNozzlePrice: null,
 		notes: null
 	},
 	{
+		id: 'Trianglelab|CHC',
+		manufacturer: 'Trianglelab',
+		name: 'CHC',
+		ecosystem: 'Various',
+		mountingPattern: 'various',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 300 as Celsius }
+		],
+		meltZoneLength: 19.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 30 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: 'various mounting options'
+	},
+	{
+		id: 'Trianglelab|CHC Pro',
+		manufacturer: 'Trianglelab',
+		name: 'CHC Pro',
+		ecosystem: 'Various',
+		mountingPattern: 'various',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 300 as Celsius }
+		],
+		meltZoneLength: 26 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 30 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: 'various mounting options'
+	},
+	{
 		id: 'Trianglelab|CHC XL',
 		manufacturer: 'Trianglelab',
 		name: 'CHC XL',
-		ecosystem: null,
+		ecosystem: 'Generic',
 		mountingPattern: 'Dragon',
 		nozzle: 'V6',
 		mzeCompatible: true,
@@ -1134,6 +1504,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 51.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 67 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -1154,6 +1525,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 35 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 44 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -1174,6 +1546,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 36.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 80 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -1194,6 +1567,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 44.7 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 85 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -1202,7 +1576,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		id: 'Trianglelab|STD6-LC',
 		manufacturer: 'Trianglelab',
 		name: 'STD6-LC',
-		ecosystem: null,
+		ecosystem: 'Generic',
 		mountingPattern: 'Dragon',
 		nozzle: 'V6',
 		mzeCompatible: true,
@@ -1214,6 +1588,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 51.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 116.5 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -1222,7 +1597,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		id: 'Unknown|Lattice Hotend',
 		manufacturer: 'Unknown',
 		name: 'Lattice Hotend',
-		ecosystem: null,
+		ecosystem: 'DIY',
 		mountingPattern: null,
 		nozzle: 'V6',
 		mzeCompatible: true,
@@ -1234,6 +1609,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 57.9 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: false,
 		price: null,
 		hfNozzlePrice: 15 as Dollars,
 		notes: 'DIY SLM hotend'
@@ -1255,6 +1631,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 18.8 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 8 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -1263,7 +1640,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		id: 'Unknown|Tricorn',
 		manufacturer: 'Unknown',
 		name: 'Tricorn',
-		ecosystem: null,
+		ecosystem: 'Generic',
 		mountingPattern: 'Dragon',
 		nozzle: 'V6',
 		mzeCompatible: true,
@@ -1275,6 +1652,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 53 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: true,
 		price: 200 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
@@ -1283,7 +1661,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		id: 'Unknown|V9',
 		manufacturer: 'Unknown',
 		name: 'V9',
-		ecosystem: null,
+		ecosystem: 'Generic',
 		mountingPattern: 'Dragon',
 		nozzle: 'V6',
 		mzeCompatible: true,
@@ -1295,6 +1673,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		meltZoneLength: 39.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
+		stillSold: false,
 		price: 220 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null

@@ -104,6 +104,14 @@ export const HotendDefinition = z.object({
 	 * bigger one.
 	 */
 	filamentPaths: z.number().int().positive(),
+	/**
+	 * Whether you can still buy one new.
+	 *
+	 * Not part of any calculation and not a column in the table, but it is the difference between a
+	 * shortlist you can act on and a museum. Covers both discontinued products and designs that were
+	 * never sold at all, like the print-it-yourself ones.
+	 */
+	stillSold: z.boolean(),
 	/** Approximate street price in USD, or `null` where nobody has found one */
 	price: Dollars.nullable(),
 	/**

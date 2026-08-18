@@ -36,16 +36,20 @@ export function seriesColor(index: number): string {
  * different marker, so a series is a colour *and* a shape rather than a colour alone — which is
  * also what keeps two similar hues apart for a reader who cannot separate them.
  */
-export const SERIES_SHAPES = ['circle', 'square', 'triangle', 'diamond', 'triangleDown'] as const;
+/**
+ * The octagon is last on purpose. It is the weakest of the six, since at marker size a polygon with
+ * that many sides is most of the way to a circle, and being last means it is not reached until the
+ * comparison is 40 hotends deep — by which point it sits nowhere near the circles in the legend.
+ */
+export const SERIES_SHAPES = ['circle', 'square', 'triangle', 'diamond', 'triangleDown', 'octagon'] as const;
 
 export type SeriesShape = (typeof SERIES_SHAPES)[number];
 
 /**
  * Filled and outlined, which doubles the shapes without inventing any.
  *
- * A hexagon was the sixth shape until this existed, and it was the weakest of them — at 10px it is
- * a circle with opinions. Outlining is the better second axis: it survives at marker size, it does
- * not depend on hue, and an outlined square is unmistakably not a filled one.
+ * Outlining is the strongest second axis available: it survives at marker size, it does not depend
+ * on hue, and an outlined square is unmistakably not a filled one.
  */
 export const SERIES_FILLS = [true, false] as const;
 
@@ -126,6 +130,22 @@ export const THRESHOLD_LINE = { stroke: '#a1a1aa', strokeDasharray: '4 4' } as c
  * The triangles are drawn slightly oversized and centroid-centred: an equilateral triangle
  * inscribed in the same circle as a square looks noticeably smaller than it.
  */
+/**
+ * Unit octagon with a flat top and bottom, which is the orientation people read as an octagon
+ * rather than as a slightly lumpy circle. First vertex at 22.5 degrees, then every 45.
+ */
+const OCTAGON = Array.from({ length: 8 }, (_, corner) => {
+	const angle = Math.PI / 8 + (corner * Math.PI) / 4;
+
+	return [Math.cos(angle), Math.sin(angle)] as const;
+});
+
+/**
+ * A regular octagon at the same circumradius covers about 10% less area than the circle, so it
+ * reads as the smaller marker. This is the scale that puts the two back at the same visual weight.
+ */
+const OCTAGON_SCALE = 1.05;
+
 export function shapePath(shape: SeriesShape, size: number): string {
 	const r = size / 2;
 
@@ -138,6 +158,8 @@ export function shapePath(shape: SeriesShape, size: number): string {
 			return `M 0 ${r * 1.15} L ${r * 1.15} ${-r * 0.75} L ${-r * 1.15} ${-r * 0.75} Z`;
 		case 'diamond':
 			return `M 0 ${-r * 1.25} L ${r * 1.25} 0 L 0 ${r * 1.25} L ${-r * 1.25} 0 Z`;
+		case 'octagon':
+			return `M ${OCTAGON.map(([x, y]) => `${(x * r * OCTAGON_SCALE).toFixed(2)} ${(y * r * OCTAGON_SCALE).toFixed(2)}`).join(' L ')} Z`;
 		default:
 			return `M ${-r} 0 A ${r} ${r} 0 1 0 ${r} 0 A ${r} ${r} 0 1 0 ${-r} 0 Z`;
 	}

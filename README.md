@@ -13,7 +13,7 @@ Live at [meltcalc.baconmilkshake.com](https://meltcalc.baconmilkshake.com).
 
 ## Features
 
-64 hotends and 36 different base polymers for comparisons.
+79 hotends and 36 different base polymers for comparisons.
 
 Max volumetric flow rate and print speed estimations with support for CHT/HF modifiers, different
 block types, and print temperatures.

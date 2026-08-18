@@ -166,6 +166,9 @@ async function generateHotends() {
 			filamentDiameter: optionalNumber(row, 'Filament (mm)', context) ?? 1.75,
 			// Blank means one bore, which is nearly every hotend ever made
 			filamentPaths: optionalNumber(row, 'Filament paths', context) ?? 1,
+			// Blank means yes: most hotends are still on sale, and getting this wrong only mislabels
+			// a filter rather than distorting a number, so it does not deserve to fail the build
+			stillSold: (optional(row, 'Still sold') ?? 'Y').toUpperCase() !== 'N',
 			price: optionalNumber(row, 'Price (USD)', context),
 			// What a CHT-style nozzle adds over the stock one, applied only when that option is ticked
 			hfNozzlePrice: optionalNumber(row, 'CHT price (USD)', context),
@@ -207,6 +210,7 @@ async function generateHotends() {
 				`\t\tmeltZoneLength: ${hotend.meltZoneLength} as Millimeter,\n` +
 				`\t\tfilamentDiameter: ${hotend.filamentDiameter} as Millimeter,\n` +
 				`\t\tfilamentPaths: ${hotend.filamentPaths},\n` +
+				`\t\tstillSold: ${hotend.stillSold},\n` +
 				`\t\tprice: ${hotend.price === null ? 'null' : `${hotend.price} as Dollars`},\n` +
 				`\t\thfNozzlePrice: ${hotend.hfNozzlePrice === null ? 'null' : `${hotend.hfNozzlePrice} as Dollars`},\n` +
 				`\t\tnotes: ${literal(hotend.notes)}\n` +
