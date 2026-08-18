@@ -52,6 +52,27 @@ export const MZE_LENGTH = 8.5 as Millimeter;
 export const HF_NOZZLE_EQUIVALENT_LENGTH = 8.5 as Millimeter;
 
 /**
+ * Heated length at the nozzle end that does not earn its keep.
+ *
+ * Measured from the tip, this lands about halfway along the hex of a V6 nozzle, which is roughly
+ * where the bore starts narrowing to the orifice. Past that point there is little wall area left
+ * against the filament and the pressure behaviour stops helping, so the length is there without
+ * melting much.
+ *
+ * A fixed deduction rather than a percentage, because the taper is the same size whatever the block
+ * behind it is. It is also what brings long melt zones back in line: they were reading optimistic
+ * against measurements, and scaling the whole length would have moved the short ones with them.
+ *
+ * Applied here rather than baked into the database, so the CSV keeps describing the hardware and
+ * this stays a modelling decision that can be changed in one place.
+ *
+ * Deducted once, not once per filament path. A multi-bore block does end in that many nozzles, so
+ * there is an argument for scaling it, but the effective lengths for those are entered by hand and
+ * already carry their own correction; scaling here would deduct twice from the same tapers.
+ */
+export const NOZZLE_TAPER_ALLOWANCE = 3.5 as Millimeter;
+
+/**
  * What an extender costs to add.
  *
  * A constant rather than a column, because it is the same commodity part everywhere it fits: a
@@ -91,7 +112,21 @@ export const HotendDefinition = z.object({
 	nonstructuralHeatbreak: z.boolean(),
 	/** Block variants it ships in, stock option first */
 	blockOptions: z.array(BlockOption).min(1),
+	/**
+	 * The physical heated channel of one bore, as built. Shown to the reader as the reference
+	 * figure; nothing is calculated from it.
+	 */
 	meltZoneLength: Millimeter,
+	/**
+	 * The heated length the model actually runs on, before anything configurable is added.
+	 *
+	 * Usually the same as `meltZoneLength`, and blank in the CSV means exactly that. It differs
+	 * where a hotend does not behave like its dimensions: a block with more than one bore carries
+	 * the total across all of them here, and one with high-flow geometry built into it carries what
+	 * that geometry is worth. Both are entered by hand rather than derived, because both are
+	 * judgements about a specific hotend rather than a rule.
+	 */
+	effectiveMeltZone: Millimeter,
 	/**
 	 * Filament this hotend takes. Almost everything is 1.75 mm, which is what the flow model is
 	 * calibrated on; a wider bore changes the feed rate, the volume held in the melt zone, the
@@ -176,21 +211,41 @@ export function hasHfNozzle(hotend: HotendDefinition, options: HotendOptions | u
 }
 
 /**
- * The melt zone length every calculation runs on: the physical heated channel, plus anything that
- * buys equivalent melting capacity. A high-flow nozzle is the second kind, so this number can be
- * longer than the hotend physically is — hence "effective" everywhere it is shown.
+ * The heated channel of one bore, as built, with the extender if one is fitted.
+ *
+ * Display only, and deliberately per bore: on a multi-path hotend this is the length of a single
+ * channel, which is the number that describes the hardware. A high-flow nozzle is absent on purpose
+ * too, since it adds no length, it only makes the length there behave as if it were longer.
+ *
+ * The gap between this and the effective figure is exactly what the model is crediting a hotend
+ * with beyond its dimensions, whether that comes from extra bores, nozzle geometry, or both.
+ */
+export function rawMeltZoneLength(hotend: HotendDefinition, options: HotendOptions | undefined): Millimeter {
+	return (hotend.meltZoneLength + (hasMze(hotend, options) ? MZE_LENGTH : 0)) as Millimeter;
+}
+
+/**
+ * The melt zone length every calculation runs on.
+ *
+ * The database's effective figure is the whole starting point: it already carries the path count
+ * for a multi-bore block and any correction for geometry that does not behave like its dimensions,
+ * so nothing here multiplies it. Flow is `limit × length ÷ energy`, so a block whose effective
+ * length is four bores' worth gets four bores' worth of flow, and the heater figure follows.
+ * Residence falls out too, since melt zone volume and flow both carry the same factor, leaving the
+ * time one path actually sees.
+ *
+ * On top of that: a high-flow nozzle, which counts here and nowhere else because it subdivides the
+ * bore rather than lengthening it, and the taper deduction. That is why this can exceed the
+ * hotend's real length, and why it is called effective everywhere it is shown.
  */
 export function effectiveMeltZoneLength(hotend: HotendDefinition, options: HotendOptions | undefined): Millimeter {
-	const perPath =
-		hotend.meltZoneLength +
+	const length =
+		hotend.effectiveMeltZone +
 		(hasMze(hotend, options) ? MZE_LENGTH : 0) +
-		(hasHfNozzle(hotend, options) ? HF_NOZZLE_EQUIVALENT_LENGTH : 0);
+		(hasHfNozzle(hotend, options) ? HF_NOZZLE_EQUIVALENT_LENGTH : 0) -
+		NOZZLE_TAPER_ALLOWANCE;
 
-	// Paths multiply the melt zone, and that one multiplication is the whole model for a multi-bore
-	// hotend. Flow is `limit × length ÷ energy`, so four paths give four times the flow, and the
-	// heater figure follows from flow. Residence falls out too: it is melt zone volume over flow,
-	// and both sides scale by the path count, leaving the time one path actually sees.
-	return (perPath * hotend.filamentPaths) as Millimeter;
+	return Math.max(length, 0) as Millimeter;
 }
 
 /**

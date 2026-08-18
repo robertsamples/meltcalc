@@ -63,7 +63,7 @@ export type ThermalSettings = {
 };
 
 export const DEFAULT_THERMAL_SETTINGS: ThermalSettings = {
-	referenceFlowPerMeltZoneMm: 1 as CubicMillimetersPerSecondPerMillimeter,
+	referenceFlowPerMeltZoneMm: 1.2 as CubicMillimetersPerSecondPerMillimeter,
 	minimumResidenceTime: 1 as Seconds
 };
 

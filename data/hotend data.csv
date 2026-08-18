@@ -1,80 +1,80 @@
-Mounting Pattern,Ecosystem,Manufacturer,Hotend,Nozzle,MZE compatible,HF nozzle compatible,Block Material,Max temp,Nonstructural heatbreak,Melt zone,Filament (mm),Filament paths,Price (USD),CHT price (USD),Still sold,Notes
-CC,CC,Elegoo,Centauri Carbon,Proprietary,N,N,Br,350,N,35.5,,,9,,Y,Proprietary nozzle
-Dragon,Chube,Lukes Lab,Chube Compact,V6,Y,Y,Cu,500,Y,38.5,,,165,15,Y,
-Dragon,Chube,Lukes Lab,Chube Air,V6,Y,Y,Cu,500,Y,46,,,260,15,Y,
-Dragon,Chube,Lukes Lab,Chube Conduction,V6,Y,Y,Cu,500,Y,56,,,320,15,Y,
-Dragon,Dragon,Phaetus,Dragon,V6,Y,Y,Cu/Al,500/300,Y,26,,,55,15,Y,
-Dragon,Dragon,Phaetus,Dragon HF,V6,Y,Y,Cu/Al,500/300,Y,33.5,,,60,15,Y,
-Dragon,Dragon,Trianglelab,Dragon Ace,V6,Y,Y,Cu,350,Y,36.2,,,80,15,Y,
-Dragon,Dragon,Trianglelab,Dragon Ace Volcano,V6,N,Y,Cu,500,Y,44.7,,,85,15,Y,
-Dragon,Dragon,Phaetus,Dragon Volcano,V6 Volcano,N,Y,Cu/Al,500/300,Y,34.5,,,65,15,Y,
-Dragon,Dragon,Phaetus,Dragon Volcano UHF,V6 Volcano,N,Y,Cu/Al,500/300,Y,35.5,,,70,15,Y,
-Dragon,Dragon,Phaetus,Dragon Volcano UUHF,V6 Volcano,N,Y,Cu/Al,500/300,Y,43,,,75,15,Y,
-Dragon,Generic,Generic,TZ2.0-V6,TZ,Y,Y,Cu,350,Y,25.35,,,12,15,Y,
-Dragon,Generic,Generic,TZ2.0-V6 HF (MZE+V6),V6,N,Y,Cu,350,Y,35.65,,,22,15,Y,MZE+V6 nozzle addition
-Lancer,Lancer,Peopoly,Lancer Short,V6 Volcano,N,Y,Al,300,Y,28,,,22.5,15,Y,
-Lancer,Lancer,Peopoly,Lancer Standard,V6 Volcano,N,Y,Al,300,Y,36.5,,,30,15,Y,
-Lancer,Lancer,Peopoly,Lancer Long,V6 Volcano,N,Y,Al,300,Y,45,,,37.5,15,Y,
-MK8,MK8,,MK8,MK8,N,Y,Al/Cu,500/300,N,18.8,,,8,15,Y,
-Mosquito,Mosquito,Mellow,NF Crazy,V6,Y,Y,Cu/Al,500/300,Y,18.5,,,41,15,Y,
-Mosquito,Mosquito,Mellow,NF Crazy HF,V6,Y,Y,Cu/Al,500/300,Y,25,,,44,15,Y,
-Mosquito,Mosquito,Mellow,NF Crazy Volcano,V6 Volcano,N,Y,Cu/Al,500/300,Y,28,,,48,15,Y,
-Mosquito,Mosquito,Mellow,NF Crazy HF Volcano,V6 Volcano,N,Y,Cu/Al,500/300,Y,34.5,,,50,15,Y,
-Mosquito,Mosquito,Slice Engineering,Mosquito,V6,Y,Y,Cu,500,Y,18.5,,,150,15,Y,
-Mosquito,Mosquito,Slice Engineering,Mosquito Magnum,V6,N,Y,Cu,500,Y,25,,,175,15,Y,
-Mosquito,Mosquito,Slice Engineering,Mosquito Magnum+,V6,N,Y,Cu,500,Y,38.7,,,369,15,Y,
-Mosquito,Mosquito,Slice Engineering,Mosquito Magnum+ HF,V6,N,Y,Cu,500,Y,45.2,,,423,15,Y,
-Mosquito,Mosquito,Slice Engineering,Mosquito Prime,V6,Y,Y,Cu,500,Y,75.2,,,1577,15,Y,Bult in HF geometry; true melt sone 66.7mm
-Dragon,Rapido,Phaetus,Rapido UHF,V6 Volcano,Y,Y,Cu,290,Y,34,,,90,15,Y,
-Revo,Revo,E3D,Revo,Revo,N,Y,Br/Cu,300/500,N,19.6,,,95,15,Y,Proprietary Revo nozzle
-A3DP,Takoto,A3DP,HE20,V6,Y,Y,Al,300,Y,26,,,160,15,Y,
-A3DP,Takoto,A3DP,HE50,V6,Y,Y,Al,300,Y,53,,,210,15,Y,
-Groove,V6,E3D,V6,V6,Y,Y,Al/Cu,300/500,N,17.5,,,8,15,Y,
-Groove,V6,E3D,Supervolcano,V6 Supervolcano,N,Y,Al/Cu,300/500,N,57.5,,,30,15,Y,Only clones available
-Groove,V6,E3D,V6 Volcano,V6 Volcano,N,Y,Al/Cu,300/500,N,26,,,12,15,Y,
-Groove,V6,Metaform,Pico Hotend,V6,Y,Y,Al/Cu,300/500,N,20.55,,,100,15,Y,
-Dragon,Vzbot,Mellow,Goliath,V6,Y,Y,Cu,500,Y,51.15,,,120,15,Y,
-X1C,X1C,Bambulab,X1C OEM,Integrated,N,N,Al,300,N,24.2,,,20,,Y,Integrated nozzle
-X1C,X1C,Generic,TZ Hotends,TZ,Y,Y,Cu,350,Y,24.2,,,12,15,Y,
-X1C,X1C,Lukes Lab,Pika (X1C),Fin,N,Y,Cu,350,Y,33,,,125,15,Y,Fin nozzle
-Various,Various,Microswiss,Flowtech,Proprietary,N,Y,Cu,300,Y,28.6,,,80,5,Y,Proprietary nozzle
-,DIY,Brumpo Tungus,Brumpo WC Hotend,V6,Y,Y,Cu,500,Y,50,,,,15,N,DIY SLM hotend
-,DIY,Brumpo Tungus,Brumpo Hotend,V6,Y,Y,Cu,500,Y,74.5,,,,15,N,DIY SLM hotend
-X1C,X1C,Generic,TZ HF (MZE+V6),V6,N,Y,Cu,350,Y,34.5,,,22,15,Y,MZE+V6 nozzle addition
-Dragon,Generic,,V9,V6,Y,Y,Cu,500,Y,39.5,,,220,15,N,
-Dragon,Generic,,Tricorn,V6,Y,Y,Cu,500,Y,53,,,200,15,Y,
-,DIY,,Lattice Hotend,V6,Y,Y,Cu,500,Y,57.9,,,,15,N,DIY SLM hotend
-INDX,INDX,Bondtech,INDX,Integrated,N,Y,St,300,N,28,,,45,0,Y,Integrated nozzle
-X1C,X1C,Trianglelab,CHC XP1,V6,Y,Y,Cu,300,Y,35,,,44,15,Y,
-,Generic,Plasmics,INo Trident,V6,N,Y,Cu,500,Y,17.5,,,450,15,N,
-MK8,Dragonfly,Phaetus,Dragonfly BMS,V6,Y,Y,Cu,500,N,35,,,37.6,15,N,
-X1C,Qidi,Qidi,Xmax 3,Proprietary,N,N,Cu,300,Y,23.7,,,35,,Y,Proprietary nozzle
-A1,A1,Bambulab,A1 Hotend,Integrated,N,N,Al,300,Y,27.2,,,10,,Y,Integrated nozzle
-Dragon,Generic,Trianglelab,CHC XL,V6,Y,Y,Al,330,Y,51.5,,,67,15,Y,
-Dragon,Generic,Trianglelab,STD6-LC,V6,Y,Y,Al,300,Y,51.5,,,116.5,15,Y,
-,Generic,Causality Manufacturing,Vesivius,V6,Y,Y,St,500,Y,92,,,,15,N,Unreleased
-Dyze,Dynze,Dyze,Typhoon,Proprietary,N,N,Cu,500,Y,114,2.85,,2700,,Y,Proprietary nozzle
-H2,H2,Bambulab,H2 Hotend,Integrated,N,Y,Cu,350,Y,33,,,18,32,Y,Integrated nozzle
-Dragon,Generic,Mellow,ALPS,V6,Y,Y,Cu,400,Y,38.2,,,45,15,Y,
-Dragon,Vzbot,Mellow,Dual Velo,Proprietary,Y,Y,Cu,400,Y,51.8,,2,143,15,Y,Proprietary nozzle (brass only) · 2 filaments
-X1C,X1C,Mellow,Fluxheat,V6,Y,Y,Cu,350,Y,34.3,,,35,15,Y,
-,DIY,Monika McWuff,Pawsitron Hotend,V6,Y,Y,St,500,Y,51.3,,4,,15,N,4 filaments · DIY SLM hotend
-U1,U1,Lukes Lab,Pika (U1),Fin,N,Y,Cu,350,Y,35.6,,,105,15,Y,Fin nozzle
-U1,U1,Snapmaker,U1 OEM,Integrated,N,N,St,300,N,24.2,,,12.5,,Y,
-A1,A1,E3D,A1 HF ObXidian,Integrated,N,N,Cu,300,Y,35.7,,,62,,Y,"Integrated nozzle, hardened, CHT"
-H2,H2,Microswiss,Microswiss H2 HF,Integrated,N,N,Cu,300,Y,41.5,,,47,,Y,"Integrated nozzle, hardened, CHT"
-Nextruder,Nextruder,Prusa,Nextruder Hotend,Integrated,N,Y,Al,290,N,20.9,,,56,5,Y,Proprietary Integrated nozzle
-MK8,MK8,Creality,Spider V1,MK8,N,Y,Al,300,Y,21.2,,,50,15,N,discontinued
-MK8,MK8,Creality,Spider V3,MK8,N,Y,Al,300,Y,27.8,,,55,15,N,discontinued
-MK8,MK8,Creality,Spider Speedy,MK8,N,Y,Cu,500,Y,25,,,50,15,Y,
-K series,K series,Creality,K2 Plus,Integrated,N,N,Al,350,Y,38,,,30,,Y,Proprietary Integrated nozzle
-,Dyze,Dyze,DyzEnd-X,Proprietary,N,N,Cu,500,N,19.5,,,90,,Y,Proprietary nozzle
-,Dyze,Dyze,DyzEnd Pro,Proprietary,N,N,Cu,500,N,19.5,,,90,,Y,Proprietary nozzle
-,Generic,Slice Engineering,Copperhead,V6,Y,Y,Cu,500,N,19.5,,,125,15,Y,
-various,Various,Trianglelab,CHC,V6,Y,Y,Cu,300,N,19.5,,,30,15,Y,various mounting options
-various,Various,Trianglelab,CHC Pro,V6,Y,Y,Cu,300,N,26,,,30,15,Y,various mounting options
-MK8,Dragonfly,Phaetus,Dragonfly HIC,Integrated,N,Y,Cu,350,N,26,,,66,15,N,discontinued
-Groove,Dragonfly,Phaetus,Dragonfly BMO,V6,Y,Y,Cu,500,N,19.5,,,52,15,N,discontinued
-Dragon,Rapido,Phaetus,Rapido HF,V6,Y,Y,Cu,290,Y,25.5,,,85,15,Y,
-,Dropeffect,Phaetus,Dropeffect XG,V6,Y,Y,Cu,300,Y,18,,,79,15,Y,
-Dragon,Dropeffect,Phaetus,Dropeffect neXtG,V6,Y,Y,Cu,350,Y,25,,,90,15,Y,
+Mounting Pattern,Ecosystem,Manufacturer,Hotend,Nozzle,MZE compatible,HF nozzle compatible,Block Material,Max temp,Nonstructural heatbreak,Melt zone,Effective melt zone,Filament (mm),Filament paths,Price (USD),CHT price (USD),Still sold,Notes
+CC,CC,Elegoo,Centauri Carbon,Proprietary,N,N,Br,350,N,35.5,35.5,,,9,,Y,Proprietary nozzle
+Dragon,Chube,Lukes Lab,Chube Compact,V6,Y,Y,Cu,500,Y,38.5,38.5,,,165,15,Y,
+Dragon,Chube,Lukes Lab,Chube Air,V6,Y,Y,Cu,500,Y,46,46,,,260,15,Y,
+Dragon,Chube,Lukes Lab,Chube Conduction,V6,Y,Y,Cu,500,Y,56,56,,,320,15,Y,
+Dragon,Dragon,Phaetus,Dragon,V6,Y,Y,Cu/Al,500/300,Y,26,26,,,55,15,Y,
+Dragon,Dragon,Phaetus,Dragon HF,V6,Y,Y,Cu/Al,500/300,Y,33.5,33.5,,,60,15,Y,
+Dragon,Dragon,Trianglelab,Dragon Ace,V6,Y,Y,Cu,350,Y,36.2,36.2,,,80,15,Y,
+Dragon,Dragon,Trianglelab,Dragon Ace Volcano,V6,N,Y,Cu,500,Y,44.7,44.7,,,85,15,Y,
+Dragon,Dragon,Phaetus,Dragon Volcano,V6 Volcano,N,Y,Cu/Al,500/300,Y,34.5,34.5,,,65,15,Y,
+Dragon,Dragon,Phaetus,Dragon Volcano UHF,V6 Volcano,N,Y,Cu/Al,500/300,Y,35.5,35.5,,,70,15,Y,
+Dragon,Dragon,Phaetus,Dragon Volcano UUHF,V6 Volcano,N,Y,Cu/Al,500/300,Y,43,43,,,75,15,Y,
+Dragon,Generic,Generic,TZ2.0-V6,TZ,Y,Y,Cu,350,Y,25.35,25.35,,,12,15,Y,
+Dragon,Generic,Generic,TZ2.0-V6 HF (MZE+V6),V6,N,Y,Cu,350,Y,35.65,35.65,,,22,15,Y,MZE+V6 nozzle addition
+Lancer,Lancer,Peopoly,Lancer Short,V6 Volcano,N,Y,Al,300,Y,28,28,,,22.5,15,Y,
+Lancer,Lancer,Peopoly,Lancer Standard,V6 Volcano,N,Y,Al,300,Y,36.5,36.5,,,30,15,Y,
+Lancer,Lancer,Peopoly,Lancer Long,V6 Volcano,N,Y,Al,300,Y,45,45,,,37.5,15,Y,
+MK8,MK8,,MK8,MK8,N,Y,Al/Cu,500/300,N,18.8,18.8,,,8,15,Y,
+Mosquito,Mosquito,Mellow,NF Crazy,V6,Y,Y,Cu/Al,500/300,Y,18.5,18.5,,,41,15,Y,
+Mosquito,Mosquito,Mellow,NF Crazy HF,V6,Y,Y,Cu/Al,500/300,Y,25,25,,,44,15,Y,
+Mosquito,Mosquito,Mellow,NF Crazy Volcano,V6 Volcano,N,Y,Cu/Al,500/300,Y,28,28,,,48,15,Y,
+Mosquito,Mosquito,Mellow,NF Crazy HF Volcano,V6 Volcano,N,Y,Cu/Al,500/300,Y,34.5,34.5,,,50,15,Y,
+Mosquito,Mosquito,Slice Engineering,Mosquito,V6,Y,Y,Cu,500,Y,18.5,18.5,,,150,15,Y,
+Mosquito,Mosquito,Slice Engineering,Mosquito Magnum,V6,N,Y,Cu,500,Y,25,25,,,175,15,Y,
+Mosquito,Mosquito,Slice Engineering,Mosquito Magnum+,V6,N,Y,Cu,500,Y,38.7,38.7,,,369,15,Y,
+Mosquito,Mosquito,Slice Engineering,Mosquito Magnum+ HF,V6,N,Y,Cu,500,Y,45.2,45.2,,,423,15,Y,
+Mosquito,Mosquito,Slice Engineering,Mosquito Prime,V6,Y,Y,Cu,500,Y,66.7,76.3,,,1577,15,Y,Bult in HF geometry
+Dragon,Rapido,Phaetus,Rapido UHF,V6 Volcano,Y,Y,Cu,290,Y,34,34,,,90,15,Y,
+Revo,Revo,E3D,Revo,Revo,N,Y,Br/Cu,300/500,N,19.6,19.6,,,95,15,Y,Proprietary Revo nozzle
+A3DP,Takoto,A3DP,HE20,V6,Y,Y,Al,300,Y,26,26,,,160,15,Y,
+A3DP,Takoto,A3DP,HE50,V6,Y,Y,Al,300,Y,53,53,,,210,15,Y,
+Groove,V6,E3D,V6,V6,Y,Y,Al/Cu,300/500,N,17.5,17.5,,,8,15,Y,
+Groove,V6,E3D,Supervolcano,V6 Supervolcano,N,Y,Al/Cu,300/500,N,57.5,57.5,,,30,15,Y,Only clones available
+Groove,V6,E3D,V6 Volcano,V6 Volcano,N,Y,Al/Cu,300/500,N,26,26,,,12,15,Y,
+Groove,V6,Metaform,Pico Hotend,V6,Y,Y,Al/Cu,300/500,N,20.55,20.55,,,100,15,Y,
+Dragon,Vzbot,Mellow,Goliath,V6,Y,Y,Cu,500,Y,51.15,51.15,,,120,15,Y,
+X1C,X1C,Bambulab,X1C OEM,Integrated,N,N,Al,300,N,24.2,24.2,,,20,,Y,Integrated nozzle
+X1C,X1C,Generic,TZ Hotends,TZ,Y,Y,Cu,350,Y,24.2,24.2,,,12,15,Y,
+X1C,X1C,Lukes Lab,Pika (X1C),Fin,N,Y,Cu,350,Y,33,33,,,125,15,Y,Fin nozzle
+Various,Various,Microswiss,Flowtech,Proprietary,N,Y,Cu,300,Y,28.6,28.6,,,80,5,Y,Proprietary nozzle
+,DIY,Brumpo Tungus,Brumpo WC Hotend,V6,Y,Y,Cu,500,Y,50,50,,,,15,N,DIY SLM hotend
+,DIY,Brumpo Tungus,Brumpo Hotend,V6,Y,Y,Cu,500,Y,74.5,74.5,,,,15,N,DIY SLM hotend
+X1C,X1C,Generic,TZ HF (MZE+V6),V6,N,Y,Cu,350,Y,34.5,34.5,,,22,15,Y,MZE+V6 nozzle addition
+Dragon,Generic,,V9,V6,Y,Y,Cu,500,Y,39.5,39.5,,,220,15,N,
+Dragon,Generic,,Tricorn,V6,Y,Y,Cu,500,Y,53,53,,,200,15,Y,
+,DIY,,Lattice Hotend,V6,Y,Y,Cu,500,Y,57.9,57.9,,,,15,N,DIY SLM hotend
+INDX,INDX,Bondtech,INDX,Integrated,N,Y,St,300,N,28,28,,,45,0,Y,Integrated nozzle
+X1C,X1C,Trianglelab,CHC XP1,V6,Y,Y,Cu,300,Y,35,35,,,44,15,Y,
+,Generic,Plasmics,INo Trident,V6,N,Y,Cu,500,Y,17.5,17.5,,,450,15,N,
+MK8,Dragonfly,Phaetus,Dragonfly BMS,V6,Y,Y,Cu,500,N,35,35,,,37.6,15,N,
+X1C,Qidi,Qidi,Xmax 3,Proprietary,N,N,Cu,300,Y,23.7,23.7,,,35,,Y,Proprietary nozzle
+A1,A1,Bambulab,A1 Hotend,Integrated,N,N,Al,300,Y,27.2,27.2,,,10,,Y,Integrated nozzle
+Dragon,Generic,Trianglelab,CHC XL,V6,Y,Y,Al,330,Y,51.5,51.5,,,67,15,Y,
+Dragon,Generic,Trianglelab,STD6-LC,V6,Y,Y,Al,300,Y,51.5,51.5,,,116.5,15,Y,
+,Generic,Causality Manufacturing,Vesivius,V6,Y,Y,St,500,Y,92,92,,,,15,N,Unreleased
+Dyze,Dynze,Dyze,Typhoon,Proprietary,N,N,Cu,500,Y,114,114,2.85,,2700,,Y,Proprietary nozzle
+H2,H2,Bambulab,H2 Hotend,Integrated,N,Y,Cu,350,Y,33,33,,,18,32,Y,Integrated nozzle
+Dragon,Generic,Mellow,ALPS,V6,Y,Y,Cu,400,Y,38.2,38.2,,,45,15,Y,
+Dragon,Vzbot,Mellow,Dual Velo,Proprietary,Y,Y,Cu,400,Y,51.8,93.6,,2,143,15,Y,Proprietary nozzle (brass only) · 2 filaments
+X1C,X1C,Mellow,Fluxheat,V6,Y,Y,Cu,350,Y,34.3,34.3,,,35,15,Y,
+,DIY,Monika McWuff,Pawsitron Hotend,V6,Y,Y,St,500,Y,51.3,176.2,,4,,15,N,4 filaments · DIY SLM hotend
+U1,U1,Lukes Lab,Pika (U1),Fin,N,Y,Cu,350,Y,35.6,35.6,,,105,15,Y,Fin nozzle
+U1,U1,Snapmaker,U1 OEM,Integrated,N,N,St,300,N,24.2,24.2,,,12.5,,Y,
+A1,A1,E3D,A1 HF ObXidian,Integrated,N,N,Cu,300,Y,27.2,35.7,,,62,,Y,"Integrated nozzle, CHT"
+H2,H2,Microswiss,Microswiss H2 HF,Integrated,N,N,Cu,300,Y,33,41.5,,,47,,Y,"Integrated nozzle, CHT"
+Nextruder,Nextruder,Prusa,Nextruder Hotend,Integrated,N,Y,Al,290,N,20.9,20.9,,,56,5,Y,Proprietary Integrated nozzle
+MK8,MK8,Creality,Spider V1,MK8,N,Y,Al,300,Y,21.2,21.2,,,50,15,N,discontinued
+MK8,MK8,Creality,Spider V3,MK8,N,Y,Al,300,Y,27.8,27.8,,,55,15,N,discontinued
+MK8,MK8,Creality,Spider Speedy,MK8,N,Y,Cu,500,Y,25,25,,,50,15,Y,
+K series,K series,Creality,K2 Plus,Integrated,N,N,Al,350,Y,38,38,,,30,,Y,Proprietary Integrated nozzle
+,Dyze,Dyze,DyzEnd-X,Proprietary,N,N,Cu,500,N,19.5,19.5,,,90,,Y,Proprietary nozzle
+,Dyze,Dyze,DyzEnd Pro,Proprietary,N,N,Cu,500,N,19.5,19.5,,,90,,Y,Proprietary nozzle
+,Generic,Slice Engineering,Copperhead,V6,Y,Y,Cu,500,N,19.5,19.5,,,125,15,Y,
+various,Various,Trianglelab,CHC,V6,Y,Y,Cu,300,N,19.5,19.5,,,30,15,Y,various mounting options
+various,Various,Trianglelab,CHC Pro,V6,Y,Y,Cu,300,N,26,26,,,30,15,Y,various mounting options
+MK8,Dragonfly,Phaetus,Dragonfly HIC,Integrated,N,Y,Cu,350,N,26,26,,,66,15,N,discontinued
+Groove,Dragonfly,Phaetus,Dragonfly BMO,V6,Y,Y,Cu,500,N,19.5,19.5,,,52,15,N,discontinued
+Dragon,Rapido,Phaetus,Rapido HF,V6,Y,Y,Cu,290,Y,25.5,25.5,,,85,15,Y,
+,Dropeffect,Phaetus,Dropeffect XG,V6,Y,Y,Cu,300,Y,18,18,,,79,15,Y,
+Dragon,Dropeffect,Phaetus,Dropeffect neXtG,V6,Y,Y,Cu,350,Y,25,25,,,90,15,Y,

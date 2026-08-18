@@ -46,17 +46,28 @@ need.
 
 **Flow ceiling.** `Q = q L / E`, where `L` is the effective melt zone length and `q` is the power a
 millimetre of melt zone couples into the filament. There is no clean closed form for `q`, so it is
-calibrated on the rule of thumb that a standard nozzle running PLA sustains about 1 mm³/s per mm of
-melt zone. That works out to about 0.36 W/mm in copper, and every other material scales by the
-energy it demands to reach its own melting point. The calibration is editable on the site if your
-measurements disagree.
+calibrated on a standard nozzle running PLA sustaining 1.2 mm³/s per mm of melt zone. That works out
+to about 0.43 W/mm in copper, and every other material scales by the energy it demands to reach its
+own melting point. The calibration is editable on the site if your measurements disagree.
 
-**Build options.** An extender adds 8.5 mm of real heated length. A CHT style nozzle adds no length
-but splits the bore into parallel channels, so the plastic meets more hot wall per millimetre. It
-buys roughly the same melting capacity, so the model counts it as an equivalent 8.5 mm and marks
-those hotends on the charts. Copper is the reference block; aluminium gives up 20% of the flow,
-brass and steel 30%. The two multi bore hotends multiply the effective melt zone by their filament
-path count, so flow and heater power scale but residence time does not.
+**Effective melt zone.** The database holds two lengths per hotend. One is the physical heated
+channel of a single bore, which is the number that describes the hardware. The other is what the
+model runs on, and it is entered by hand wherever a hotend does not behave like its dimensions: a
+multi bore block carries the total across all its bores, and a hotend with high flow geometry built
+into it carries what that geometry is worth rather than what it measures.
+
+From there the model takes off 3.5 mm for the nozzle taper. Measured back from the tip that lands
+about halfway along the hex of a V6 nozzle, which is roughly where the bore starts narrowing to the
+orifice. Past that point there is little wall left against the filament and the pressure behaviour
+stops helping, so the length is there without melting much. It is a fixed deduction rather than a
+percentage because the taper is the same size whatever the block behind it is, and it is what brings
+long melt zones back in line, since they read optimistic against measurements otherwise.
+
+**Build options.** An extender adds 8.5 mm of real heated length, so it counts against both figures.
+A CHT style nozzle adds no length but splits the bore into parallel channels, so the plastic meets
+more hot wall per millimetre. That buys roughly the same melting capacity, so the model counts it as
+an equivalent 8.5 mm against the effective figure only, and marks those hotends on the charts.
+Copper is the reference block; aluminium gives up 20% of the flow, brass and steel 30%.
 
 **Superheat.** Running hotter raises `q`, but less than proportionally. It scales as
 `(ΔT_set / ΔT_ref)^n`, with `n` picked so that doubling a material's normal superheat gives 1.5x the
@@ -69,7 +80,8 @@ flow, because a cartridge is the cheap swappable part and nobody is stuck with a
 
 **Residence time.** Melt zone volume over flow. The few hotends built for 2.85 mm filament hold 2.7x
 as much plastic per millimetre and are fed 2.7x slower, so the same melt zone gives them
-proportionally longer.
+proportionally longer. On a multi bore block the flow and the volume both carry the bore count, so
+what comes out is the time one path sees rather than the whole hotend.
 
 ## Obligatory notes
 

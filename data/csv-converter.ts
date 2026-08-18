@@ -162,6 +162,10 @@ async function generateHotends() {
 			nonstructuralHeatbreak: required(row, 'Nonstructural heatbreak', context).toUpperCase() === 'Y',
 			blockOptions: parseBlockOptions(row, context),
 			meltZoneLength: requiredNumber(row, 'Melt zone', context),
+			// Blank means "behaves like its dimensions", which is nearly every hotend. Only fill it in
+			// where the two genuinely differ
+			effectiveMeltZone:
+				optionalNumber(row, 'Effective melt zone', context) ?? requiredNumber(row, 'Melt zone', context),
 			// Blank means the 1.75 mm nearly everything takes, so only the odd one out needs a value
 			filamentDiameter: optionalNumber(row, 'Filament (mm)', context) ?? 1.75,
 			// Blank means one bore, which is nearly every hotend ever made
@@ -208,6 +212,7 @@ async function generateHotends() {
 					.join(',\n') +
 				`\n\t\t],\n` +
 				`\t\tmeltZoneLength: ${hotend.meltZoneLength} as Millimeter,\n` +
+				`\t\teffectiveMeltZone: ${hotend.effectiveMeltZone} as Millimeter,\n` +
 				`\t\tfilamentDiameter: ${hotend.filamentDiameter} as Millimeter,\n` +
 				`\t\tfilamentPaths: ${hotend.filamentPaths},\n` +
 				`\t\tstillSold: ${hotend.stillSold},\n` +

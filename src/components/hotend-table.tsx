@@ -17,6 +17,7 @@ import {
 	type HotendDefinition,
 	hotendLabel,
 	MZE_LENGTH,
+	NOZZLE_TAPER_ALLOWANCE,
 	orderedBlockOptions
 } from '@/lib/hotend';
 import { headroomStatus, STATUS_COLORS, STATUS_LABELS } from '@/lib/series';
@@ -90,7 +91,7 @@ function HotendNotes({ notes }: { notes: string | null }) {
  * a fact about the hotend rather than a result, three of them are two-valued so sorting them only
  * groups, and every control dropped is width this table needs to fit without scrolling sideways.
  */
-type SortKey = 'name' | 'price' | 'meltZone' | 'flow' | 'speed' | 'status';
+type SortKey = 'name' | 'price' | 'rawMeltZone' | 'meltZone' | 'flow' | 'speed' | 'status';
 
 type SortDirection = 'asc' | 'desc';
 
@@ -148,7 +149,22 @@ const COLUMNS: Column[] = [
 			</>
 		)
 	},
-	{ key: 'meltZone', label: 'Effective melt zone', align: 'center' },
+	// Two melt zones side by side, so the gap between them reads as what the build options bought.
+	// Short headers: the pair only makes sense read together, and the help says the rest
+	{ key: 'rawMeltZone', label: 'Melt zone', align: 'center' },
+	{
+		key: 'meltZone',
+		label: 'Effective',
+		align: 'center',
+		help: (
+			<>
+				The heated length the model runs on. It counts a high-flow nozzle as +
+				{HF_NOZZLE_EQUIVALENT_LENGTH} mm of equivalent capacity even though it adds no real
+				length, multiplies by the filament path count, and takes off {NOZZLE_TAPER_ALLOWANCE} mm
+				per path for the nozzle taper, where there is too little wall area to melt much.
+			</>
+		)
+	},
 	{ key: 'flow', label: 'Max flow', align: 'center' },
 	{ key: 'speed', label: 'Max speed', align: 'center', title: 'At the current layer height and line width' },
 	{ key: 'status', label: 'Status' },
@@ -168,6 +184,8 @@ function sortValue(entry: HotendPerformance, key: SortKey, crossSection: number)
 		// Unpriced hotends group at the bottom of a descending sort rather than reading as free
 		case 'price':
 			return entry.price ?? Number.NEGATIVE_INFINITY;
+		case 'rawMeltZone':
+			return entry.rawMeltZoneLength;
 		case 'meltZone':
 			return entry.meltZoneLength;
 		case 'flow':
@@ -490,12 +508,17 @@ export function HotendTable() {
 										</TableCell>
 
 										<TableCell
-											title={
-												entry.hfNozzle
-													? `${formatNumber(entry.hotend.meltZoneLength, 1)} mm physical channel`
-													: undefined
-											}
+											className="text-muted-foreground"
+											title="Heated channel as built, with the extender if one is fitted"
 										>
+											<Measure
+												value={formatNumber(entry.rawMeltZoneLength, 1)}
+												unit="mm"
+												digits={5}
+												unitWidth={2}
+											/>
+										</TableCell>
+										<TableCell>
 											<Measure
 												value={formatNumber(entry.meltZoneLength, 1)}
 												unit="mm"

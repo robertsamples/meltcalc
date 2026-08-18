@@ -18,6 +18,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 26 as Millimeter,
+		effectiveMeltZone: 26 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -39,6 +40,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 53 as Millimeter,
+		effectiveMeltZone: 53 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -60,6 +62,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 27.2 as Millimeter,
+		effectiveMeltZone: 27.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -81,6 +84,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 33 as Millimeter,
+		effectiveMeltZone: 33 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -102,6 +106,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 24.2 as Millimeter,
+		effectiveMeltZone: 24.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -123,6 +128,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'St', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 28 as Millimeter,
+		effectiveMeltZone: 28 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -144,6 +150,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 74.5 as Millimeter,
+		effectiveMeltZone: 74.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: false,
@@ -165,6 +172,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 50 as Millimeter,
+		effectiveMeltZone: 50 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: false,
@@ -186,6 +194,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'St', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 92 as Millimeter,
+		effectiveMeltZone: 92 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: false,
@@ -207,6 +216,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 38 as Millimeter,
+		effectiveMeltZone: 38 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -228,6 +238,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 25 as Millimeter,
+		effectiveMeltZone: 25 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -249,6 +260,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 21.2 as Millimeter,
+		effectiveMeltZone: 21.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: false,
@@ -270,6 +282,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 27.8 as Millimeter,
+		effectiveMeltZone: 27.8 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: false,
@@ -291,6 +304,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 19.5 as Millimeter,
+		effectiveMeltZone: 19.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -312,6 +326,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 19.5 as Millimeter,
+		effectiveMeltZone: 19.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -333,6 +348,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 114 as Millimeter,
+		effectiveMeltZone: 114 as Millimeter,
 		filamentDiameter: 2.85 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -353,13 +369,14 @@ export const HOTEND_DB: HotendDefinition[] = [
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 300 as Celsius }
 		],
-		meltZoneLength: 35.7 as Millimeter,
+		meltZoneLength: 27.2 as Millimeter,
+		effectiveMeltZone: 35.7 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
 		price: 62 as Dollars,
 		hfNozzlePrice: null,
-		notes: 'Integrated nozzle, hardened, CHT'
+		notes: 'Integrated nozzle, CHT'
 	},
 	{
 		id: 'E3D|Revo',
@@ -376,6 +393,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 19.6 as Millimeter,
+		effectiveMeltZone: 19.6 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -398,6 +416,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 57.5 as Millimeter,
+		effectiveMeltZone: 57.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -420,6 +439,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 17.5 as Millimeter,
+		effectiveMeltZone: 17.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -442,6 +462,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 26 as Millimeter,
+		effectiveMeltZone: 26 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -463,6 +484,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Br', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 35.5 as Millimeter,
+		effectiveMeltZone: 35.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -484,6 +506,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 34.5 as Millimeter,
+		effectiveMeltZone: 34.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -505,6 +528,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 24.2 as Millimeter,
+		effectiveMeltZone: 24.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -526,6 +550,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 25.35 as Millimeter,
+		effectiveMeltZone: 25.35 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -547,6 +572,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 35.65 as Millimeter,
+		effectiveMeltZone: 35.65 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -568,6 +594,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 46 as Millimeter,
+		effectiveMeltZone: 46 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -589,6 +616,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 38.5 as Millimeter,
+		effectiveMeltZone: 38.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -610,6 +638,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 56 as Millimeter,
+		effectiveMeltZone: 56 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -631,6 +660,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 35.6 as Millimeter,
+		effectiveMeltZone: 35.6 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -652,6 +682,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 33 as Millimeter,
+		effectiveMeltZone: 33 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -673,6 +704,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 400 as Celsius }
 		],
 		meltZoneLength: 38.2 as Millimeter,
+		effectiveMeltZone: 38.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -694,6 +726,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 400 as Celsius }
 		],
 		meltZoneLength: 51.8 as Millimeter,
+		effectiveMeltZone: 93.6 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 2,
 		stillSold: true,
@@ -715,6 +748,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 34.3 as Millimeter,
+		effectiveMeltZone: 34.3 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -736,6 +770,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 51.15 as Millimeter,
+		effectiveMeltZone: 51.15 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -758,6 +793,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 18.5 as Millimeter,
+		effectiveMeltZone: 18.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -780,6 +816,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 25 as Millimeter,
+		effectiveMeltZone: 25 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -802,6 +839,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 34.5 as Millimeter,
+		effectiveMeltZone: 34.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -824,6 +862,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 28 as Millimeter,
+		effectiveMeltZone: 28 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -846,6 +885,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 20.55 as Millimeter,
+		effectiveMeltZone: 20.55 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -867,6 +907,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 28.6 as Millimeter,
+		effectiveMeltZone: 28.6 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -887,13 +928,14 @@ export const HOTEND_DB: HotendDefinition[] = [
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 300 as Celsius }
 		],
-		meltZoneLength: 41.5 as Millimeter,
+		meltZoneLength: 33 as Millimeter,
+		effectiveMeltZone: 41.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
 		price: 47 as Dollars,
 		hfNozzlePrice: null,
-		notes: 'Integrated nozzle, hardened, CHT'
+		notes: 'Integrated nozzle, CHT'
 	},
 	{
 		id: 'Monika McWuff|Pawsitron Hotend',
@@ -909,6 +951,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'St', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 51.3 as Millimeter,
+		effectiveMeltZone: 176.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 4,
 		stillSold: false,
@@ -930,6 +973,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 45 as Millimeter,
+		effectiveMeltZone: 45 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -951,6 +995,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 28 as Millimeter,
+		effectiveMeltZone: 28 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -972,6 +1017,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 36.5 as Millimeter,
+		effectiveMeltZone: 36.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -994,6 +1040,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 26 as Millimeter,
+		effectiveMeltZone: 26 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1016,6 +1063,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 33.5 as Millimeter,
+		effectiveMeltZone: 33.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1038,6 +1086,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 34.5 as Millimeter,
+		effectiveMeltZone: 34.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1060,6 +1109,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 35.5 as Millimeter,
+		effectiveMeltZone: 35.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1082,6 +1132,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 43 as Millimeter,
+		effectiveMeltZone: 43 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1103,6 +1154,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 19.5 as Millimeter,
+		effectiveMeltZone: 19.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: false,
@@ -1124,6 +1176,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 35 as Millimeter,
+		effectiveMeltZone: 35 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: false,
@@ -1145,6 +1198,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 26 as Millimeter,
+		effectiveMeltZone: 26 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: false,
@@ -1166,6 +1220,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 25 as Millimeter,
+		effectiveMeltZone: 25 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1187,6 +1242,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 18 as Millimeter,
+		effectiveMeltZone: 18 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1208,6 +1264,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 290 as Celsius }
 		],
 		meltZoneLength: 25.5 as Millimeter,
+		effectiveMeltZone: 25.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1229,6 +1286,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 290 as Celsius }
 		],
 		meltZoneLength: 34 as Millimeter,
+		effectiveMeltZone: 34 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1250,6 +1308,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 17.5 as Millimeter,
+		effectiveMeltZone: 17.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: false,
@@ -1271,6 +1330,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 290 as Celsius }
 		],
 		meltZoneLength: 20.9 as Millimeter,
+		effectiveMeltZone: 20.9 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1292,6 +1352,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 23.7 as Millimeter,
+		effectiveMeltZone: 23.7 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1313,6 +1374,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 19.5 as Millimeter,
+		effectiveMeltZone: 19.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1334,6 +1396,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 18.5 as Millimeter,
+		effectiveMeltZone: 18.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1355,6 +1418,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 25 as Millimeter,
+		effectiveMeltZone: 25 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1376,6 +1440,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 38.7 as Millimeter,
+		effectiveMeltZone: 38.7 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1397,6 +1462,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 45.2 as Millimeter,
+		effectiveMeltZone: 45.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1417,13 +1483,14 @@ export const HOTEND_DB: HotendDefinition[] = [
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
-		meltZoneLength: 75.2 as Millimeter,
+		meltZoneLength: 66.7 as Millimeter,
+		effectiveMeltZone: 76.3 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
 		price: 1577 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
-		notes: 'Bult in HF geometry; true melt sone 66.7mm'
+		notes: 'Bult in HF geometry'
 	},
 	{
 		id: 'Snapmaker|U1 OEM',
@@ -1439,6 +1506,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'St', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 24.2 as Millimeter,
+		effectiveMeltZone: 24.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1460,6 +1528,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 19.5 as Millimeter,
+		effectiveMeltZone: 19.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1481,6 +1550,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 26 as Millimeter,
+		effectiveMeltZone: 26 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1502,6 +1572,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 330 as Celsius }
 		],
 		meltZoneLength: 51.5 as Millimeter,
+		effectiveMeltZone: 51.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1523,6 +1594,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 35 as Millimeter,
+		effectiveMeltZone: 35 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1544,6 +1616,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 350 as Celsius }
 		],
 		meltZoneLength: 36.2 as Millimeter,
+		effectiveMeltZone: 36.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1565,6 +1638,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 44.7 as Millimeter,
+		effectiveMeltZone: 44.7 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1586,6 +1660,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 51.5 as Millimeter,
+		effectiveMeltZone: 51.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1607,6 +1682,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 57.9 as Millimeter,
+		effectiveMeltZone: 57.9 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: false,
@@ -1629,6 +1705,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 300 as Celsius }
 		],
 		meltZoneLength: 18.8 as Millimeter,
+		effectiveMeltZone: 18.8 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1650,6 +1727,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 53 as Millimeter,
+		effectiveMeltZone: 53 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1671,6 +1749,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
 		meltZoneLength: 39.5 as Millimeter,
+		effectiveMeltZone: 39.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: false,

@@ -7,6 +7,7 @@ import {
 	type HotendOptions,
 	hasHfNozzle,
 	hasMze,
+	rawMeltZoneLength,
 	resolveBlock
 } from '@/lib/hotend';
 import { defaultMaterial, type MaterialDefinition } from '@/lib/material';
@@ -327,6 +328,8 @@ export type HotendPerformance = {
 	block: BlockOption;
 	/** Melt zone length as configured, including an extender and any high-flow nozzle equivalent */
 	meltZoneLength: Millimeter;
+	/** The physical heated channel with any extender, for display beside the effective figure */
+	rawMeltZoneLength: Millimeter;
 	/** Whether a melt zone extender is fitted */
 	mze: boolean;
 	/** Whether that length includes a high-flow nozzle, i.e. is longer than the physical channel */
@@ -396,6 +399,7 @@ export function hotendPerformance(
 		hotend,
 		block,
 		meltZoneLength,
+		rawMeltZoneLength: rawMeltZoneLength(hotend, hotendOptions),
 		mze: hasMze(hotend, hotendOptions),
 		hfNozzle: hasHfNozzle(hotend, hotendOptions),
 		withinTemperature: printTemperature <= block.maxTemperature,

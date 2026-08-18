@@ -3,7 +3,7 @@ import { ChevronRightIcon } from 'lucide-react';
 import { Term } from '@/components/term';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { formatNumber } from '@/lib/format';
-import { BLOCK_MATERIAL_DERATE, HF_NOZZLE_EQUIVALENT_LENGTH, MZE_LENGTH } from '@/lib/hotend';
+import { BLOCK_MATERIAL_DERATE, HF_NOZZLE_EQUIVALENT_LENGTH, MZE_LENGTH, NOZZLE_TAPER_ALLOWANCE } from '@/lib/hotend';
 import {
 	FILAMENT_CROSS_SECTION,
 	FILAMENT_DIAMETER,
@@ -73,12 +73,23 @@ export function AboutCard({ className }: { className?: string }) {
 						and is zero at or below the melting point.
 					</p>
 					<p>
-						<span className="text-foreground">Effective melt zone length.</span> An extender contributes
-						its physical length ({formatNumber(MZE_LENGTH, 1)} mm). A high-flow (CHT-style) nozzle
-						contributes none, but subdivides the bore and so raises wall area per unit length; it is
-						modelled as an equivalent {formatNumber(HF_NOZZLE_EQUIVALENT_LENGTH, 1)} mm. Multi-bore
-						blocks multiply <code>L</code> by their filament path count. Reported lengths may therefore
-						exceed the physical channel, and are marked where they do.
+						<span className="text-foreground">Effective melt zone length.</span> The database holds a
+						physical channel length per bore and, separately, the length <code>L</code> is taken from.
+						The two diverge where a hotend does not behave like its dimensions: a multi-bore block
+						carries the total across its bores, and one with high-flow geometry built in carries what
+						that geometry is worth. An extender then contributes its physical length (
+						{formatNumber(MZE_LENGTH, 1)} mm) to both. A high-flow (CHT-style) nozzle contributes none,
+						but subdivides the bore and so raises wall area per unit length; it is modelled as an
+						equivalent {formatNumber(HF_NOZZLE_EQUIVALENT_LENGTH, 1)} mm against <code>L</code> alone.
+					</p>
+					<p>
+						<span className="text-foreground">Taper allowance.</span> A fixed{' '}
+						{formatNumber(NOZZLE_TAPER_ALLOWANCE, 1)} mm is deducted from <code>L</code>. Measured back
+						from the tip it falls near the middle of a V6 nozzle's hex, approximately where the bore
+						begins converging on the orifice; beyond that point wall area against the filament is small
+						and the pressure gradient no longer assists transfer. It is fixed rather than
+						proportional because the taper is invariant to block length, and it is what reconciles long
+						melt zones with measurement, which the uncorrected model overestimates.
 					</p>
 					<p>
 						<span className="text-foreground">Heater power.</span> Cartridge rating is reported as{' '}
@@ -92,7 +103,8 @@ export function AboutCard({ className }: { className?: string }) {
 						<code>A</code> the feedstock cross-section ({formatNumber(FILAMENT_CROSS_SECTION, 3)} mm² at{' '}
 						{FILAMENT_DIAMETER} mm). Larger feedstock raises <code>A</code> and lowers feed velocity in
 						proportion, so at fixed <code>Q</code> the <Term term="residence time" /> scales with{' '}
-						<code>A</code>.
+						<code>A</code>. On a multi-bore block both <code>L</code> and <code>Q</code> carry the bore
+						count, so <code>t</code> resolves to the time a single path sees.
 					</p>
 					<p>
 						<span className="text-foreground">Assumptions and omissions.</span> Steady state throughout.
