@@ -322,12 +322,12 @@ function buildCostModel(
 	// Everything the reader selected, not the eight the bars would have shown: the headline on a
 	// scatter card describes the whole picture, so counting only a slice of it would be wrong
 	const chosen = all.filter((entry) => order.includes(entry.hotend.id));
-	const priced = chosen.filter((entry) => entry.hotend.price !== null && entry.costPerFlow !== null);
+	const priced = chosen.filter((entry) => entry.price !== null && entry.costPerFlow !== null);
 
 	if (priced.length === 0) return buildFlowModel(performance, common);
 
-	const cloud = all.filter((entry) => entry.hotend.price !== null && Number.isFinite(entry.maxFlow));
-	const trend = fitAgainstLogX(cloud.map((entry) => ({ x: entry.hotend.price as number, y: entry.maxFlow })));
+	const cloud = all.filter((entry) => entry.price !== null && Number.isFinite(entry.maxFlow));
+	const trend = fitAgainstLogX(cloud.map((entry) => ({ x: entry.price as number, y: entry.maxFlow })));
 
 	const costs = cloud.map((entry) => entry.costPerFlow ?? 0).filter((cost) => cost > 0);
 	const bounds = { cheapest: Math.min(...costs), dearest: Math.max(...costs) };
@@ -337,7 +337,7 @@ function buildCostModel(
 			const at = order.indexOf(entry.hotend.id);
 
 			return {
-				x: entry.hotend.price as number,
+				x: entry.price as number,
 				y: entry.maxFlow,
 				label: at === -1 ? null : shortPerformanceLabel(entry),
 				// The same slot the app would give it, so a hotend keeps its colour and shape

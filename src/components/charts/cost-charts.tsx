@@ -51,14 +51,14 @@ export function CostPerFlowChart() {
 	const performance = useAtomValue(performanceAtom);
 
 	const priced = performance.filter(
-		(entry) => entry.hotend.price !== null && entry.costPerFlow !== null && Number.isFinite(entry.costPerFlow)
+		(entry) => entry.price !== null && entry.costPerFlow !== null && Number.isFinite(entry.costPerFlow)
 	);
 
 	const rows: CostRow[] = priced
 		.map((entry) => ({
 			id: entry.hotend.id,
 			label: performanceLabel(entry),
-			price: entry.hotend.price as number,
+			price: entry.price as number,
 			maxFlow: entry.maxFlow,
 			costPerFlow: entry.costPerFlow as number
 		}))
@@ -351,12 +351,12 @@ export function PriceVsFlowScatter() {
 	const points: ScatterPoint[] = useMemo(
 		() =>
 			all
-				.filter((entry) => entry.hotend.price !== null && entry.costPerFlow !== null)
+				.filter((entry) => entry.price !== null && entry.costPerFlow !== null)
 				.map((entry) => ({
 					id: entry.hotend.id,
 					label: performanceLabel(entry),
 					shortLabel: shortPerformanceLabel(entry),
-					price: entry.hotend.price as number,
+					price: entry.price as number,
 					maxFlow: Number.isFinite(entry.maxFlow) ? entry.maxFlow : 0,
 					costPerFlow: entry.costPerFlow as number,
 					seriesIndex: selected.indexOf(entry.hotend.id)

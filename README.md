@@ -54,6 +54,10 @@ hotend ships in more than one. Copper is the reference; aluminium derates flow 2
 designs here, with two and four filament paths — multiply the effective melt zone by their path
 count, which is the whole model for them: flow and heater scale, residence time does not.
 
+Neither option is free, and both are charged for in the cost views: an extender adds a flat $9, and
+a high-flow nozzle adds whatever `CHT price (USD)` says for that hotend, over the nozzle it already
+ships with. On a cheap hotend that can outweigh the flow it buys, which is the point of showing it.
+
 ### The one empirical number
 
 There is no clean closed form for conduction into a moving plastic rod, so `q` is calibrated on the

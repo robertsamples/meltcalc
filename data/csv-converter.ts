@@ -167,6 +167,8 @@ async function generateHotends() {
 			// Blank means one bore, which is nearly every hotend ever made
 			filamentPaths: optionalNumber(row, 'Filament paths', context) ?? 1,
 			price: optionalNumber(row, 'Price (USD)', context),
+			// What a CHT-style nozzle adds over the stock one, applied only when that option is ticked
+			hfNozzlePrice: optionalNumber(row, 'CHT price (USD)', context),
 			// ` · ` separates independent notes; a parenthetical renders in the warning colour. Quote
 			// the cell if it ever needs a comma, or every column after it shifts
 			notes: optional(row, 'Notes')
@@ -206,6 +208,7 @@ async function generateHotends() {
 				`\t\tfilamentDiameter: ${hotend.filamentDiameter} as Millimeter,\n` +
 				`\t\tfilamentPaths: ${hotend.filamentPaths},\n` +
 				`\t\tprice: ${hotend.price === null ? 'null' : `${hotend.price} as Dollars`},\n` +
+				`\t\thfNozzlePrice: ${hotend.hfNozzlePrice === null ? 'null' : `${hotend.hfNozzlePrice} as Dollars`},\n` +
 				`\t\tnotes: ${literal(hotend.notes)}\n` +
 				`\t}`
 		)

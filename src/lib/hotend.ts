@@ -51,6 +51,15 @@ export function blockMaterialFactor(material: BlockMaterial): number {
 export const MZE_LENGTH = 8.5 as Millimeter;
 export const HF_NOZZLE_EQUIVALENT_LENGTH = 8.5 as Millimeter;
 
+/**
+ * What an extender costs to add.
+ *
+ * A constant rather than a column, because it is the same commodity part everywhere it fits: a
+ * short adapter or a nut. The hotends that ship with one already in the box are marked as
+ * incompatible in the database — they cannot take a second — so this never double-counts them.
+ */
+export const MZE_PRICE = 9 as Dollars;
+
 export const BlockOption = z.object({
 	material: BlockMaterial,
 	maxTemperature: Celsius
@@ -97,6 +106,15 @@ export const HotendDefinition = z.object({
 	filamentPaths: z.number().int().positive(),
 	/** Approximate street price in USD, or `null` where nobody has found one */
 	price: Dollars.nullable(),
+	/**
+	 * What fitting a high-flow (CHT-style) nozzle adds to the price, over the nozzle the hotend
+	 * ships with. Not the nozzle's own price: the standard one is already in `price`.
+	 *
+	 * Per hotend rather than a constant because it depends on the thread it takes — a Volcano-length
+	 * CHT is not a V6 one — and `null` where no figure has been found, which costs nothing rather
+	 * than guessing.
+	 */
+	hfNozzlePrice: Dollars.nullable(),
 	/**
 	 * Free text from the CSV: what a reader needs to know that no column carries — a nozzle only one
 	 * company sells, a hotend that exists only as a print file, how many filaments run through it.
@@ -165,6 +183,23 @@ export function effectiveMeltZoneLength(hotend: HotendDefinition, options: Hoten
 	// heater figure follows from flow. Residence falls out too: it is melt zone volume over flow,
 	// and both sides scale by the path count, leaving the time one path actually sees.
 	return (perPath * hotend.filamentPaths) as Millimeter;
+}
+
+/**
+ * Price as configured: the hotend plus whatever has been added to it.
+ *
+ * The build options are not free, and comparing a hotend carrying an extender and a high-flow
+ * nozzle against a bare one at the same price would flatter it in exactly the view meant to catch
+ * that. A hotend with no price stays priceless rather than becoming the cost of its accessories.
+ */
+export function effectivePrice(hotend: HotendDefinition, options: HotendOptions | undefined): Dollars | null {
+	if (hotend.price === null) return null;
+
+	const extender = hasMze(hotend, options) ? MZE_PRICE : 0;
+	// An unknown nozzle price adds nothing, which understates rather than invents
+	const nozzle = hasHfNozzle(hotend, options) ? (hotend.hfNozzlePrice ?? 0) : 0;
+
+	return (hotend.price + extender + nozzle) as Dollars;
 }
 
 /** The hottest any of its block variants will go; what decides whether a material is off the table */

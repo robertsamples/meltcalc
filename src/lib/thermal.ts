@@ -2,6 +2,7 @@ import {
 	type BlockOption,
 	blockMaterialFactor,
 	effectiveMeltZoneLength,
+	effectivePrice,
 	type HotendDefinition,
 	type HotendOptions,
 	hasHfNozzle,
@@ -14,6 +15,7 @@ import type {
 	CubicMillimeter,
 	CubicMillimetersPerSecond,
 	CubicMillimetersPerSecondPerMillimeter,
+	Dollars,
 	DollarsPerFlow,
 	JoulesPerCubicMillimeter,
 	Kelvin,
@@ -349,6 +351,11 @@ export type HotendPerformance = {
 	/** `maxFlow / flowRate`: below 1 the hotend cannot keep up with what is being asked of it */
 	headroom: number;
 	/**
+	 * Price as configured — the hotend plus any extender and high-flow nozzle fitted to it, which
+	 * is what someone comparing these actually pays. `null` where the hotend has no price.
+	 */
+	price: Dollars | null;
+	/**
 	 * What a mm³/s of sustainable flow costs on this hotend, or `null` when its price is unknown.
 	 * A missing price is not a cheap one, so it stays missing rather than becoming a number.
 	 */
@@ -383,6 +390,7 @@ export function hotendPerformance(
 
 	const maxFlow = meltZoneLimitedFlow(meltZoneLength, meltEnergy, blockLimit);
 	const heaterPower = requiredHeaterPower(printEnergy, maxFlow);
+	const price = effectivePrice(hotend, hotendOptions);
 
 	return {
 		hotend,
@@ -400,7 +408,8 @@ export function hotendPerformance(
 			hotend.filamentPaths) as MillimetersPerSecond,
 		specificPower: specificMeltPower(meltPower(meltEnergy, flowRate), meltZoneLength),
 		headroom: flowRate > 0 ? maxFlow / flowRate : Number.POSITIVE_INFINITY,
-		costPerFlow:
-			hotend.price !== null && maxFlow > 0 ? ((hotend.price / maxFlow) as DollarsPerFlow) : null
+		price,
+		// Against the configured price, so an option that buys flow is charged for what it costs
+		costPerFlow: price !== null && maxFlow > 0 ? ((price / maxFlow) as DollarsPerFlow) : null
 	};
 }

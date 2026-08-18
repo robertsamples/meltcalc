@@ -167,7 +167,7 @@ function sortValue(entry: HotendPerformance, key: SortKey, crossSection: number)
 			return hotendLabel(entry.hotend);
 		// Unpriced hotends group at the bottom of a descending sort rather than reading as free
 		case 'price':
-			return entry.hotend.price ?? Number.NEGATIVE_INFINITY;
+			return entry.price ?? Number.NEGATIVE_INFINITY;
 		case 'meltZone':
 			return entry.meltZoneLength;
 		case 'flow':
@@ -388,12 +388,12 @@ export function HotendTable() {
 										</TableCell>
 
 										<TableCell
-											title={entry.hotend.price === null ? 'No price in the database yet' : undefined}
+											title={entry.price === null ? 'No price in the database yet' : undefined}
 										>
-											{entry.hotend.price === null ? (
+											{entry.price === null ? (
 												<Measure value="—" digits={4} />
 											) : (
-												<Measure value={`$${formatNumber(entry.hotend.price, 0)}`} digits={4} />
+												<Measure value={`$${formatNumber(entry.price, 0)}`} digits={4} />
 											)}
 										</TableCell>
 

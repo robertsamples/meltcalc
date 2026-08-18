@@ -21,6 +21,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 160 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -40,6 +41,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 210 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -59,6 +61,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 10 as Dollars,
+		hfNozzlePrice: null,
 		notes: 'Integrated nozzle'
 	},
 	{
@@ -78,6 +81,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 18 as Dollars,
+		hfNozzlePrice: 32 as Dollars,
 		notes: 'Integrated nozzle'
 	},
 	{
@@ -97,6 +101,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 20 as Dollars,
+		hfNozzlePrice: null,
 		notes: 'Integrated nozzle'
 	},
 	{
@@ -116,6 +121,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 45 as Dollars,
+		hfNozzlePrice: 0 as Dollars,
 		notes: 'Integrated nozzle'
 	},
 	{
@@ -135,6 +141,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: null,
+		hfNozzlePrice: 15 as Dollars,
 		notes: 'DIY SLM hotend'
 	},
 	{
@@ -154,6 +161,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: null,
+		hfNozzlePrice: 15 as Dollars,
 		notes: 'DIY SLM hotend'
 	},
 	{
@@ -173,6 +181,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: null,
+		hfNozzlePrice: 15 as Dollars,
 		notes: 'Unreleased'
 	},
 	{
@@ -192,7 +201,28 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 2.85 as Millimeter,
 		filamentPaths: 1,
 		price: 2700 as Dollars,
+		hfNozzlePrice: null,
 		notes: 'Proprietary nozzle'
+	},
+	{
+		id: 'E3D|A1 HF ObXidian',
+		manufacturer: 'E3D',
+		name: 'A1 HF ObXidian',
+		ecosystem: 'A1',
+		mountingPattern: 'A1',
+		nozzle: 'Integrated',
+		mzeCompatible: false,
+		hfNozzleCompatible: false,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 300 as Celsius }
+		],
+		meltZoneLength: 35.7 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		price: 62 as Dollars,
+		hfNozzlePrice: null,
+		notes: 'Integrated nozzle, hardened, CHT'
 	},
 	{
 		id: 'E3D|Revo',
@@ -212,6 +242,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 95 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: 'Proprietary Revo nozzle'
 	},
 	{
@@ -232,6 +263,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 30 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -252,6 +284,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 8 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -272,6 +305,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 12 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -291,6 +325,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 9 as Dollars,
+		hfNozzlePrice: null,
 		notes: 'Proprietary nozzle'
 	},
 	{
@@ -310,6 +345,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 22 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: 'MZE+V6 nozzle addition'
 	},
 	{
@@ -329,6 +365,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 12 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -348,6 +385,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 12 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -367,6 +405,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 22 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: 'MZE+V6 nozzle addition'
 	},
 	{
@@ -386,6 +425,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 260 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -405,6 +445,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 165 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -424,6 +465,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 320 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -443,6 +485,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 105 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: 'Fin nozzle'
 	},
 	{
@@ -462,6 +505,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 125 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: 'Fin nozzle'
 	},
 	{
@@ -481,6 +525,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 45 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -500,6 +545,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 2,
 		price: 143 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: 'Proprietary nozzle (brass only) · 2 filaments'
 	},
 	{
@@ -519,6 +565,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 35 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -538,6 +585,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 120 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -558,6 +606,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 41 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -578,6 +627,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 44 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -598,6 +648,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 50 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -618,6 +669,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 48 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -638,6 +690,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 100 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -657,7 +710,28 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 80 as Dollars,
+		hfNozzlePrice: 5 as Dollars,
 		notes: 'Proprietary nozzle'
+	},
+	{
+		id: 'Microswiss|Microswiss H2 HF',
+		manufacturer: 'Microswiss',
+		name: 'Microswiss H2 HF',
+		ecosystem: 'H2',
+		mountingPattern: 'H2',
+		nozzle: 'Integrated',
+		mzeCompatible: false,
+		hfNozzleCompatible: false,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 300 as Celsius }
+		],
+		meltZoneLength: 41.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		price: 47 as Dollars,
+		hfNozzlePrice: null,
+		notes: 'Integrated nozzle, hardened, CHT'
 	},
 	{
 		id: 'Monika McWuff|Pawsitron Hotend',
@@ -676,6 +750,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 4,
 		price: null,
+		hfNozzlePrice: 15 as Dollars,
 		notes: '4 filaments · DIY SLM hotend'
 	},
 	{
@@ -695,6 +770,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 37.5 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -714,6 +790,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 22.5 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -733,6 +810,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 30 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -753,6 +831,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 55 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -773,6 +852,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 60 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -793,6 +873,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 65 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -813,6 +894,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 70 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -833,6 +915,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 75 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -852,6 +935,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 37.6 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -871,6 +955,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 90 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -890,6 +975,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 450 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -909,6 +995,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 35 as Dollars,
+		hfNozzlePrice: null,
 		notes: 'Proprietary nozzle'
 	},
 	{
@@ -928,6 +1015,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 150 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -947,6 +1035,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 175 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -966,6 +1055,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 369 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -985,6 +1075,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 423 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -1000,11 +1091,12 @@ export const HOTEND_DB: HotendDefinition[] = [
 		blockOptions: [
 			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
-		meltZoneLength: 66.7 as Millimeter,
+		meltZoneLength: 75.2 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 1577 as Dollars,
-		notes: null
+		hfNozzlePrice: 15 as Dollars,
+		notes: 'Bult in HF geometry; true melt sone 66.7mm'
 	},
 	{
 		id: 'Snapmaker|U1 OEM',
@@ -1023,6 +1115,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 12.5 as Dollars,
+		hfNozzlePrice: null,
 		notes: null
 	},
 	{
@@ -1042,6 +1135,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 67 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -1061,6 +1155,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 44 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -1080,6 +1175,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 80 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -1099,6 +1195,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 85 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -1118,6 +1215,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 116.5 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -1137,6 +1235,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: null,
+		hfNozzlePrice: 15 as Dollars,
 		notes: 'DIY SLM hotend'
 	},
 	{
@@ -1157,6 +1256,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 8 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -1176,6 +1276,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 200 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
 	{
@@ -1195,6 +1296,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		price: 220 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	}
 ];
