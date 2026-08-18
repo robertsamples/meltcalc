@@ -150,27 +150,25 @@ const COLUMNS: Column[] = [
 		)
 	},
 	// Two melt zones side by side, so the gap between them reads as what the build options bought.
-	// Short headers: the pair only makes sense read together, and the help says the rest
+	// Short headers: the pair only makes sense read together, and neither can afford a help icon
 	{ key: 'rawMeltZone', label: 'Melt zone', align: 'center' },
 	{
 		key: 'meltZone',
 		label: 'Effective',
 		align: 'center',
-		help: (
-			<>
-				The heated length the model runs on. It counts a high-flow nozzle as +
-				{HF_NOZZLE_EQUIVALENT_LENGTH} mm of equivalent capacity even though it adds no real
-				length, multiplies by the filament path count, and takes off {NOZZLE_TAPER_ALLOWANCE} mm
-				per path for the nozzle taper, where there is too little wall area to melt much.
-			</>
-		)
+		// A plain title rather than a help icon: the icon costs width this table does not have, and
+		// the full account of what goes into this number is in the "How this works" card anyway
+		title:
+			`The heated length the model runs on. Counts a high-flow nozzle as +${HF_NOZZLE_EQUIVALENT_LENGTH} mm ` +
+			`of equivalent capacity though it adds no real length, and takes off ${NOZZLE_TAPER_ALLOWANCE} mm ` +
+			'for the nozzle taper, where there is too little wall area to melt much.'
 	},
 	{ key: 'flow', label: 'Max flow', align: 'center' },
 	{ key: 'speed', label: 'Max speed', align: 'center', title: 'At the current layer height and line width' },
 	{ key: 'status', label: 'Status' },
 	// Prose, and every hotend's is about something different: there is no order to put it in.
 	// A floor, because a table full of numbers will otherwise give this column whatever is left
-	{ key: null, label: 'Notes', className: 'min-w-[10.5rem]' }
+	{ key: null, label: 'Notes', className: 'min-w-36' }
 ];
 
 /**
