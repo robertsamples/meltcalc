@@ -29,6 +29,9 @@ const CHART_CONFIG = {
 } satisfies ChartConfig;
 
 const REQUIRED_COLOR = seriesColor(0);
+
+/** The top of the stocked list, which is what "no cartridge covers this" is measured against */
+const LARGEST_HEATER = HEATER_SIZES[HEATER_SIZES.length - 1];
 /** The slack block is the same hue, dimmed: it is the same quantity continued, not a new one */
 const SLACK_OPACITY = 0.3;
 
@@ -154,7 +157,11 @@ export function HeaterChart() {
 										fontSize={11}
 										className="fill-foreground"
 										formatter={(value: number | null) =>
-											value === null ? 'over 240 W' : `${formatNumber(value, 0)} W`
+											// Off the list rather than a literal, so adding a cartridge size
+											// cannot leave this label naming the old ceiling
+											value === null
+												? `over ${formatNumber(LARGEST_HEATER, 0)} W`
+												: `${formatNumber(value, 0)} W`
 										}
 									/>
 								</Bar>
@@ -174,14 +181,14 @@ export function HeaterChart() {
 								Reserve up to the cartridge to fit, one size past the minimum
 							</span>
 							<span className="opacity-70">
-								At {formatNumber(HEATER_EFFICIENCY, 0)}% of rated output reaching the plastic
+								At {formatNumber(HEATER_EFFICIENCY, 1)}% of rated output reaching the plastic
 							</span>
 						</div>
 
 						{overSized > 0 ? (
 							<p className="text-[11px] text-muted-foreground">
 								{overSized} hotend{overSized === 1 ? '' : 's'} would need more than the largest
-								cartridge on the list ({HEATER_SIZES[HEATER_SIZES.length - 1]} W) to run{' '}
+								cartridge on the list ({LARGEST_HEATER} W) to run{' '}
 								{material.name} at full flow — in practice that means running below the melt zone's
 								ceiling, not buying a bigger heater.
 							</p>

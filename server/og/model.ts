@@ -436,7 +436,7 @@ function buildHeaterModel(performance: Performance[], common: CommonInput): OgMo
 	const subtitle = [
 		common.materialName,
 		`${formatNumber(common.meltEnergy, 3)} J/mm³ to melt`,
-		`${formatNumber(HEATER_EFFICIENCY, 0)}% of rated output reaching the plastic`
+		`${formatNumber(HEATER_EFFICIENCY, 1)}% of rated output reaching the plastic`
 	].join(' · ');
 
 	return {

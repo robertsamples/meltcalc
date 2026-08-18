@@ -269,16 +269,16 @@ export function meltZoneLimitedFlow(
  *
  * The rest holds the block itself at temperature and leaks into the mount, the nozzle and the air.
  * It is a fixed number rather than a setting because it is not something a user of this app knows
- * about their machine — measured hotends land near a third, and the figure moves far less between
- * them than the melt zone lengths this app is really about.
+ * about their machine — measured hotends land somewhat under a third, and the figure moves far less
+ * between them than the melt zone lengths this app is really about.
  */
-export const HEATER_EFFICIENCY = 30 as Percent;
+export const HEATER_EFFICIENCY = 32.5 as Percent;
 
 /**
  * Cartridge wattages that are actually easy to buy. A heater is not a continuous choice: the answer
  * to "what do I need" is one of these, so the recommendation snaps to the list.
  */
-export const HEATER_SIZES: readonly Watts[] = [30, 40, 60, 70, 80, 100, 120, 240].map((size) => size as Watts);
+export const HEATER_SIZES: readonly Watts[] = [30, 40, 60, 70, 80, 100, 120, 200, 240].map((size) => size as Watts);
 
 /**
  * Electrical watts a cartridge has to be rated for to sustain a flow rate.

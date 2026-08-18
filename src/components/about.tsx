@@ -93,7 +93,7 @@ export function AboutCard({ className }: { className?: string }) {
 					</p>
 					<p>
 						<span className="text-foreground">Heater power.</span> Cartridge rating is reported as{' '}
-						<code>P = Q E_set / η</code> at η = {formatNumber(HEATER_EFFICIENCY, 0)}%, where{' '}
+						<code>P = Q E_set / η</code> at η = {formatNumber(HEATER_EFFICIENCY, 1)}%, where{' '}
 						<code>E_set</code> is the enthalpy to the setpoint rather than to the melting point. It is
 						not imposed as a constraint on <code>Q</code>: the cartridge is assumed sized to the hotend.
 						The remaining output maintains block temperature and is lost to the mount and surroundings.
