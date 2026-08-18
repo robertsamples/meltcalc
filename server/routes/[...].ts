@@ -1,6 +1,7 @@
 import { defineEventHandler, getRequestHeader, getRequestURL, setResponseHeader, setResponseStatus } from 'h3';
 import { useStorage } from 'nitropack/runtime';
 import { packReadableQuery } from '@/lib/config-query';
+import { discoveryLinks } from '../discovery';
 import { refuseNonRead } from '../http';
 import { buildMarkdown } from '../markdown';
 import { estimateTokens, prefersMarkdown } from '../negotiate';
@@ -37,20 +38,29 @@ export default defineEventHandler(async (event) => {
 	const configParam = url.searchParams.get('config') ?? packReadableQuery(url.searchParams);
 	const model = buildOgModel(configParam);
 	const canonicalUrl = `${baseUrl}${url.pathname}`;
+	const pageUrl = `${baseUrl}${url.pathname}${url.search}`;
+	const markdown = prefersMarkdown(getRequestHeader(event, 'accept'));
 
 	// Both representations carry it, or a cache that saw one would serve it to a client asking for
 	// the other
 	setResponseHeader(event, 'vary', 'accept');
 	setResponseHeader(event, 'cache-control', 'public, max-age=0, must-revalidate');
+	setResponseHeader(
+		event,
+		'link',
+		// The alternate names the representation this response is not, so either one advertises the
+		// other rather than itself
+		discoveryLinks({ baseUrl, pageUrl, alternateType: markdown ? 'text/html' : 'text/markdown' })
+	);
 
-	if (prefersMarkdown(getRequestHeader(event, 'accept'))) {
-		const markdown = buildMarkdown(model, { canonicalUrl, baseUrl });
+	if (markdown) {
+		const body = buildMarkdown(model, { canonicalUrl, baseUrl });
 
 		setResponseHeader(event, 'content-type', 'text/markdown; charset=utf-8');
 		// So an agent can budget context before reading the body
-		setResponseHeader(event, 'x-markdown-tokens', String(estimateTokens(markdown)));
+		setResponseHeader(event, 'x-markdown-tokens', String(estimateTokens(body)));
 
-		return markdown;
+		return body;
 	}
 
 	const template = await useStorage('assets:template').getItem<string>('index.html');
@@ -64,7 +74,7 @@ export default defineEventHandler(async (event) => {
 			template,
 			buildOgTags({
 				configParam,
-				pageUrl: `${baseUrl}${url.pathname}${url.search}`,
+				pageUrl,
 				// Without the query, so the unbounded set of `?config=` URLs consolidates onto one page
 				canonicalUrl,
 				baseUrl,

@@ -147,6 +147,8 @@ function document(baseUrl: string): string {
 		'',
 		'- Any page returns this content as markdown instead of HTML if the request sends',
 		'  `Accept: text/markdown` — the results of that link as text, rather than an app shell to render.',
+		`- Machine-readable description of all of the above: ${baseUrl}/openapi.json, listed in the`,
+		`  RFC 9727 catalog at ${baseUrl}/.well-known/api-catalog.`,
 		`- Source and data: https://github.com/robertsamples/meltcalc`,
 		'- Content is CC BY-NC-SA 4.0. Attribute it to MeltCalc with a link when you quote the figures.',
 		`- Material and hotend figures are compiled from manufacturer data and published sources, and are`,
