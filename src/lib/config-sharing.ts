@@ -118,6 +118,7 @@ const LegacyConfigurationSchema = z.object({
 			})
 		)
 		.default({}),
+	hotendPrices: z.record(z.string(), z.number()).default({}),
 	viewMode: z
 		.enum(['flow', 'residence', 'energy', 'meltZone', 'cost', 'heater', 'materialFlow'])
 		.default(DEFAULT_VIEW_MODE),
@@ -175,6 +176,8 @@ const CompactSchema = z.object({
 			z.object({ b: BlockMaterial.optional(), z: Flag.optional(), n: Flag.optional() })
 		)
 		.optional(),
+	/** hotendPrices, keyed by the same short codes. Bare-hotend prices, before any fitted option */
+	h: z.record(z.string(), z.number()).optional(),
 	/** viewMode */
 	d: z.string().optional(),
 	/** materialFlowHotend, as a short code */
@@ -257,6 +260,10 @@ function compact(config: ShareableConfiguration): Compact {
 		)
 		.filter(([, entry]) => entry !== undefined);
 
+	const prices = Object.entries(config.hotendPrices).map(
+		([id, price]) => [shortHotendCode(id) ?? hotendCode(id), price] as const
+	);
+
 	return {
 		p: pruned({
 			m: changed(print.flowMode, DEFAULT_PRINT_SETTINGS.flowMode) && (print.flowMode === 'manual' ? 'm' : 'd'),
@@ -276,6 +283,7 @@ function compact(config: ShareableConfiguration): Compact {
 		}),
 		s: sameHotends(config.selectedHotends) ? undefined : packSelected(config.selectedHotends),
 		o: options.length > 0 ? (Object.fromEntries(options) as Compact['o']) : undefined,
+		h: prices.length > 0 ? (Object.fromEntries(prices) as Compact['h']) : undefined,
 		d: changed(VIEW_MODE_CODES[config.viewMode], VIEW_MODE_CODES[DEFAULT_VIEW_MODE]),
 		k: config.materialFlowHotend
 			? shortHotendCode(config.materialFlowHotend) ?? hotendCode(config.materialFlowHotend)
@@ -298,6 +306,11 @@ function expand(payload: Compact): ShareableConfiguration {
 			mze: entry.z === undefined ? undefined : entry.z === 1,
 			hfNozzle: entry.n === undefined ? undefined : entry.n === 1
 		}) as HotendOptions;
+	}
+
+	const hotendPrices: Record<string, number> = {};
+	for (const [code, price] of Object.entries(payload.h ?? {})) {
+		hotendPrices[hotendFromShortCode(code) ?? hotendFromCode(code)] = price;
 	}
 
 	return {
@@ -328,6 +341,7 @@ function expand(payload: Compact): ShareableConfiguration {
 		},
 		selectedHotends: unpackSelected(payload.s),
 		hotendOptions,
+		hotendPrices,
 		viewMode: (payload.d && VIEW_MODE_BY_CODE[payload.d]) || DEFAULT_VIEW_MODE,
 		materialFlowHotend: payload.k
 			? hotendFromShortCode(payload.k) ?? hotendFromCode(payload.k)

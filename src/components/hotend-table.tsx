@@ -1,6 +1,6 @@
 import { useAtom, useAtomValue } from 'jotai';
 import { ChevronDownIcon, ChevronRightIcon, ChevronsUpDownIcon, ChevronUpIcon, CircleHelpIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { HotendSelection } from '@/components/hotend-selection';
 import { SeriesMarker } from '@/components/series-marker';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
@@ -24,6 +24,7 @@ import { headroomStatus, STATUS_COLORS, STATUS_LABELS } from '@/lib/series';
 import { extrusionCrossSection, type HotendPerformance } from '@/lib/thermal';
 import {
 	currentHotendOptionsAtom,
+	currentHotendPricesAtom,
 	currentPrintSettingsAtom,
 	currentSelectedHotendsAtom,
 	performanceAtom,
@@ -230,6 +231,90 @@ function nextSort(sort: Sort, column: Column): Sort {
 }
 
 /**
+ * The price cell: the database's figure, editable in place.
+ *
+ * Prices go stale and vary by region, so the number shown is a starting point rather than a fact.
+ * Grey says so — an untouched cell is the database talking, and the moment a reader types their own
+ * it turns to full contrast. Clearing the box hands it back to the database rather than leaving a
+ * hole, so there is no way to end up with a hotend that has no price because of an edit.
+ *
+ * What is stored is the price of the bare hotend, never the total on screen. The extender and the
+ * high-flow nozzle stay derived on top, so ticking one adds its cost to whatever is in the box and
+ * unticking takes off exactly the same amount however many times it is toggled.
+ *
+ * Committed on blur rather than per keystroke: the table can be sorted by this column, and a row
+ * that reorders itself between two digits is unusable.
+ */
+function PriceCell({
+	entry,
+	onCommit
+}: {
+	entry: HotendPerformance;
+	/** The bare-hotend price to store, or `null` to fall back to the database */
+	onCommit: (base: number | null) => void;
+}) {
+	const [draft, setDraft] = useState<string | null>(null);
+	// Set when Escape asks to abandon the edit. A ref because the blur it triggers fires before any
+	// state update lands, so the blur handler cannot see it in state
+	const abandoned = useRef(false);
+
+	const shown = entry.price === null ? '' : String(Number(entry.price.toFixed(2)));
+
+	function commit(raw: string) {
+		const value = Number(raw.trim());
+		// Anything unusable, including an emptied box, means "use the database figure"
+		if (raw.trim() === '' || !Number.isFinite(value) || value < 0) return onCommit(null);
+
+		// The box holds the total, so the options have to come back off before storing. Floored at
+		// zero: a total below what the fitted options cost has no bare price that produces it
+		onCommit(Math.max(value - entry.priceOfOptions, 0));
+	}
+
+	return (
+		<Tooltip>
+			{/* The whole cell is the trigger, so the hint appears wherever the pointer lands rather
+			    than only over the box itself. Radix closes on pointer-down, so it is out of the way
+			    the moment the field is actually clicked into */}
+			<TooltipTrigger asChild>
+				<span className="flex items-baseline justify-center gap-px">
+					<span className={entry.priceOverridden ? '' : 'text-muted-foreground'}>$</span>
+					<input
+						type="number"
+						min={0}
+						step={5}
+						value={draft ?? shown}
+						placeholder="—"
+						aria-label={`Price of ${hotendLabel(entry.hotend)} in dollars`}
+						onFocus={(event) => event.currentTarget.select()}
+						onChange={(event) => setDraft(event.target.value)}
+						onKeyDown={(event) => {
+							if (event.key === 'Enter') event.currentTarget.blur();
+							if (event.key === 'Escape') {
+								abandoned.current = true;
+								event.currentTarget.blur();
+							}
+						}}
+						onBlur={() => {
+							if (!abandoned.current && draft !== null) commit(draft);
+							abandoned.current = false;
+							setDraft(null);
+						}}
+						// The border is always drawn, not just on hover: a column of bare numbers gives
+						// no reason to try clicking one, and the whole feature is invisible until someone does
+						className={`w-9 rounded-sm border border-muted-foreground/25 bg-transparent px-0.5 text-right tabular-nums outline-none hover:border-muted-foreground/50 focus:border-muted-foreground/80 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${
+							entry.priceOverridden ? '' : 'text-muted-foreground'
+						}`}
+					/>
+				</span>
+			</TooltipTrigger>
+			<TooltipContent className="font-normal">
+				Type to enter a custom price, leave empty to restore the default.
+			</TooltipContent>
+		</Tooltip>
+	);
+}
+
+/**
  * A measurement and its unit, centred in the column but still aligned to each other.
  *
  * Flush-right numbers leave a widening gap under a long header like "Effective melt zone", which
@@ -337,6 +422,7 @@ export function HotendTable() {
 	const print = useAtomValue(currentPrintSettingsAtom);
 	const printTemperature = useAtomValue(printTemperatureAtom);
 	const [options, setOptions] = useAtom(currentHotendOptionsAtom);
+	const [prices, setPrices] = useAtom(currentHotendPricesAtom);
 	// Deliberately not in the configuration: how a table is ordered is how it is being read right
 	// now, not part of the comparison a share link describes
 	const [sort, setSort] = useState<Sort>(null);
@@ -347,6 +433,15 @@ export function HotendTable() {
 
 	function update(hotend: HotendDefinition, change: { block?: BlockMaterial; mze?: boolean; hfNozzle?: boolean }) {
 		setOptions({ ...options, [hotend.id]: { ...options[hotend.id], ...change } });
+	}
+
+	/** `null` removes the entry rather than storing one, so "no override" has a single representation */
+	function updatePrice(hotend: HotendDefinition, base: number | null) {
+		const next = { ...prices };
+		if (base === null) delete next[hotend.id];
+		else next[hotend.id] = base;
+
+		setPrices(next);
 	}
 
 	return (
@@ -403,14 +498,10 @@ export function HotendTable() {
 											</span>
 										</TableCell>
 
-										<TableCell
-											title={entry.price === null ? 'No price in the database yet' : undefined}
-										>
-											{entry.price === null ? (
-												<Measure value="—" digits={4} />
-											) : (
-												<Measure value={`$${formatNumber(entry.price, 0)}`} digits={4} />
-											)}
+										{/* No `title`: the cell carries a real tooltip, and a native one would fight
+										    it with its own second-long delay */}
+										<TableCell>
+											<PriceCell entry={entry} onCommit={(base) => updatePrice(entry.hotend, base)} />
 										</TableCell>
 
 										{/* The toggle is its own centred block, so a hotend with a choice and one

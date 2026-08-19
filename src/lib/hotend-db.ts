@@ -398,7 +398,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentPaths: 1,
 		stillSold: true,
 		price: 95 as Dollars,
-		hfNozzlePrice: 15 as Dollars,
+		hfNozzlePrice: 20 as Dollars,
 		notes: 'Proprietary Revo nozzle'
 	},
 	{

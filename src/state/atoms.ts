@@ -8,6 +8,7 @@ import {
 	DEFAULT_ENERGY_PER_SECOND,
 	DEFAULT_HIDDEN_FAMILIES,
 	DEFAULT_HOTEND_IDS,
+	DEFAULT_HOTEND_PRICES,
 	DEFAULT_MATERIAL_FLOW_AS_SPEED,
 	DEFAULT_MATERIAL_FLOW_HOTEND,
 	DEFAULT_MATERIAL_SETTINGS,
@@ -113,6 +114,7 @@ const materialSettingsAtom = atomWithLocalStorage<MaterialSettings>('materialSet
 const thermalSettingsAtom = atomWithLocalStorage<ThermalSettings>('thermalSettings', DEFAULT_THERMAL_SETTINGS);
 const selectedHotendsAtom = atomWithLocalStorage<string[]>('selectedHotends', DEFAULT_HOTEND_IDS);
 const hotendOptionsAtom = atomWithLocalStorage<Record<string, HotendOptions>>('hotendOptions', {});
+const hotendPricesAtom = atomWithLocalStorage<Record<string, number>>('hotendPrices', DEFAULT_HOTEND_PRICES);
 const viewModeAtom = atomWithLocalStorage<ViewMode>('viewMode', DEFAULT_VIEW_MODE);
 const energyPerSecondAtom = atomWithLocalStorage<boolean>('energyPerSecond', DEFAULT_ENERGY_PER_SECOND);
 const energyPerMaterialStartAtom = atomWithLocalStorage<boolean>(
@@ -134,6 +136,7 @@ const tempMaterialSettingsAtom = atom<MaterialSettings | null>(null);
 const tempThermalSettingsAtom = atom<ThermalSettings | null>(null);
 const tempSelectedHotendsAtom = atom<string[] | null>(null);
 const tempHotendOptionsAtom = atom<Record<string, HotendOptions> | null>(null);
+const tempHotendPricesAtom = atom<Record<string, number> | null>(null);
 const tempViewModeAtom = atom<ViewMode | null>(null);
 const tempEnergyPerSecondAtom = atom<boolean | null>(null);
 const tempEnergyPerMaterialStartAtom = atom<boolean | null>(null);
@@ -149,6 +152,7 @@ export const currentMaterialSettingsAtom = overridableAtom(materialSettingsAtom,
 export const currentThermalSettingsAtom = overridableAtom(thermalSettingsAtom, tempThermalSettingsAtom);
 export const currentSelectedHotendsAtom = overridableAtom(selectedHotendsAtom, tempSelectedHotendsAtom);
 export const currentHotendOptionsAtom = overridableAtom(hotendOptionsAtom, tempHotendOptionsAtom);
+export const currentHotendPricesAtom = overridableAtom(hotendPricesAtom, tempHotendPricesAtom);
 export const currentViewModeAtom = overridableAtom(viewModeAtom, tempViewModeAtom);
 export const currentEnergyPerSecondAtom = overridableAtom(energyPerSecondAtom, tempEnergyPerSecondAtom);
 export const currentEnergyPerMaterialStartAtom = overridableAtom(
@@ -245,7 +249,8 @@ const performanceInputAtom = atom((get) => {
 		flowRate: get(flowRateAtom),
 		limit: get(availablePowerLimitAtom),
 		printTemperature: get(printTemperatureAtom),
-		options: get(currentHotendOptionsAtom)
+		options: get(currentHotendOptionsAtom),
+		prices: get(currentHotendPricesAtom)
 	};
 });
 
@@ -271,6 +276,7 @@ export const currentConfigurationAtom = atom<ShareableConfiguration>((get) => ({
 	thermalSettings: get(currentThermalSettingsAtom),
 	selectedHotends: get(currentSelectedHotendsAtom),
 	hotendOptions: get(currentHotendOptionsAtom),
+	hotendPrices: get(currentHotendPricesAtom),
 	viewMode: get(currentViewModeAtom),
 	energyPerSecond: get(currentEnergyPerSecondAtom),
 	energyPerMaterialStart: get(currentEnergyPerMaterialStartAtom),
@@ -288,6 +294,7 @@ export const loadImportedConfigurationAtom = atom(null, (_get, set, config: Shar
 	set(tempThermalSettingsAtom, config.thermalSettings);
 	set(tempSelectedHotendsAtom, config.selectedHotends);
 	set(tempHotendOptionsAtom, config.hotendOptions);
+	set(tempHotendPricesAtom, config.hotendPrices);
 	set(tempViewModeAtom, config.viewMode);
 	set(tempEnergyPerSecondAtom, config.energyPerSecond);
 	set(tempEnergyPerMaterialStartAtom, config.energyPerMaterialStart);
@@ -309,6 +316,7 @@ export const saveImportedConfigurationAtom = atom(null, (get, set) => {
 	const thermalSettings = get(tempThermalSettingsAtom);
 	const selectedHotends = get(tempSelectedHotendsAtom);
 	const hotendOptions = get(tempHotendOptionsAtom);
+	const hotendPrices = get(tempHotendPricesAtom);
 	const viewMode = get(tempViewModeAtom);
 	const energyPerSecond = get(tempEnergyPerSecondAtom);
 	const energyPerMaterialStart = get(tempEnergyPerMaterialStartAtom);
@@ -324,6 +332,7 @@ export const saveImportedConfigurationAtom = atom(null, (get, set) => {
 	if (thermalSettings) set(thermalSettingsAtom, thermalSettings);
 	if (selectedHotends) set(selectedHotendsAtom, selectedHotends);
 	if (hotendOptions) set(hotendOptionsAtom, hotendOptions);
+	if (hotendPrices) set(hotendPricesAtom, hotendPrices);
 	if (viewMode) set(viewModeAtom, viewMode);
 	if (energyPerSecond !== null) set(energyPerSecondAtom, energyPerSecond);
 	if (energyPerMaterialStart !== null) set(energyPerMaterialStartAtom, energyPerMaterialStart);

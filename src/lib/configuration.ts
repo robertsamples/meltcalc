@@ -129,7 +129,7 @@ export const DEFAULT_HOTEND_IDS = [
 	'Slice Engineering|Mosquito Magnum',
 	'Phaetus|Dragon HF',
 	'Phaetus|Rapido UHF',
-	'Bambulab|X1C OEM Hotend'
+	'Bambulab|X1C OEM'
 ];
 
 /** Energy chart axis: per cubic millimetre, or per second at the configured flow rate */
@@ -159,6 +159,15 @@ export const DEFAULT_MATERIAL_FLOW_AS_SPEED = false;
 export const DEFAULT_HIDDEN_FAMILIES: string[] = [];
 
 /**
+ * Prices the reader has corrected, by hotend id. Absent means the database's figure.
+ *
+ * Stored as the price of the bare hotend, before any fitted option is added, so the option costs
+ * stay derived. Typing a price while a high-flow nozzle is ticked therefore records what the hotend
+ * costs without it, and unticking the box takes off exactly what ticking it put on.
+ */
+export const DEFAULT_HOTEND_PRICES: Record<string, number> = {};
+
+/**
  * What the background of the price scatter means: what a mm³/s costs outright, or how each hotend
  * stands against the price/flow trend of the whole database.
  */
@@ -179,6 +188,8 @@ export type ShareableConfiguration = {
 	selectedHotends: string[];
 	/** Per-hotend block choice and extender, keyed by hotend id. Absent means "as it comes" */
 	hotendOptions: Record<string, HotendOptions>;
+	/** Corrected bare-hotend prices, keyed by hotend id. Absent means the database's figure */
+	hotendPrices: Record<string, number>;
 	viewMode: ViewMode;
 	energyPerSecond: boolean;
 	energyPerMaterialStart: boolean;
@@ -198,6 +209,7 @@ export const DEFAULT_CONFIGURATION: ShareableConfiguration = {
 	thermalSettings: DEFAULT_THERMAL_SETTINGS,
 	selectedHotends: DEFAULT_HOTEND_IDS,
 	hotendOptions: {},
+	hotendPrices: DEFAULT_HOTEND_PRICES,
 	viewMode: DEFAULT_VIEW_MODE,
 	energyPerSecond: DEFAULT_ENERGY_PER_SECOND,
 	energyPerMaterialStart: DEFAULT_ENERGY_PER_MATERIAL_START,

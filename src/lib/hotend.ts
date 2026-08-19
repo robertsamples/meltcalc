@@ -255,14 +255,31 @@ export function effectiveMeltZoneLength(hotend: HotendDefinition, options: Hoten
  * nozzle against a bare one at the same price would flatter it in exactly the view meant to catch
  * that. A hotend with no price stays priceless rather than becoming the cost of its accessories.
  */
-export function effectivePrice(hotend: HotendDefinition, options: HotendOptions | undefined): Dollars | null {
-	if (hotend.price === null) return null;
-
+export function priceOfOptions(hotend: HotendDefinition, options: HotendOptions | undefined): Dollars {
 	const extender = hasMze(hotend, options) ? MZE_PRICE : 0;
 	// An unknown nozzle price adds nothing, which understates rather than invents
 	const nozzle = hasHfNozzle(hotend, options) ? (hotend.hfNozzlePrice ?? 0) : 0;
 
-	return (hotend.price + extender + nozzle) as Dollars;
+	return (extender + nozzle) as Dollars;
+}
+
+/**
+ * `override` is the price of the bare hotend as corrected by the reader, before any option.
+ *
+ * Keeping the override at that level is what makes the checkboxes behave: the extender and the
+ * nozzle stay derived, so ticking one adds its cost to whatever is showing and unticking takes off
+ * exactly the same amount, however many times it is toggled. Storing the total instead would let
+ * the two drift apart.
+ */
+export function effectivePrice(
+	hotend: HotendDefinition,
+	options: HotendOptions | undefined,
+	override?: number | null
+): Dollars | null {
+	const base = override ?? hotend.price;
+	if (base === null) return null;
+
+	return (base + priceOfOptions(hotend, options)) as Dollars;
 }
 
 /** The hottest any of its block variants will go; what decides whether a material is off the table */

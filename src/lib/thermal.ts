@@ -7,6 +7,7 @@ import {
 	type HotendOptions,
 	hasHfNozzle,
 	hasMze,
+	priceOfOptions,
 	rawMeltZoneLength,
 	resolveBlock
 } from '@/lib/hotend';
@@ -358,6 +359,10 @@ export type HotendPerformance = {
 	 * is what someone comparing these actually pays. `null` where the hotend has no price.
 	 */
 	price: Dollars | null;
+	/** What the fitted options contribute to that, so a price can be edited without them moving */
+	priceOfOptions: Dollars;
+	/** Whether the price came from the reader rather than the database */
+	priceOverridden: boolean;
 	/**
 	 * What a mm³/s of sustainable flow costs on this hotend, or `null` when its price is unknown.
 	 * A missing price is not a cheap one, so it stays missing rather than becoming a number.
@@ -377,11 +382,13 @@ export type PerformanceInput = {
 	printTemperature: Celsius;
 	/** Per-hotend choices: block variant and whether an extender is fitted */
 	options?: Record<string, HotendOptions>;
+	/** Reader-corrected bare-hotend prices, keyed by hotend id. Absent means the database's figure */
+	prices?: Record<string, number>;
 };
 
 export function hotendPerformance(
 	hotend: HotendDefinition,
-	{ meltEnergy, printEnergy, flowRate, limit, printTemperature, options }: PerformanceInput
+	{ meltEnergy, printEnergy, flowRate, limit, printTemperature, options, prices }: PerformanceInput
 ): HotendPerformance {
 	const hotendOptions = options?.[hotend.id];
 	const block = resolveBlock(hotend, hotendOptions);
@@ -393,7 +400,8 @@ export function hotendPerformance(
 
 	const maxFlow = meltZoneLimitedFlow(meltZoneLength, meltEnergy, blockLimit);
 	const heaterPower = requiredHeaterPower(printEnergy, maxFlow);
-	const price = effectivePrice(hotend, hotendOptions);
+	const override = prices?.[hotend.id];
+	const price = effectivePrice(hotend, hotendOptions, override);
 
 	return {
 		hotend,
@@ -413,6 +421,8 @@ export function hotendPerformance(
 		specificPower: specificMeltPower(meltPower(meltEnergy, flowRate), meltZoneLength),
 		headroom: flowRate > 0 ? maxFlow / flowRate : Number.POSITIVE_INFINITY,
 		price,
+		priceOfOptions: priceOfOptions(hotend, hotendOptions),
+		priceOverridden: override !== undefined,
 		// Against the configured price, so an option that buys flow is charged for what it costs
 		costPerFlow: price !== null && maxFlow > 0 ? ((price / maxFlow) as DollarsPerFlow) : null
 	};

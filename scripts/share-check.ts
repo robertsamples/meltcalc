@@ -1,7 +1,7 @@
 import { hotendSlug, parseReadableQuery } from '@/lib/config-query';
 import { decodeConfig, encodeConfig } from '@/lib/config-sharing';
 import { DEFAULT_CONFIGURATION, MAX_COMPARED_HOTENDS, type ShareableConfiguration } from '@/lib/configuration';
-import { HOTEND_DB, hotendCode } from '@/lib/hotend';
+import { findHotend, HOTEND_DB, hotendCode } from '@/lib/hotend';
 import type { Celsius, CubicMillimetersPerSecond } from '@/lib/units';
 
 /**
@@ -55,7 +55,7 @@ check('6 hotends + options', {
 		'Phaetus|Dragon HF',
 		'Slice Engineering|Mosquito Magnum',
 		'Lukes Lab|Chube Compact',
-		'Bambulab|X1C OEM Hotend'
+		'Bambulab|X1C OEM'
 	],
 	hotendOptions: { 'E3D|V6': { block: 'Cu', hfNozzle: true }, 'Phaetus|Dragon HF': { mze: true } },
 	materialSettings: {
@@ -72,6 +72,14 @@ check('a full comparison', {
 	...DEFAULT_CONFIGURATION,
 	selectedHotends: HOTEND_DB.slice(0, MAX_COMPARED_HOTENDS).map((hotend) => hotend.id),
 	viewMode: 'heater'
+});
+
+// A corrected price has to survive the round trip keyed by short code, or a shared cost comparison
+// shows different money from the one that was shared
+check('corrected prices', {
+	...DEFAULT_CONFIGURATION,
+	hotendPrices: { 'E3D|V6': 11.5, 'Phaetus|Rapido UHF': 84 },
+	viewMode: 'cost'
 });
 
 check('material flow, pinned hotend', {
@@ -171,6 +179,17 @@ console.log(
 	`${parseReadableQuery(new URLSearchParams('?utm_source=reddit')) === null ? 'OK  ' : 'FAIL'} ` +
 		'readable: ignores tracking params'
 );
+
+// A rename in the CSV changes a hotend's id, and the defaults are the one place that references
+// ids from outside the database. Silently they degrade to a shorter comparison for every new visitor
+{
+	const missing = DEFAULT_CONFIGURATION.selectedHotends.filter((id) => !findHotend(id));
+	console.log(
+		`${missing.length === 0 ? 'OK  ' : 'FAIL'} default hotends all exist   ` +
+			`${DEFAULT_CONFIGURATION.selectedHotends.length - missing.length}/${DEFAULT_CONFIGURATION.selectedHotends.length}`
+	);
+	for (const id of missing) console.log(`  no hotend with id "${id}"`);
+}
 
 // Every published slug has to name exactly one thing, or `/llms.txt` is documenting an ambiguity
 {

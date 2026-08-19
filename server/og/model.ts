@@ -215,7 +215,8 @@ function buildFromConfiguration(config: ShareableConfiguration): OgModel | null 
 		flowRate,
 		limit: availableLimit,
 		printTemperature,
-		options: config.hotendOptions
+		options: config.hotendOptions,
+		prices: config.hotendPrices
 	};
 
 	const { hotends } = resolveHotends(selectedHotends);
