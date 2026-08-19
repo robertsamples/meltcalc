@@ -19,6 +19,7 @@ import {
 	allPerformanceAtom,
 	currentCostBandModeAtom,
 	currentCostLabelsAtom,
+	currentCostShowUnselectedAtom,
 	currentSelectedHotendsAtom,
 	performanceAtom
 } from '@/state/atoms';
@@ -346,7 +347,9 @@ export function PriceVsFlowScatter() {
 	const selected = useAtomValue(currentSelectedHotendsAtom);
 	const [mode, setMode] = useAtom(currentCostBandModeAtom);
 	const [labels, setLabels] = useAtom(currentCostLabelsAtom);
+	const [showUnselected, setShowUnselected] = useAtom(currentCostShowUnselectedAtom);
 	const labelsId = useId();
+	const unselectedId = useId();
 
 	const points: ScatterPoint[] = useMemo(
 		() =>
@@ -365,8 +368,11 @@ export function PriceVsFlowScatter() {
 	);
 
 	const selectedPoints = points.filter((point) => point.seriesIndex !== -1);
-	const otherPoints = points.filter((point) => point.seriesIndex === -1);
+	// Hiding these is a change to the picture, never to the analysis: `points` stays the whole priced
+	// database below, so the bands and the trend are fitted over everything either way
+	const otherPoints = showUnselected ? points.filter((point) => point.seriesIndex === -1) : [];
 	const hidden = all.length - points.length;
+	const drawn = useMemo(() => [...selectedPoints, ...otherPoints], [selectedPoints, otherPoints]);
 
 	// The bands span what the current selection of material and hotends actually costs
 	const costBounds = useMemo(() => {
@@ -386,15 +392,15 @@ export function PriceVsFlowScatter() {
 
 	// Round numbers inside the data's own range, so the ticks land where prices actually are
 	const priceTicks = useMemo(() => {
-		if (points.length === 0) return [];
-		const prices = points.map((point) => point.price);
+		if (drawn.length === 0) return [];
+		const prices = drawn.map((point) => point.price);
 		const lowest = Math.min(...prices);
 		const highest = Math.max(...prices);
 
 		return [10, 25, 50, 100, 250, 500, 1000, 2500].filter(
 			(tick) => tick >= lowest * 0.6 && tick <= highest * 1.4
 		);
-	}, [points]);
+	}, [drawn]);
 
 	return (
 		<Card>
@@ -419,11 +425,27 @@ export function PriceVsFlowScatter() {
 				</ToggleGroup>
 			</CardHeader>
 			<CardContent className="space-y-3">
-				<div className="flex items-center gap-2">
-					<Checkbox id={labelsId} checked={labels} onCheckedChange={(on) => setLabels(on === true)} />
-					<Label htmlFor={labelsId} className="text-xs font-normal">
-						Name the selected hotends where there is room
-					</Label>
+				<div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+					<div className="flex items-center gap-2">
+						<Checkbox id={labelsId} checked={labels} onCheckedChange={(on) => setLabels(on === true)} />
+						<Label htmlFor={labelsId} className="text-xs font-normal">
+							Name the selected hotends where there is room
+						</Label>
+					</div>
+					<div className="flex items-center gap-2">
+						<Checkbox
+							id={unselectedId}
+							checked={showUnselected}
+							onCheckedChange={(on) => setShowUnselected(on === true)}
+						/>
+						<Label
+							htmlFor={unselectedId}
+							className="text-xs font-normal"
+							title="The background and the trend are fitted over every priced hotend either way"
+						>
+							Show unselected in grey
+						</Label>
+					</div>
 				</div>
 
 				{/* Tall on purpose: fifty points in a 320 px box is a smear, and the whole reason for
@@ -496,10 +518,14 @@ export function PriceVsFlowScatter() {
 				{spec ? <BandLegend legend={spec.legend} /> : null}
 
 				<div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-					<span className="flex items-center gap-1.5">
-						<span className="size-2 rounded-full" style={{ background: UNPRICED_COLOR }} />
-						In the database
-					</span>
+					{/* Only while they are on the chart: a key for a colour nothing is drawn in is worse
+					    than no key */}
+					{showUnselected ? (
+						<span className="flex items-center gap-1.5">
+							<span className="size-2 rounded-full" style={{ background: UNPRICED_COLOR }} />
+							In the database
+						</span>
+					) : null}
 					<span className="flex items-center gap-1.5">
 						<SeriesMarker index={0} />
 						Selected for comparison

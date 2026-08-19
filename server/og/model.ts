@@ -235,7 +235,14 @@ function buildFromConfiguration(config: ShareableConfiguration): OgModel | null 
 
 		// Every selected hotend, not the eight the bar cards cap at: a marker costs nothing on a
 		// scatter, and dropping the rest to anonymous grey loses the whole point of the picture
-		return buildCostModel(performance, common, everything, config.costBandMode, hotends.map((hotend) => hotend.id));
+		return buildCostModel(
+			performance,
+			common,
+			everything,
+			config.costBandMode,
+			hotends.map((hotend) => hotend.id),
+			config.costShowUnselected
+		);
 	}
 	if (viewMode === 'heater') return buildHeaterModel(performance, common);
 	if (viewMode === 'materialFlow') {
@@ -326,7 +333,8 @@ function buildCostModel(
 	common: CommonInput,
 	all: Performance[],
 	mode: CostBandMode,
-	order: string[]
+	order: string[],
+	showUnselected: boolean
 ): OgModel {
 	// Everything the reader selected, not the eight the bars would have shown: the headline on a
 	// scatter card describes the whole picture, so counting only a slice of it would be wrong
@@ -342,7 +350,9 @@ function buildCostModel(
 	const bounds = { cheapest: Math.min(...costs), dearest: Math.max(...costs) };
 
 	const scatter: OgScatter = {
-		points: cloud.map((entry) => {
+		// Dropped from the drawing only. `cloud` still feeds the trend and the bands below, so the
+		// card's background says the same thing whether or not the rest of the database is on it
+		points: (showUnselected ? cloud : cloud.filter((entry) => order.includes(entry.hotend.id))).map((entry) => {
 			const at = order.indexOf(entry.hotend.id);
 
 			return {
@@ -386,10 +396,10 @@ function buildCostModel(
 	 * not a headline. What does change is the picture: which of the two backgrounds is on, and how
 	 * much of the database the reader is being shown against.
 	 */
-	const title =
-		mode === 'value'
-			? `Value against trend, ${cloud.length} hotends`
-			: `Price against flow, ${cloud.length} hotends`;
+	// The count has to be what is drawn, not what was fitted: with the rest of the database hidden a
+	// card claiming seventy-odd hotends over three dots is describing a picture it is not showing
+	const plotted = showUnselected ? `${cloud.length} hotends` : `${priced.length} of ${cloud.length} hotends`;
+	const title = mode === 'value' ? `Value against trend, ${plotted}` : `Price against flow, ${plotted}`;
 
 	return {
 		variant: 'config',

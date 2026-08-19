@@ -178,6 +178,15 @@ export const DEFAULT_COST_BAND_MODE: CostBandMode = 'cost';
 /** Whether the price scatter names the hotends it has room to name */
 export const DEFAULT_COST_LABELS = true;
 
+/**
+ * Whether the price scatter draws the hotends that are not in the comparison.
+ *
+ * On by default, because the cloud is the point: a hotend's price only means something against what
+ * everything else charges. Turning it off narrows the picture to the shortlist without changing what
+ * the background says, since the bands and the trend are always fitted over every priced hotend.
+ */
+export const DEFAULT_COST_SHOW_UNSELECTED = true;
+
 export const DEFAULT_DEBUG = false;
 
 /** Everything a share link carries. Keep it serialisable: it round-trips through JSON */
@@ -200,6 +209,7 @@ export type ShareableConfiguration = {
 	hiddenFamilies: string[];
 	costBandMode: CostBandMode;
 	costLabels: boolean;
+	costShowUnselected: boolean;
 	debug: boolean;
 };
 
@@ -218,5 +228,6 @@ export const DEFAULT_CONFIGURATION: ShareableConfiguration = {
 	hiddenFamilies: DEFAULT_HIDDEN_FAMILIES,
 	costBandMode: DEFAULT_COST_BAND_MODE,
 	costLabels: DEFAULT_COST_LABELS,
+	costShowUnselected: DEFAULT_COST_SHOW_UNSELECTED,
 	debug: DEFAULT_DEBUG
 };

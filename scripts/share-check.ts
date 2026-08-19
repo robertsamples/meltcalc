@@ -79,7 +79,8 @@ check('a full comparison', {
 check('corrected prices', {
 	...DEFAULT_CONFIGURATION,
 	hotendPrices: { 'E3D|V6': 11.5, 'Phaetus|Rapido UHF': 84 },
-	viewMode: 'cost'
+	viewMode: 'cost',
+	costShowUnselected: false
 });
 
 check('material flow, pinned hotend', {

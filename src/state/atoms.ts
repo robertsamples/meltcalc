@@ -3,6 +3,7 @@ import {
 	type CostBandMode,
 	DEFAULT_COST_BAND_MODE,
 	DEFAULT_COST_LABELS,
+	DEFAULT_COST_SHOW_UNSELECTED,
 	DEFAULT_DEBUG,
 	DEFAULT_ENERGY_PER_MATERIAL_START,
 	DEFAULT_ENERGY_PER_SECOND,
@@ -129,6 +130,7 @@ const materialFlowAsSpeedAtom = atomWithLocalStorage<boolean>(
 const hiddenFamiliesAtom = atomWithLocalStorage<string[]>('hiddenFamilies', DEFAULT_HIDDEN_FAMILIES);
 const costBandModeAtom = atomWithLocalStorage<CostBandMode>('costBandMode', DEFAULT_COST_BAND_MODE);
 const costLabelsAtom = atomWithLocalStorage<boolean>('costLabels', DEFAULT_COST_LABELS);
+const costShowUnselectedAtom = atomWithLocalStorage<boolean>('costShowUnselected', DEFAULT_COST_SHOW_UNSELECTED);
 const debugAtom = atomWithLocalStorage<boolean>('debug', DEFAULT_DEBUG);
 
 const tempPrintSettingsAtom = atom<PrintSettings | null>(null);
@@ -145,6 +147,7 @@ const tempMaterialFlowAsSpeedAtom = atom<boolean | null>(null);
 const tempHiddenFamiliesAtom = atom<string[] | null>(null);
 const tempCostBandModeAtom = atom<CostBandMode | null>(null);
 const tempCostLabelsAtom = atom<boolean | null>(null);
+const tempCostShowUnselectedAtom = atom<boolean | null>(null);
 const tempDebugAtom = atom<boolean | null>(null);
 
 export const currentPrintSettingsAtom = overridableAtom(printSettingsAtom, tempPrintSettingsAtom);
@@ -167,6 +170,7 @@ export const currentMaterialFlowAsSpeedAtom = overridableAtom(
 export const currentHiddenFamiliesAtom = overridableAtom(hiddenFamiliesAtom, tempHiddenFamiliesAtom);
 export const currentCostBandModeAtom = overridableAtom(costBandModeAtom, tempCostBandModeAtom);
 export const currentCostLabelsAtom = overridableAtom(costLabelsAtom, tempCostLabelsAtom);
+export const currentCostShowUnselectedAtom = overridableAtom(costShowUnselectedAtom, tempCostShowUnselectedAtom);
 export const currentDebugAtom = overridableAtom(debugAtom, tempDebugAtom);
 
 /** The materials the comparisons should show: everything whose family is not switched off */
@@ -285,6 +289,7 @@ export const currentConfigurationAtom = atom<ShareableConfiguration>((get) => ({
 	hiddenFamilies: get(currentHiddenFamiliesAtom),
 	costBandMode: get(currentCostBandModeAtom),
 	costLabels: get(currentCostLabelsAtom),
+	costShowUnselected: get(currentCostShowUnselectedAtom),
 	debug: get(currentDebugAtom)
 }));
 
@@ -303,6 +308,7 @@ export const loadImportedConfigurationAtom = atom(null, (_get, set, config: Shar
 	set(tempHiddenFamiliesAtom, config.hiddenFamilies);
 	set(tempCostBandModeAtom, config.costBandMode);
 	set(tempCostLabelsAtom, config.costLabels);
+	set(tempCostShowUnselectedAtom, config.costShowUnselected);
 	set(tempDebugAtom, config.debug);
 
 	set(isImportedConfigAtom, true);
@@ -325,6 +331,7 @@ export const saveImportedConfigurationAtom = atom(null, (get, set) => {
 	const hiddenFamilies = get(tempHiddenFamiliesAtom);
 	const costBandMode = get(tempCostBandModeAtom);
 	const costLabels = get(tempCostLabelsAtom);
+	const costShowUnselected = get(tempCostShowUnselectedAtom);
 	const debug = get(tempDebugAtom);
 
 	if (printSettings) set(printSettingsAtom, printSettings);
@@ -341,6 +348,7 @@ export const saveImportedConfigurationAtom = atom(null, (get, set) => {
 	if (hiddenFamilies !== null) set(hiddenFamiliesAtom, hiddenFamilies);
 	if (costBandMode !== null) set(costBandModeAtom, costBandMode);
 	if (costLabels !== null) set(costLabelsAtom, costLabels);
+	if (costShowUnselected !== null) set(costShowUnselectedAtom, costShowUnselected);
 	if (debug !== null) set(debugAtom, debug);
 
 	set(discardImportedConfigurationAtom);

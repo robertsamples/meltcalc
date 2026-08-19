@@ -3,6 +3,7 @@ import {
 	DEFAULT_CONFIGURATION,
 	DEFAULT_COST_BAND_MODE,
 	DEFAULT_COST_LABELS,
+	DEFAULT_COST_SHOW_UNSELECTED,
 	DEFAULT_DEBUG,
 	DEFAULT_ENERGY_PER_MATERIAL_START,
 	DEFAULT_ENERGY_PER_SECOND,
@@ -129,6 +130,7 @@ const LegacyConfigurationSchema = z.object({
 	hiddenFamilies: z.array(z.string()).default(DEFAULT_HIDDEN_FAMILIES),
 	costBandMode: z.enum(['cost', 'value']).default(DEFAULT_COST_BAND_MODE),
 	costLabels: z.boolean().default(DEFAULT_COST_LABELS),
+	costShowUnselected: z.boolean().default(DEFAULT_COST_SHOW_UNSELECTED),
 	debug: z.boolean().default(DEFAULT_DEBUG)
 });
 
@@ -184,12 +186,13 @@ const CompactSchema = z.object({
 	k: z.string().optional(),
 	/** hiddenFamilies, by name — there are only eight, and a name cannot drift the way an index can */
 	q: z.array(z.string()).optional(),
-	/** energyPerSecond, energyPerMaterialStart, materialFlowAsSpeed, costBandMode, debug */
+	/** energyPerSecond, energyPerMaterialStart, materialFlowAsSpeed, costBandMode, labels, unselected, debug */
 	x: Flag.optional(),
 	y: Flag.optional(),
 	v: Flag.optional(),
 	w: Flag.optional(),
 	l: Flag.optional(),
+	u: Flag.optional(),
 	g: Flag.optional()
 });
 
@@ -294,6 +297,7 @@ function compact(config: ShareableConfiguration): Compact {
 		v: flag(config.materialFlowAsSpeed, DEFAULT_MATERIAL_FLOW_AS_SPEED),
 		w: flag(config.costBandMode === 'value', DEFAULT_COST_BAND_MODE === 'value'),
 		l: flag(config.costLabels, DEFAULT_COST_LABELS),
+		u: flag(config.costShowUnselected, DEFAULT_COST_SHOW_UNSELECTED),
 		g: flag(config.debug, DEFAULT_DEBUG)
 	};
 }
@@ -352,6 +356,8 @@ function expand(payload: Compact): ShareableConfiguration {
 		materialFlowAsSpeed: payload.v === undefined ? DEFAULT_MATERIAL_FLOW_AS_SPEED : payload.v === 1,
 		costBandMode: payload.w === undefined ? DEFAULT_COST_BAND_MODE : payload.w === 1 ? 'value' : 'cost',
 		costLabels: payload.l === undefined ? DEFAULT_COST_LABELS : payload.l === 1,
+		costShowUnselected:
+			payload.u === undefined ? DEFAULT_COST_SHOW_UNSELECTED : payload.u === 1,
 		debug: payload.g === undefined ? DEFAULT_DEBUG : payload.g === 1
 	};
 }
