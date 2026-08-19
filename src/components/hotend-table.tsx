@@ -1,5 +1,12 @@
 import { useAtom, useAtomValue } from 'jotai';
-import { ChevronDownIcon, ChevronRightIcon, ChevronsUpDownIcon, ChevronUpIcon, CircleHelpIcon } from 'lucide-react';
+import {
+	ChevronDownIcon,
+	ChevronRightIcon,
+	ChevronsUpDownIcon,
+	ChevronUpIcon,
+	CircleHelpIcon,
+	RotateCcwIcon
+} from 'lucide-react';
 import { useRef, useState } from 'react';
 import { HotendSelection } from '@/components/hotend-selection';
 import { SeriesMarker } from '@/components/series-marker';
@@ -15,10 +22,12 @@ import {
 	type BlockMaterial,
 	HF_NOZZLE_EQUIVALENT_LENGTH,
 	type HotendDefinition,
+	type HotendOptions,
 	hotendLabel,
 	MZE_LENGTH,
 	NOZZLE_TAPER_ALLOWANCE,
-	orderedBlockOptions
+	orderedBlockOptions, 
+	shortHotendLabel
 } from '@/lib/hotend';
 import { headroomStatus, STATUS_COLORS, STATUS_LABELS } from '@/lib/series';
 import { extrusionCrossSection, type HotendPerformance } from '@/lib/thermal';
@@ -79,6 +88,35 @@ function HotendNotes({ notes }: { notes: string | null }) {
 				)
 			)}
 		</>
+	);
+}
+
+/**
+ * Hands every corrected price back to the database at once.
+ *
+ * Disabled while there is nothing to undo, which also keeps it from reading as an action with an
+ * effect on a table nobody has edited. No confirmation: the prices it clears are a preference rather
+ * than work, and retyping one is the same gesture that set it.
+ */
+function ResetColumn({ count, onReset, hint }: { count: number; onReset: () => void; hint: string }) {
+	return (
+		<Tooltip>
+			<TooltipTrigger asChild>
+				<button
+					type="button"
+					disabled={count === 0}
+					onClick={onReset}
+					aria-label={hint}
+					// Full contrast rather than muted: these are the only controls in the header, and a
+					// reader who has just changed something needs to find the way back without hunting.
+					// Disabled while there is nothing to undo, so an untouched column offers no action
+					className="shrink-0 text-foreground transition-opacity hover:text-destructive-foreground disabled:pointer-events-none disabled:opacity-25"
+				>
+					<RotateCcwIcon className="size-3" />
+				</button>
+			</TooltipTrigger>
+			<TooltipContent className="font-normal">{hint}</TooltipContent>
+		</Tooltip>
 	);
 }
 
@@ -169,7 +207,7 @@ const COLUMNS: Column[] = [
 	{ key: 'status', label: 'Status' },
 	// Prose, and every hotend's is about something different: there is no order to put it in.
 	// A floor, because a table full of numbers will otherwise give this column whatever is left
-	{ key: null, label: 'Notes', className: 'min-w-36' }
+	{ key: null, label: 'Notes', className: 'min-w-32' }
 ];
 
 /**
@@ -178,8 +216,9 @@ const COLUMNS: Column[] = [
  */
 function sortValue(entry: HotendPerformance, key: SortKey, crossSection: number): number | string {
 	switch (key) {
+		// The abbreviated form, so the order matches the names actually on screen
 		case 'name':
-			return hotendLabel(entry.hotend);
+			return shortHotendLabel(entry.hotend);
 		// Unpriced hotends group at the bottom of a descending sort rather than reading as free
 		case 'price':
 			return entry.price ?? Number.NEGATIVE_INFINITY;
@@ -359,7 +398,18 @@ const ALIGNMENT = {
 	left: { head: '', content: '' }
 } as const;
 
-function SortableHeader({ column, sort, onSort }: { column: Column; sort: Sort; onSort: (next: Sort) => void }) {
+function SortableHeader({
+	column,
+	sort,
+	onSort,
+	lead
+}: {
+	column: Column;
+	sort: Sort;
+	onSort: (next: Sort) => void;
+	/** A control belonging to this column, drawn before its label */
+	lead?: React.ReactNode;
+}) {
 	const active = column.key !== null && sort?.key === column.key;
 	const alignment = ALIGNMENT[column.align ?? 'left'];
 
@@ -388,6 +438,7 @@ function SortableHeader({ column, sort, onSort }: { column: Column; sort: Sort; 
 			aria-sort={active ? (sort?.direction === 'asc' ? 'ascending' : 'descending') : 'none'}
 		>
 			<span className={`flex items-center gap-1 ${alignment.content}`}>
+				{lead}
 				{column.key === null ? (
 					label
 				) : (
@@ -435,6 +486,29 @@ export function HotendTable() {
 		setOptions({ ...options, [hotend.id]: { ...options[hotend.id], ...change } });
 	}
 
+	/**
+	 * Drops one build option across every hotend, leaving the others alone.
+	 *
+	 * Entries left with nothing in them are removed rather than kept as empty objects, so "as it
+	 * comes" has one representation and a share link does not carry the ghost of a cleared choice.
+	 */
+	function resetOption(key: 'block' | 'mze' | 'hfNozzle') {
+		const next: Record<string, HotendOptions> = {};
+		for (const [id, entry] of Object.entries(options)) {
+			const { [key]: _dropped, ...rest } = entry;
+			if (Object.keys(rest).length > 0) next[id] = rest;
+		}
+
+		setOptions(next);
+	}
+
+	/** How many hotends carry a non-default value for each option, which is what enables its reset */
+	const changed = {
+		block: Object.values(options).filter((entry) => entry.block !== undefined).length,
+		mze: Object.values(options).filter((entry) => entry.mze === true).length,
+		hfNozzle: Object.values(options).filter((entry) => entry.hfNozzle === true).length
+	};
+
 	/** `null` removes the entry rather than storing one, so "no override" has a single representation */
 	function updatePrice(hotend: HotendDefinition, base: number | null) {
 		const next = { ...prices };
@@ -467,7 +541,7 @@ export function HotendTable() {
 				</summary>
 				<CardContent className="px-0 pb-4">
 					<div className="overflow-x-auto">
-					<Table className="text-xs leading-tight [&_th]:px-2 [&_th]:h-8 [&_td]:px-2 [&_td]:py-1">
+					<Table className="text-xs leading-tight [&_th]:px-1.5 [&_th]:h-8 [&_td]:px-1.5 [&_td]:py-1">
 						<TableHeader>
 							<TableRow>
 								{COLUMNS.map((column) => (
@@ -476,6 +550,33 @@ export function HotendTable() {
 										column={column}
 										sort={sort}
 										onSort={setSort}
+										lead={
+											column.key === 'price' ? (
+												<ResetColumn
+													count={Object.keys(prices).length}
+													onReset={() => setPrices({})}
+													hint="Reset all modified prices to default"
+												/>
+											) : column.label === 'Block' ? (
+												<ResetColumn
+													count={changed.block}
+													onReset={() => resetOption('block')}
+													hint="Reset to default"
+												/>
+											) : column.label === 'MZE' ? (
+												<ResetColumn
+													count={changed.mze}
+													onReset={() => resetOption('mze')}
+													hint="Reset to default"
+												/>
+											) : column.label === 'CHT' ? (
+												<ResetColumn
+													count={changed.hfNozzle}
+													onReset={() => resetOption('hfNozzle')}
+													hint="Reset to default"
+												/>
+											) : null
+										}
 									/>
 								))}
 							</TableRow>
@@ -494,7 +595,9 @@ export function HotendTable() {
 										<TableCell className="font-medium">
 											<span className="flex items-center gap-2">
 												<SeriesMarker index={Math.max(colorIndex, 0)} />
-												{hotendLabel(entry.hotend)}
+												{/* Abbreviated here and nowhere else: the charts and the picker have
+												    the room to use the name the company actually goes by */}
+												{shortHotendLabel(entry.hotend)}
 											</span>
 										</TableCell>
 

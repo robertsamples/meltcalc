@@ -1,7 +1,7 @@
 import { hotendSlug, parseReadableQuery } from '@/lib/config-query';
 import { decodeConfig, encodeConfig } from '@/lib/config-sharing';
 import { DEFAULT_CONFIGURATION, MAX_COMPARED_HOTENDS, type ShareableConfiguration } from '@/lib/configuration';
-import { findHotend, HOTEND_DB, hotendCode } from '@/lib/hotend';
+import { ABBREVIATED_IDS, findHotend, HOTEND_DB, hotendCode } from '@/lib/hotend';
 import type { Celsius, CubicMillimetersPerSecond } from '@/lib/units';
 
 /**
@@ -190,6 +190,17 @@ console.log(
 			`${DEFAULT_CONFIGURATION.selectedHotends.length - missing.length}/${DEFAULT_CONFIGURATION.selectedHotends.length}`
 	);
 	for (const id of missing) console.log(`  no hotend with id "${id}"`);
+}
+
+// Same story for the table's shortened names: a rename in the CSV would leave them pointing at a
+// hotend that no longer exists, and the row would quietly go back to its long label
+{
+	const stale = ABBREVIATED_IDS.filter((id) => !findHotend(id));
+	console.log(
+		`${stale.length === 0 ? 'OK  ' : 'FAIL'} shortened names resolve  ` +
+			`${ABBREVIATED_IDS.length - stale.length}/${ABBREVIATED_IDS.length}`
+	);
+	for (const id of stale) console.log(`  no hotend with id "${id}"`);
 }
 
 // Every published slug has to name exactly one thing, or `/llms.txt` is documenting an ambiguity

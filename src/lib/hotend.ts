@@ -291,6 +291,41 @@ export function hotendLabel(hotend: HotendDefinition): string {
 	return hotend.manufacturer === 'Unknown' ? hotend.name : `${hotend.manufacturer} ${hotend.name}`;
 }
 
+/**
+ * Manufacturers whose full name costs more width than it carries meaning.
+ *
+ * Only for places paying for that width by the column. Everywhere with room — the charts, the
+ * picker, `/llms.txt`, the shared cards — keeps the name the company actually uses.
+ */
+const ABBREVIATED_MANUFACTURERS: Record<string, string> = {
+	'Slice Engineering': 'Slice Eng',
+	'Causality Manufacturing': 'Causality Mfg'
+};
+
+/**
+ * Product names trimmed of what the manufacturer beside them already says.
+ *
+ * A handful of hotends repeat their maker's name, or end in the word "hotend" in a column headed
+ * Hotend. Written out per hotend rather than derived, because the redundancy is different in each
+ * one and a rule that caught them all would catch names that are not redundant at all.
+ */
+const ABBREVIATED_NAMES: Record<string, string> = {
+	'Brumpo Tungus|Brumpo Hotend': 'Hotend',
+	'Brumpo Tungus|Brumpo WC Hotend': 'WC Hotend',
+	'Monika McWuff|Pawsitron Hotend': 'Pawsitron'
+};
+
+/** Every hotend this file renames, for the check that keeps those keys pointing at something */
+export const ABBREVIATED_IDS = Object.keys(ABBREVIATED_NAMES);
+
+/** The same label with any abbreviation applied, for the table */
+export function shortHotendLabel(hotend: HotendDefinition): string {
+	const name = ABBREVIATED_NAMES[hotend.id] ?? hotend.name;
+	if (hotend.manufacturer === 'Unknown') return name;
+
+	return `${ABBREVIATED_MANUFACTURERS[hotend.manufacturer] ?? hotend.manufacturer} ${name}`;
+}
+
 const BY_ID = new Map(HOTEND_DB.map((hotend) => [hotend.id, hotend]));
 
 export function findHotend(id: string): HotendDefinition | undefined {
