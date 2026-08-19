@@ -2,6 +2,7 @@ import { hotendSlug, parseReadableQuery } from '@/lib/config-query';
 import { decodeConfig, encodeConfig } from '@/lib/config-sharing';
 import { DEFAULT_CONFIGURATION, MAX_COMPARED_HOTENDS, type ShareableConfiguration } from '@/lib/configuration';
 import { CURRENCIES, FALLBACK_RATES, money } from '@/lib/currency';
+import { FLOW_CLASSES, flowClassAt, flowClassOfReferenceFlow } from '@/lib/flow-class';
 import { ABBREVIATED_IDS, findHotend, HOTEND_DB, hotendCode } from '@/lib/hotend';
 import type { Celsius, CubicMillimetersPerSecond } from '@/lib/units';
 
@@ -256,4 +257,38 @@ console.log(
 	const leaked = keys.filter((key) => /currenc/i.test(key));
 	console.log(`${leaked.length === 0 ? 'OK  ' : 'FAIL'} currency stays out of links   ${keys.length} fields`);
 	for (const key of leaked) console.log(`  "${key}" would be shared`);
+}
+
+// The flow classes are drawn as a strip up an axis and used to group the picker, so their bounds
+// have to tile the number line: a gap would leave a hotend under no heading at all, and an overlap
+// would colour two bands over the same rates. The rates people quote have both, so this is the
+// check that whatever is written above has been reconciled into a partition
+{
+	const problems: string[] = [];
+	for (const [index, entry] of FLOW_CLASSES.entries()) {
+		const next = FLOW_CLASSES[index + 1];
+		if (next && next.min !== entry.max) problems.push(`${entry.label} ends at ${entry.max}, ${next.label} starts at ${next.min}`);
+		// The boundary itself, and a hair either side of it, have to land where the labels claim
+		if (flowClassOfReferenceFlow(entry.min) !== entry) problems.push(`${entry.min} mm³/s is not ${entry.label}`);
+		if (flowClassOfReferenceFlow(entry.min - 0.01) === entry && entry.min > 0) {
+			problems.push(`${entry.min - 0.01} mm³/s reads as ${entry.label}`);
+		}
+	}
+	if (FLOW_CLASSES[0].min !== 0) problems.push('the bottom class does not start at zero');
+	if (Number.isFinite(FLOW_CLASSES[FLOW_CLASSES.length - 1].max)) problems.push('the top class has a ceiling');
+
+	console.log(`${problems.length === 0 ? 'OK  ' : 'FAIL'} flow classes tile the axis  ${FLOW_CLASSES.map((c) => c.label).join(' ')}`);
+	for (const note of problems) console.log(`  ${note}`);
+}
+
+// The picker sorts on flow and the chart draws bands on flow, both from the same boundary list.
+// They agree only while one comparison is used for both, so this pins that: a hotend classified at
+// a band's own edge has to come out as that band, or a dot could sit outside the heading it is under
+{
+	const bands = FLOW_CLASSES.map((flowClass, index) => ({ flowClass, from: index * 10, to: (index + 1) * 10 }));
+	const wrong = bands.filter(
+		(band) => flowClassAt(bands, band.from) !== band.flowClass || flowClassAt(bands, band.to - 0.01) !== band.flowClass
+	);
+	console.log(`${wrong.length === 0 ? 'OK  ' : 'FAIL'} flow bands classify edges   ${bands.length} bands`);
+	for (const band of wrong) console.log(`  ${band.flowClass.label} does not own its own edge`);
 }

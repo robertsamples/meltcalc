@@ -31,12 +31,13 @@ import {
 	type Money, 
 	money
 } from '@/lib/currency';
+import { FLOW_CLASSES, type FlowClassBand } from '@/lib/flow-class';
 import { HOTEND_DB, type HotendDefinition, type HotendOptions, resolveHotends } from '@/lib/hotend';
 import { defaultMaterial, findMaterial, MATERIAL_DB, type MaterialDefinition } from '@/lib/material';
 import {
 	type EnergyBreakdown,
 	energyPerVolume,
-	type HotendPerformance, 
+	type HotendPerformance,
 	hotendPerformance,
 	meltPower,
 	specificPowerLimit,
@@ -357,6 +358,39 @@ export const allPerformanceAtom = atom<HotendPerformance[]>((get) => {
 	const input = get(performanceInputAtom);
 
 	return HOTEND_DB.map((hotend) => hotendPerformance(hotend, input));
+});
+
+/**
+ * The class boundaries as flow rates, for the material and calibration currently on screen.
+ *
+ * This is the one place the numbers in `FLOW_CLASSES` become something anything is compared against.
+ * Everything downstream — the strip on the price chart, the headings in the picker — reads these,
+ * which is what makes the two agree: a hotend is under the HF heading exactly when its dot is inside
+ * the HF band, because it is the same comparison.
+ *
+ * The boundaries are quoted for PLA, so they are scaled by how much flow a millimetre of melt zone
+ * is worth here against what it is worth there. Both the material and the calibration setting feed
+ * that ratio, which is what stops either from silently reclassifying the whole database: turning the
+ * calibration up makes every hotend faster and moves the lines by exactly as much.
+ *
+ * Because the scale hits every hotend and every boundary equally, changing material re-labels the
+ * axis without moving anybody between classes. What moves a hotend is a difference between it and
+ * its peers — a block derate, an extender, a high-flow nozzle.
+ */
+export const flowClassBandsAtom = atom<FlowClassBand[]>((get) => {
+	const meltEnergy = get(energyAtom).toMelt;
+	const limit = get(availablePowerLimitAtom);
+	if (!(meltEnergy > 0) || !(limit > 0)) return [];
+
+	// What one millimetre of melt zone sustains here, against the reference figure the community
+	// numbers were quoted at. Exactly 1 for PLA at the default calibration
+	const scale = limit / meltEnergy / DEFAULT_THERMAL_SETTINGS.referenceFlowPerMeltZoneMm;
+
+	return FLOW_CLASSES.map((flowClass) => ({
+		flowClass,
+		from: flowClass.min * scale,
+		to: flowClass.max * scale
+	}));
 });
 
 export const currentConfigurationAtom = atom<ShareableConfiguration>((get) => ({

@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue } from 'jotai';
-import { PlusIcon } from 'lucide-react';
+import { ChevronDownIcon, ChevronRightIcon, PlusIcon } from 'lucide-react';
 import { useId, useMemo, useState } from 'react';
 import { SeriesMarker } from '@/components/series-marker';
 import { Button } from '@/components/ui/button';
@@ -9,11 +9,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MAX_COMPARED_HOTENDS } from '@/lib/configuration';
+import { flowClassAt, flowClassOrigin, flowClassRange } from '@/lib/flow-class';
 import { formatNumber } from '@/lib/format';
 import { ECOSYSTEMS, highestTemperature, hotendLabel } from '@/lib/hotend';
 import {
 	allPerformanceAtom,
 	currentSelectedHotendsAtom,
+	flowClassBandsAtom,
 	materialAtom,
 	moneyAtom,
 	printTemperatureAtom
@@ -38,6 +40,7 @@ export function HotendSelection() {
 	const material = useAtomValue(materialAtom);
 	const performance = useAtomValue(allPerformanceAtom);
 	const money = useAtomValue(moneyAtom);
+	const classBands = useAtomValue(flowClassBandsAtom);
 	// A rupiah price is three times the characters a dollar one is, and the column it sits in is
 	// fixed-width. Three steps rather than a measurement: this is a dialog with room to give
 	const priceColumn = money.rate >= 1000 ? 'w-24' : money.rate >= 30 ? 'w-20' : 'w-14';
@@ -49,6 +52,10 @@ export function HotendSelection() {
 	const [minTemp, setMinTemp] = useState('');
 	const [heatbreakOnly, setHeatbreakOnly] = useState(false);
 	const [soldOnly, setSoldOnly] = useState(false);
+	// Which class headings are folded shut. Empty by default: the grouping is there to give the list
+	// structure, and a dialog that opens showing nothing but four headings has hidden the thing it
+	// is for
+	const [collapsed, setCollapsed] = useState<string[]>([]);
 	const priceFilterId = useId();
 	const flowFilterId = useId();
 	const tempFilterId = useId();
@@ -99,6 +106,57 @@ export function HotendSelection() {
 	);
 	const removable = visible.filter((entry) => selected.includes(entry.hotend.id));
 	const room = MAX_COMPARED_HOTENDS - selected.length;
+
+	/**
+	 * The list, split by the flow class each hotend currently lands in.
+	 *
+	 * On the flow figure printed on each row, against boundaries `flowClassBandsAtom` has already
+	 * worked out from the standard melt zone lengths at a copper block. Sorting on the number the
+	 * reader can see is what makes the headings checkable: every row under "HF hotends" reads
+	 * between the two figures in that heading, with nothing to take on trust.
+	 *
+	 * It also means a class follows everything that changes the flow — the extender, the nozzle, the
+	 * block, the material. A hotend on a brass block sitting a class below one with the same channel
+	 * is the derate showing up where it matters rather than being hidden by the label.
+	 *
+	 * Fastest first, matching the sort the list already uses. Empty classes are dropped rather than
+	 * shown empty, so a filter down to six hotends does not leave three headings standing over
+	 * nothing.
+	 */
+	const groups = useMemo(
+		() =>
+			[...classBands]
+				.reverse()
+				.map((band) => ({
+					band,
+					entries: visible.filter((entry) => flowClassAt(classBands, entry.maxFlow) === band.flowClass)
+				}))
+				.filter((group) => group.entries.length > 0),
+		[visible, classBands]
+	);
+
+	/**
+	 * Ticks or clears a whole class at once, over exactly what the filters are showing.
+	 *
+	 * Hotends too cold for the material are left out of both directions: they cannot be selected, so
+	 * counting them would leave the box permanently short of full and the heading permanently
+	 * indeterminate.
+	 */
+	function toggleClass(entries: typeof visible, on: boolean) {
+		const ids = entries
+			.filter((entry) => highestTemperature(entry.hotend) >= printTemperature)
+			.map((entry) => entry.hotend.id);
+
+		setSelected((previous) => {
+			if (!on) return previous.filter((id) => !ids.includes(id));
+
+			const missing = ids.filter((id) => !previous.includes(id));
+
+			// The cap still applies, exactly as it does to "Add all": a class bigger than the room
+			// left adds what fits rather than refusing
+			return [...previous, ...missing.slice(0, MAX_COMPARED_HOTENDS - previous.length)];
+		});
+	}
 
 	function toggle(id: string) {
 		setSelected((previous) =>
@@ -282,69 +340,153 @@ export function HotendSelection() {
 					</span>
 				</div>
 
-				<div className="max-h-[55vh] overflow-y-auto rounded-md border divide-y">
-					{visible.map(({ hotend, maxFlow }) => {
-						const index = selected.indexOf(hotend.id);
-						const checked = index !== -1;
-						const maxTemperature = highestTemperature(hotend);
-						const tooCold = maxTemperature < printTemperature;
-						const disabled = tooCold || (!checked && full);
-						const controlId = `hotend-${hotend.id}`;
+				<div className="max-h-[55vh] overflow-y-auto rounded-md border">
+					{groups.map((group, groupIndex) => {
+						const open = !collapsed.includes(group.band.flowClass.label);
+						// Only the ones that can actually be ticked, so a class of hotends the material
+						// is too hot for does not sit permanently half-selected
+						const selectable = group.entries.filter(
+							(entry) => highestTemperature(entry.hotend) >= printTemperature
+						);
+						const chosen = selectable.filter((entry) => selected.includes(entry.hotend.id)).length;
+						const state = chosen === 0 ? false : chosen === selectable.length ? true : 'indeterminate';
 
 						return (
-							<div
-								key={hotend.id}
-								className={`flex items-center gap-2 px-2 py-1.5 text-sm ${
-									disabled && !checked ? 'opacity-40' : 'hover:bg-accent/50'
-								}`}
-							>
-								<Checkbox
-									id={controlId}
-									checked={checked}
-									disabled={disabled && !checked}
-									onCheckedChange={() => toggle(hotend.id)}
-								/>
-								{/* The whole row is the hit target, which is why everything else lives in the
-								    label rather than beside it */}
-								<Label
-									htmlFor={controlId}
-									className={`flex flex-1 items-center gap-2 font-normal min-w-0 ${
-										disabled && !checked ? '' : 'cursor-pointer'
+							<div key={group.band.flowClass.label} className={groupIndex > 0 ? 'border-t' : ''}>
+								{/* Sticky, because the list is taller than its box and a heading that
+								    scrolls away leaves the rows under it unattributed */}
+								<div className="sticky top-0 z-10 flex items-center gap-2 border-b bg-card/95 px-2 py-1.5 backdrop-blur-sm">
+									<button
+										type="button"
+										onClick={() =>
+											setCollapsed((previous) =>
+												open
+													? [...previous, group.band.flowClass.label]
+													: previous.filter((label) => label !== group.band.flowClass.label)
+											)
+										}
+										aria-expanded={open}
+										aria-label={`${open ? 'Collapse' : 'Expand'} ${group.band.flowClass.name}`}
+										className="text-muted-foreground hover:text-foreground"
+									>
+										{open ? (
+											<ChevronDownIcon className="size-4" />
+										) : (
+											<ChevronRightIcon className="size-4" />
+										)}
+									</button>
+									<Checkbox
+										id={`flow-class-${group.band.flowClass.label}`}
+										checked={state}
+										disabled={selectable.length === 0 || (state !== true && full)}
+										onCheckedChange={() => toggleClass(group.entries, state !== true)}
+										aria-label={`Select every ${group.band.flowClass.name} hotend shown`}
+									/>
+									<Label
+										htmlFor={`flow-class-${group.band.flowClass.label}`}
+										className="flex flex-1 cursor-pointer items-center gap-2 text-xs font-medium"
+										title={
+											`${group.band.flowClass.name}: ${flowClassRange(group.band)} in ` +
+											`${material.name}, from the ${flowClassOrigin(group.band.flowClass)} ` +
+											'this class is quoted at for PLA'
+										}
+									>
+										{/* The same swatch the chart strip uses, so the two read as one
+										    idea rather than two coincidental groupings */}
+										<span
+											className="size-2.5 shrink-0 rounded-[2px]"
+											style={{ background: group.band.flowClass.color }}
+										/>
+										{group.band.flowClass.label} hotends
+										{/* Bracketed, because the count and the range that follows it are
+										    both numbers and "37 36 mm³/s and above" reads as one figure */}
+										<span className="font-normal text-muted-foreground tabular-nums">
+											({group.entries.length})
+										</span>
+										<span className="font-normal text-muted-foreground tabular-nums">
+											{flowClassRange(group.band)}
+										</span>
+									</Label>
+									{chosen > 0 ? (
+										<span className="text-[11px] text-muted-foreground tabular-nums">
+											{chosen} selected
+										</span>
+									) : null}
+								</div>
+
+								{open ? (
+									<div className="divide-y">
+										{group.entries.map(({ hotend, maxFlow, meltZoneLength }) => {
+							const index = selected.indexOf(hotend.id);
+							const checked = index !== -1;
+							const maxTemperature = highestTemperature(hotend);
+							const tooCold = maxTemperature < printTemperature;
+							const disabled = tooCold || (!checked && full);
+							const controlId = `hotend-${hotend.id}`;
+
+							return (
+								<div
+									key={hotend.id}
+									className={`flex items-center gap-2 px-2 py-1.5 text-sm ${
+										disabled && !checked ? 'opacity-40' : 'hover:bg-accent/50'
 									}`}
 								>
-									{checked ? (
-										<SeriesMarker index={index} />
-									) : (
-										<span className="size-[11px] shrink-0" />
-									)}
-									<span className="flex-1 truncate">{hotendLabel(hotend)}</span>
-									{/* The two columns the filters act on, then the two that explain them */}
-									<span
-										className={`text-xs text-muted-foreground tabular-nums shrink-0 text-right ${priceColumn}`}
-										title={hotend.price === null ? 'No price in the database yet' : undefined}
-									>
-										{hotend.price === null ? '—' : money.format(hotend.price)}
-									</span>
-									<span
-										className="text-xs tabular-nums shrink-0 w-20 text-right"
-										title={`Sustainable flow in ${material.name}`}
-									>
-										{formatNumber(maxFlow, 1)} mm³/s
-									</span>
-									<span
-										className={`text-xs tabular-nums shrink-0 w-16 text-right ${
-											tooCold ? 'text-destructive-foreground' : 'text-muted-foreground'
+									<Checkbox
+										id={controlId}
+										checked={checked}
+										disabled={disabled && !checked}
+										onCheckedChange={() => toggle(hotend.id)}
+									/>
+									{/* The whole row is the hit target, which is why everything else lives in the
+									    label rather than beside it */}
+									<Label
+										htmlFor={controlId}
+										className={`flex flex-1 items-center gap-2 font-normal min-w-0 ${
+											disabled && !checked ? '' : 'cursor-pointer'
 										}`}
-										title={tooCold ? `Only rated to ${maxTemperature} °C` : undefined}
 									>
-										{formatNumber(maxTemperature, 0)} °C
-									</span>
-									{/* The melt zone is what the flow beside it is bought with; there is room for
-									    both now the dialog is wider */}
-									<span className="text-xs text-muted-foreground tabular-nums shrink-0 w-16 text-right">
-										{formatNumber(hotend.meltZoneLength, 1)} mm
-									</span>
-								</Label>
+										{checked ? (
+											<SeriesMarker index={index} />
+										) : (
+											<span className="size-[11px] shrink-0" />
+										)}
+										<span className="flex-1 truncate">{hotendLabel(hotend)}</span>
+										{/* The two columns the filters act on, then the two that explain them */}
+										<span
+											className={`text-xs text-muted-foreground tabular-nums shrink-0 text-right ${priceColumn}`}
+											title={hotend.price === null ? 'No price in the database yet' : undefined}
+										>
+											{hotend.price === null ? '—' : money.format(hotend.price)}
+										</span>
+										<span
+											className="text-xs tabular-nums shrink-0 w-20 text-right"
+											title={`Sustainable flow in ${material.name}`}
+										>
+											{formatNumber(maxFlow, 1)} mm³/s
+										</span>
+										<span
+											className={`text-xs tabular-nums shrink-0 w-16 text-right ${
+												tooCold ? 'text-destructive-foreground' : 'text-muted-foreground'
+											}`}
+											title={tooCold ? `Only rated to ${maxTemperature} °C` : undefined}
+										>
+											{formatNumber(maxTemperature, 0)} °C
+										</span>
+										{/* Effective, not the bare channel: it is what the flow beside it is bought
+										    with, and it is the number the heading above this row grouped on — a column
+										    showing the other length would look like the grouping had gone wrong */}
+										<span
+											className="text-xs text-muted-foreground tabular-nums shrink-0 w-16 text-right"
+											title={`Effective melt zone; the physical channel is ${formatNumber(hotend.meltZoneLength, 1)} mm`}
+										>
+											{formatNumber(meltZoneLength, 1)} mm
+										</span>
+									</Label>
+								</div>
+							);
+										})}
+									</div>
+								) : null}
 							</div>
 						);
 					})}

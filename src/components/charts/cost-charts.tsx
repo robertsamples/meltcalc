@@ -12,6 +12,7 @@ import { chartFootnotes, performanceLabel, shortPerformanceLabel } from '@/lib/c
 import type { CostBandMode } from '@/lib/configuration';
 import { BAND_SAMPLES, type BandSpec, costBands, valueBands } from '@/lib/cost-bands';
 import { roundLinearTicks, roundTicks } from '@/lib/currency';
+import { FLOW_CLASSES, type FlowClassBand, flowClassOrigin, flowClassRange } from '@/lib/flow-class';
 import { formatFlow, formatNumber } from '@/lib/format';
 import { labelMetrics, placeLabels } from '@/lib/point-labels';
 import { fitAgainstLogX, type LogTrend, trendAt } from '@/lib/regression';
@@ -22,6 +23,7 @@ import {
 	currentCostLabelsAtom,
 	currentCostShowUnselectedAtom,
 	currentSelectedHotendsAtom,
+	flowClassBandsAtom,
 	moneyAtom,
 	performanceAtom
 } from '@/state/atoms';
@@ -276,6 +278,102 @@ function TrendLine({ xAxisMap, yAxisMap, trend }: { xAxisMap?: AxisMap; yAxisMap
 	return <path d={path} fill="none" stroke="#a1a1aa" strokeOpacity={0.55} strokeWidth={1.5} />;
 }
 
+/** How wide the flow-class strip is, and how much room a label needs before it is worth drawing */
+const CLASS_STRIP_WIDTH = 15;
+const CLASS_LABEL_SIZE = 10;
+const CLASS_LABEL_CLEARANCE = 30;
+
+/**
+ * The community's flow classes, as a strip up the flow axis.
+ *
+ * The classes are melt zone lengths, so `flowClassBandsAtom` has already put each boundary through
+ * the flow model for the material on screen; what arrives here is where they land in mm³/s.
+ *
+ * Down the left edge inside the plot rather than outside it, because it is read against the y
+ * values and has to share their scale. Nothing is drawn there anyway: the x domain starts a fifth
+ * of a decade below the cheapest hotend, so the strip sits in padding rather than over data — and
+ * it goes in before the points regardless, so a marker that did land under it stays on top.
+ *
+ * Labels run vertically, which costs nothing here — a strip fifteen pixels wide has no room for
+ * "UUHF" any other way, and turning them is what lets the strip stay narrow enough to be an
+ * annotation instead of a fifth chart element.
+ */
+function FlowClassStrip({
+	xAxisMap,
+	yAxisMap,
+	bands
+}: {
+	xAxisMap?: AxisMap;
+	yAxisMap?: AxisMap;
+	bands: FlowClassBand[];
+}) {
+	const xScale = xAxisMap && Object.values(xAxisMap)[0]?.scale;
+	const yScale = yAxisMap && Object.values(yAxisMap)[0]?.scale;
+	if (!xScale || !yScale) return null;
+
+	const [priceMin, priceMax] = xScale.domain();
+	const [flowMin, flowMax] = yScale.domain();
+	const left = xScale(priceMin);
+	// Clipped to the axis, so the open-topped class stops at the top of the plot rather than running
+	// off it, and a class entirely above the data does not draw at all
+	const clamp = (flow: number) => Math.min(Math.max(flow, flowMin), flowMax);
+
+	return (
+		<g>
+			{bands.map((band) => {
+				const { flowClass: entry, from, to } = band;
+				const top = yScale(clamp(to));
+				const bottom = yScale(clamp(from));
+				const height = bottom - top;
+				if (!(height > 1) || !Number.isFinite(left) || !(xScale(priceMax) > left)) return null;
+
+				/**
+				 * Toward the bottom of the band rather than its middle.
+				 *
+				 * The classes are nothing like equal on this axis — the open-topped one runs from 36
+				 * to whatever the fastest multi-filament hotend manages, which is most of the plot —
+				 * so centring puts its name a long way from the boundary it announces and a long way
+				 * from any data. Sitting each label just above its own floor keeps all four near the
+				 * thresholds they define, and near the crowd at the bottom of the chart. A short
+				 * band has no room for the offset and simply centres.
+				 */
+				const text = entry.label.length * CLASS_LABEL_SIZE * 0.62;
+				const middle = bottom - Math.min(height / 2, text / 2 + 8);
+
+				return (
+					<g key={entry.label}>
+						<title>{`${entry.name}: ${flowClassRange(band)}, from ${flowClassOrigin(entry)}`}</title>
+						<rect
+							x={left}
+							y={top}
+							width={CLASS_STRIP_WIDTH}
+							height={height}
+							fill={entry.color}
+							fillOpacity={0.9}
+						/>
+						{/* A band the data has squeezed to a sliver gets its colour but not a name it
+						    has no room for */}
+						{height >= CLASS_LABEL_CLEARANCE ? (
+							<text
+								x={left + CLASS_STRIP_WIDTH / 2}
+								y={middle}
+								fill={entry.ink}
+								fontSize={CLASS_LABEL_SIZE}
+								fontWeight={500}
+								textAnchor="middle"
+								dominantBaseline="central"
+								transform={`rotate(-90 ${left + CLASS_STRIP_WIDTH / 2} ${middle})`}
+							>
+								{entry.label}
+							</text>
+						) : null}
+					</g>
+				);
+			})}
+		</g>
+	);
+}
+
 type ScatterPoint = {
 	id: string;
 	label: string;
@@ -362,6 +460,7 @@ export function PriceVsFlowScatter() {
 	const [mode, setMode] = useAtom(currentCostBandModeAtom);
 	const [labels, setLabels] = useAtom(currentCostLabelsAtom);
 	const [showUnselected, setShowUnselected] = useAtom(currentCostShowUnselectedAtom);
+	const classBands = useAtomValue(flowClassBandsAtom);
 	const labelsId = useId();
 	const unselectedId = useId();
 
@@ -469,6 +568,9 @@ export function PriceVsFlowScatter() {
 						{/* First child, so the bands sit behind the axes and the points */}
 						<Customized component={<Bands spec={spec} />} />
 						{mode === 'value' ? <Customized component={<TrendLine trend={trend} />} /> : null}
+						{/* Over the background, under the points: it is an annotation on the axis, not
+						    something a marker should ever be hidden behind */}
+						<Customized component={<FlowClassStrip bands={classBands} />} />
 						{/* Log price: the database spans $8 to four figures, and on a linear axis the
 						    twenty hotends people actually cross-shop pile up against the left edge */}
 						<XAxis
@@ -548,6 +650,26 @@ export function PriceVsFlowScatter() {
 					<span className="flex items-center gap-1.5">
 						<SeriesMarker index={0} />
 						Selected for comparison
+					</span>
+					{/* The strip carries its own labels, so this only has to say where the lines come
+					    from — the lengths are the definition, and a reader who knows the classes will
+					    want to check them against the ones they know */}
+					<span className="flex items-center gap-1.5">
+						<span className="flex h-2 w-8 overflow-hidden rounded-[2px]">
+							{FLOW_CLASSES.map((entry) => (
+								<span key={entry.label} className="flex-1" style={{ background: entry.color }} />
+							))}
+						</span>
+						<span
+							title={
+								'Quoted for PLA: ' +
+								`${FLOW_CLASSES.map((entry) => `${entry.label} ${flowClassOrigin(entry)}`).join(' · ')}. ` +
+								'Scaled for whatever is being printed, so the bands move with the material ' +
+								'and a hotend stays in the same class.'
+							}
+						>
+							Community flow classes
+						</span>
 					</span>
 					{hidden > 0 ? (
 						<span className="opacity-70">
