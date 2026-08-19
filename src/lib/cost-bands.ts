@@ -111,14 +111,21 @@ export type BandSpec = {
  * the origin on linear axes, and a curve here because price is logarithmic. The bands are spaced
  * across whatever the current data actually spans rather than at round numbers.
  */
-export function costBands(bounds: { cheapest: number; dearest: number }): BandSpec | null {
+export function costBands(
+	bounds: { cheapest: number; dearest: number },
+	/**
+	 * How to write one of the boundary costs. Given by the app so the colourbar is labelled in
+	 * whatever currency the reader picked; the default is what the OpenGraph renderer uses, since a
+	 * card is drawn once for everybody and has no reader to ask.
+	 */
+	money: (usd: number) => string = (usd) => `$${formatNumber(usd, 2)}`
+): BandSpec | null {
 	if (!(bounds.cheapest > 0) || !(bounds.dearest > bounds.cheapest)) return null;
 
 	// Geometric steps, because the costs they separate span an order of magnitude
 	const ratio = (bounds.dearest / bounds.cheapest) ** (1 / (BAND_COUNT - 1));
 	const boundaries = Array.from({ length: BAND_COUNT - 1 }, (_, index) => bounds.cheapest * ratio ** (index + 1));
 	const bands = BAND_COLORS.map((color) => ({ color, opacity: BAND_OPACITY }));
-	const money = (value: number) => `$${formatNumber(value, 2)}`;
 
 	return {
 		// Open-ended at both ends: everything cheaper than the first boundary, dearer than the last

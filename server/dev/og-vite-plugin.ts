@@ -1,11 +1,11 @@
 import type { Plugin } from 'vite';
 
 /**
- * Runs the OpenGraph server code inside `vite dev`.
+ * Runs the server-side code inside `vite dev`.
  *
- * Without this, `/og.png` and the injected tags would only exist in a production build, and every
- * change to them would need a full build to see. The modules are loaded through Vite's SSR
- * pipeline, so this is the same code Nitro serves, not a copy.
+ * Without this, `/og.png`, `/api/exchange-rates` and the injected tags would only exist in a
+ * production build, and every change to them would need a full build to see. The modules are loaded
+ * through Vite's SSR pipeline, so this is the same code Nitro serves, not a copy.
  */
 export function ogDevPlugin(): Plugin {
 	return {
@@ -13,6 +13,22 @@ export function ogDevPlugin(): Plugin {
 		apply: 'serve',
 
 		configureServer(server) {
+			// The currency picker is useless without rates, and they come from a server route. Same
+			// module Nitro runs, so dev cannot drift from production
+			server.middlewares.use((req, res, next) => {
+				const url = new URL(req.url ?? '/', 'http://localhost');
+				if (url.pathname !== '/api/exchange-rates') return next();
+
+				void server
+					.ssrLoadModule('/server/exchange-rates.ts')
+					.then(async ({ currentRates }) => {
+						res.setHeader('content-type', 'application/json; charset=utf-8');
+						res.setHeader('cache-control', 'no-store');
+						res.end(JSON.stringify(await currentRates()));
+					})
+					.catch(next);
+			});
+
 			server.middlewares.use((req, res, next) => {
 				const url = new URL(req.url ?? '/', 'http://localhost');
 				if (url.pathname !== '/og.png') return next();

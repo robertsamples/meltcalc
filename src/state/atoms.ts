@@ -22,6 +22,15 @@ import {
 	type ThermalSettings,
 	type ViewMode 
 } from '@/lib/configuration';
+import {
+	BASE_CURRENCY,
+	type ExchangeRates,
+	FALLBACK_RATES,
+	findCurrency,
+	isExchangeRates,
+	type Money, 
+	money
+} from '@/lib/currency';
 import { HOTEND_DB, type HotendDefinition, type HotendOptions, resolveHotends } from '@/lib/hotend';
 import { defaultMaterial, findMaterial, MATERIAL_DB, type MaterialDefinition } from '@/lib/material';
 import {
@@ -108,6 +117,65 @@ function overridableAtom<T>(persisted: Writable<T>, temp: PrimitiveAtom<T | null
 	);
 }
 
+/**
+ * The currency everything on screen is priced in, and the rates that get it there.
+ *
+ * Deliberately not part of `ShareableConfiguration`. A currency is a fact about who is reading, not
+ * about the comparison — sharing a link should not push euros onto someone in Osaka, and a shared
+ * link that carried one would make two readers of the same URL disagree about what a hotend costs.
+ * So it lives in `localStorage` alone, with no imported-config layer over it.
+ */
+const currencyCodeAtom = atomWithLocalStorage<string>('currency', BASE_CURRENCY);
+
+export const currentCurrencyCodeAtom = currencyCodeAtom;
+
+const RATES_KEY = 'exchangeRates';
+
+/**
+ * How long a stored copy is used before the app asks for a fresh one. Rates move daily at most, and
+ * the figures they price are street prices someone typed into a spreadsheet.
+ */
+const RATES_MAX_AGE_MS = 12 * 60 * 60 * 1000;
+
+type CachedRates = { at: number; rates: ExchangeRates };
+
+function readCachedRates(): CachedRates | null {
+	try {
+		const stored = localStorage.getItem(RATES_KEY);
+		if (!stored) return null;
+
+		const parsed = JSON.parse(stored) as Partial<CachedRates>;
+		// A copy written by an older build can be shaped differently, and dividing prices by whatever
+		// it happens to hold is worse than showing dollars
+		if (typeof parsed.at !== 'number' || !isExchangeRates(parsed.rates)) return null;
+
+		return { at: parsed.at, rates: parsed.rates };
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * The rate table in use. Seeded synchronously from the last good response so the first paint has
+ * real money in it, and replaced once `/api/exchange-rates` answers.
+ */
+export const exchangeRatesAtom = atom<ExchangeRates>(readCachedRates()?.rates ?? FALLBACK_RATES);
+
+/** Whether the seeded copy is old enough to be worth a request. Read once, on mount */
+export function ratesAreStale(): boolean {
+	const cached = readCachedRates();
+
+	return cached === null || Date.now() - cached.at > RATES_MAX_AGE_MS;
+}
+
+export function storeRates(rates: ExchangeRates): void {
+	try {
+		localStorage.setItem(RATES_KEY, JSON.stringify({ at: Date.now(), rates } satisfies CachedRates));
+	} catch {
+		// A full or disabled store costs a refetch next visit, nothing more
+	}
+}
+
 // Persisted layer: private on purpose. Components must use the `current*` atoms so imported
 // (shared-link) configs are respected
 const printSettingsAtom = atomWithLocalStorage<PrintSettings>('printSettings', DEFAULT_PRINT_SETTINGS);
@@ -178,6 +246,23 @@ export const visibleMaterialsAtom = atom<MaterialDefinition[]>((get) => {
 	const hidden = get(currentHiddenFamiliesAtom);
 
 	return MATERIAL_DB.filter((material) => !hidden.includes(material.family));
+});
+
+/**
+ * Every price on screen goes through this: the chosen currency, today's rate, and the formatting
+ * that pairs with them.
+ *
+ * One atom rather than a helper each component calls, because the decimals a currency gets are
+ * derived from its rate — so two labels formatting independently is how a column ends up mixing
+ * "¥360" with "¥359.87".
+ */
+export const moneyAtom = atom<Money>((get) => {
+	const code = get(currentCurrencyCodeAtom);
+	// A code stored by a build that offered a currency this one dropped falls back rather than
+	// leaving every price blank
+	const currency = findCurrency(code) ?? (findCurrency(BASE_CURRENCY) as NonNullable<ReturnType<typeof findCurrency>>);
+
+	return money(currency, get(exchangeRatesAtom));
 });
 
 // Derived layer: the whole analysis, recomputed from the settings above. Components read these
@@ -361,6 +446,7 @@ export const discardImportedConfigurationAtom = atom(null, (_get, set) => {
 	set(tempThermalSettingsAtom, null);
 	set(tempSelectedHotendsAtom, null);
 	set(tempHotendOptionsAtom, null);
+	set(tempHotendPricesAtom, null);
 	set(tempViewModeAtom, null);
 	set(tempEnergyPerSecondAtom, null);
 	set(tempEnergyPerMaterialStartAtom, null);
@@ -369,6 +455,7 @@ export const discardImportedConfigurationAtom = atom(null, (_get, set) => {
 	set(tempHiddenFamiliesAtom, null);
 	set(tempCostBandModeAtom, null);
 	set(tempCostLabelsAtom, null);
+	set(tempCostShowUnselectedAtom, null);
 	set(tempDebugAtom, null);
 
 	set(isImportedConfigAtom, false);

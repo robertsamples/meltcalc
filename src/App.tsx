@@ -9,6 +9,7 @@ import { MaterialFlowChart } from '@/components/charts/material-flow-chart';
 import { MaxFlowChart } from '@/components/charts/max-flow-chart';
 import { MeltZoneLandscape, SpecificPowerChart } from '@/components/charts/melt-zone-charts';
 import { ResidenceByHotendChart, ResidenceCurveChart } from '@/components/charts/residence-charts';
+import { CurrencySelect } from '@/components/currency-select';
 import { HotendTable } from '@/components/hotend-table';
 import { ImportWarning } from '@/components/import-warning';
 import { MaterialSettingsCard, ModelSettingsCard, PrintSettingsCard } from '@/components/settings';
@@ -44,7 +45,10 @@ export function App() {
 						Hotend and Material comparisons for max flow rate, print speed, heater requriements, and value.
 					</p>
 				</div>
-				<ShareConfigButton />
+				<div className="flex items-center gap-3">
+					<CurrencySelect />
+					<ShareConfigButton />
+				</div>
 			</header>
 
 			<ImportWarning />

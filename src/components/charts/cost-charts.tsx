@@ -11,6 +11,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { chartFootnotes, performanceLabel, shortPerformanceLabel } from '@/lib/chart-labels';
 import type { CostBandMode } from '@/lib/configuration';
 import { BAND_SAMPLES, type BandSpec, costBands, valueBands } from '@/lib/cost-bands';
+import { roundLinearTicks, roundTicks } from '@/lib/currency';
 import { formatFlow, formatNumber } from '@/lib/format';
 import { labelMetrics, placeLabels } from '@/lib/point-labels';
 import { fitAgainstLogX, type LogTrend, trendAt } from '@/lib/regression';
@@ -21,6 +22,7 @@ import {
 	currentCostLabelsAtom,
 	currentCostShowUnselectedAtom,
 	currentSelectedHotendsAtom,
+	moneyAtom,
 	performanceAtom
 } from '@/state/atoms';
 
@@ -36,7 +38,7 @@ import {
  * a chart whose whole job is ranking by price.
  */
 
-const COST_CONFIG = { costPerFlow: { label: '$ per mm³/s' } } satisfies ChartConfig;
+const COST_CONFIG = { costPerFlow: { label: 'Cost per mm³/s' } } satisfies ChartConfig;
 
 const UNPRICED_COLOR = '#71717a';
 
@@ -50,6 +52,7 @@ type CostRow = {
 
 export function CostPerFlowChart() {
 	const performance = useAtomValue(performanceAtom);
+	const money = useAtomValue(moneyAtom);
 
 	const priced = performance.filter(
 		(entry) => entry.price !== null && entry.costPerFlow !== null && Number.isFinite(entry.costPerFlow)
@@ -66,6 +69,11 @@ export function CostPerFlowChart() {
 		.sort((a, b) => a.costPerFlow - b.costPerFlow);
 
 	const unpriced = performance.length - priced.length;
+
+	// Chosen in the reader's currency and divided back, so the labels are round whatever they are
+	// written in. The last one is the axis maximum, which is what keeps the scale ending somewhere
+	// deliberate instead of on whatever the dearest hotend happens to cost
+	const ticks = roundLinearTicks(money.convert(Math.max(0, ...rows.map((row) => row.costPerFlow)))).map(money.toUsd);
 
 	return (
 		<Card>
@@ -85,12 +93,17 @@ export function CostPerFlowChart() {
 							<BarChart data={rows} layout="vertical" margin={{ left: 4, right: 64, top: 8, bottom: 4 }}>
 								<XAxis
 									type="number"
+									domain={[0, ticks[ticks.length - 1] ?? 'auto']}
+									ticks={ticks}
 									tickLine={false}
 									axisLine={AXIS_LINE}
 									tick={{ fontSize: 11 }}
-									tickFormatter={(value: number) => `$${formatNumber(value, 0)}`}
+									// `fine` rather than whole units, and the same precision the bar labels
+									// carry: a euro is worth a fifth of the range this axis spans, so
+									// rounding the ticks to one would collapse half of them together
+									tickFormatter={(value: number) => money.format(value, 'fine')}
 									label={{
-										value: '$ per mm³/s',
+										value: `${money.currency.code} per mm³/s`,
 										position: 'insideBottomRight',
 										offset: -2,
 										fontSize: 11
@@ -110,10 +123,10 @@ export function CostPerFlowChart() {
 										<>
 											<p className="font-medium text-sm">{row.label}</p>
 											<p className="tabular-nums">
-												${formatNumber(row.costPerFlow, 2)} per mm³/s
+												{money.format(row.costPerFlow, 'fine')} per mm³/s
 											</p>
 											<p className="text-muted-foreground tabular-nums">
-												${formatNumber(row.price, 0)} · {formatFlow(row.maxFlow)}
+												{money.format(row.price)} · {formatFlow(row.maxFlow)}
 											</p>
 										</>
 									))}
@@ -130,7 +143,7 @@ export function CostPerFlowChart() {
 										position="right"
 										fontSize={11}
 										className="fill-foreground"
-										formatter={(value: number) => `$${formatNumber(value, 2)}`}
+										formatter={(value: number) => money.format(value, 'fine')}
 									/>
 								</Bar>
 							</BarChart>
@@ -345,6 +358,7 @@ function PointLabels({
 export function PriceVsFlowScatter() {
 	const all = useAtomValue(allPerformanceAtom);
 	const selected = useAtomValue(currentSelectedHotendsAtom);
+	const money = useAtomValue(moneyAtom);
 	const [mode, setMode] = useAtom(currentCostBandModeAtom);
 	const [labels, setLabels] = useAtom(currentCostLabelsAtom);
 	const [showUnselected, setShowUnselected] = useAtom(currentCostShowUnselectedAtom);
@@ -386,21 +400,21 @@ export function PriceVsFlowScatter() {
 	const trend = useMemo(() => fitAgainstLogX(points.map((point) => ({ x: point.price, y: point.maxFlow }))), [points]);
 
 	const spec = useMemo(
-		() => (mode === 'value' ? valueBands(trend) : costBands(costBounds)),
-		[mode, trend, costBounds]
+		() => (mode === 'value' ? valueBands(trend) : costBands(costBounds, (usd) => money.format(usd, 'fine'))),
+		[mode, trend, costBounds, money]
 	);
 
-	// Round numbers inside the data's own range, so the ticks land where prices actually are
+	// Round numbers inside the data's own range, so the ticks land where prices actually are.
+	// Chosen in the reader's currency and divided back, because a tick is a label first: round
+	// dollars are €93 and ¥7,980 once converted, which reads as an axis nobody chose
 	const priceTicks = useMemo(() => {
 		if (drawn.length === 0) return [];
 		const prices = drawn.map((point) => point.price);
 		const lowest = Math.min(...prices);
 		const highest = Math.max(...prices);
 
-		return [10, 25, 50, 100, 250, 500, 1000, 2500].filter(
-			(tick) => tick >= lowest * 0.6 && tick <= highest * 1.4
-		);
-	}, [drawn]);
+		return roundTicks(money.convert(lowest) * 0.6, money.convert(highest) * 1.4).map(money.toUsd);
+	}, [drawn, money]);
 
 	return (
 		<Card>
@@ -466,8 +480,13 @@ export function PriceVsFlowScatter() {
 							tickLine={false}
 							axisLine={AXIS_LINE}
 							tick={{ fontSize: 11 }}
-							tickFormatter={(value: number) => `$${formatNumber(value, 0)}`}
-							label={{ value: 'price (USD, log)', position: 'insideBottomRight', offset: -2, fontSize: 11 }}
+							tickFormatter={(value: number) => money.format(value)}
+							label={{
+								value: `price (${money.currency.code}, log)`,
+								position: 'insideBottomRight',
+								offset: -2,
+								fontSize: 11
+							}}
 						/>
 						<YAxis
 							type="number"
@@ -485,10 +504,10 @@ export function PriceVsFlowScatter() {
 								<>
 									<p className="font-medium text-sm">{point.label}</p>
 									<p className="tabular-nums">
-										${formatNumber(point.price, 0)} · {formatFlow(point.maxFlow)}
+										{money.format(point.price)} · {formatFlow(point.maxFlow)}
 									</p>
 									<p className="text-muted-foreground tabular-nums">
-										${formatNumber(point.costPerFlow, 2)} per mm³/s
+										{money.format(point.costPerFlow, 'fine')} per mm³/s
 									</p>
 								</>
 							))}

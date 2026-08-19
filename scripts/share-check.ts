@@ -1,6 +1,7 @@
 import { hotendSlug, parseReadableQuery } from '@/lib/config-query';
 import { decodeConfig, encodeConfig } from '@/lib/config-sharing';
 import { DEFAULT_CONFIGURATION, MAX_COMPARED_HOTENDS, type ShareableConfiguration } from '@/lib/configuration';
+import { CURRENCIES, FALLBACK_RATES, money } from '@/lib/currency';
 import { ABBREVIATED_IDS, findHotend, HOTEND_DB, hotendCode } from '@/lib/hotend';
 import type { Celsius, CubicMillimetersPerSecond } from '@/lib/units';
 
@@ -216,4 +217,43 @@ console.log(
 		`${clashes.length === 0 ? 'OK  ' : 'FAIL'} readable: hotend slugs unique  ${slugs.size} of ${HOTEND_DB.length}`
 	);
 	for (const [slug, ids] of clashes) console.log(`  "${slug}" names ${ids.join(' and ')}`);
+}
+
+// ---------------------------------------------------------------------------------------------
+// The currency picker. A code in that list is an ISO 4217 code as far as `Intl` is concerned, and
+// a typo in one does not fail a build — it throws the moment somebody selects it. The snapshot is
+// checked with it because a currency the feeds go on to drop would silently fall back to dollars
+// while the picker still claims to be quoting it.
+{
+	const broken: string[] = [];
+	for (const currency of CURRENCIES) {
+		if (!(currency.code in FALLBACK_RATES.rates)) {
+			broken.push(`${currency.code} has no rate in the compiled-in snapshot`);
+			continue;
+		}
+		try {
+			const quoted = money(currency, FALLBACK_RATES);
+			// A code `Intl` does not know throws above; one it knows but cannot sign would leave the
+			// price cell drawing nothing where its symbol goes
+			if (!quoted.symbol) broken.push(`${currency.code} formats without a symbol`);
+			if (!quoted.format(89).match(/\d/)) broken.push(`${currency.code} formats to no digits`);
+		} catch (error) {
+			broken.push(`${currency.code} is not a currency Intl accepts: ${String(error)}`);
+		}
+	}
+
+	console.log(
+		`${broken.length === 0 ? 'OK  ' : 'FAIL'} currencies all format      ` +
+			`${CURRENCIES.length - broken.length}/${CURRENCIES.length}`
+	);
+	for (const note of broken) console.log(`  ${note}`);
+}
+
+// A currency is a preference, not part of the comparison, so it must not ride along in a link:
+// a config that carried one would make two readers of the same URL see different money
+{
+	const keys = Object.keys(DEFAULT_CONFIGURATION);
+	const leaked = keys.filter((key) => /currenc/i.test(key));
+	console.log(`${leaked.length === 0 ? 'OK  ' : 'FAIL'} currency stays out of links   ${keys.length} fields`);
+	for (const key of leaked) console.log(`  "${key}" would be shared`);
 }

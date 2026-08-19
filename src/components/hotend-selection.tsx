@@ -11,7 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { MAX_COMPARED_HOTENDS } from '@/lib/configuration';
 import { formatNumber } from '@/lib/format';
 import { ECOSYSTEMS, highestTemperature, hotendLabel } from '@/lib/hotend';
-import { allPerformanceAtom, currentSelectedHotendsAtom, materialAtom, printTemperatureAtom } from '@/state/atoms';
+import {
+	allPerformanceAtom,
+	currentSelectedHotendsAtom,
+	materialAtom,
+	moneyAtom,
+	printTemperatureAtom
+} from '@/state/atoms';
 
 const ALL_ECOSYSTEMS = 'all';
 
@@ -31,6 +37,10 @@ export function HotendSelection() {
 	const printTemperature = useAtomValue(printTemperatureAtom);
 	const material = useAtomValue(materialAtom);
 	const performance = useAtomValue(allPerformanceAtom);
+	const money = useAtomValue(moneyAtom);
+	// A rupiah price is three times the characters a dollar one is, and the column it sits in is
+	// fixed-width. Three steps rather than a measurement: this is a dialog with room to give
+	const priceColumn = money.rate >= 1000 ? 'w-24' : money.rate >= 30 ? 'w-20' : 'w-14';
 	const [open, setOpen] = useState(false);
 	const [search, setSearch] = useState('');
 	const [ecosystem, setEcosystem] = useState(ALL_ECOSYSTEMS);
@@ -52,7 +62,8 @@ export function HotendSelection() {
 	 */
 	const visible = useMemo(() => {
 		const needle = search.trim().toLowerCase();
-		const priceCeiling = Number.parseFloat(maxPrice);
+		// Typed in whatever currency the header is set to, against prices held in dollars
+		const priceCeiling = money.toUsd(Number.parseFloat(maxPrice));
 		const flowFloor = Number.parseFloat(minFlow);
 		const temperatureFloor = Number.parseFloat(minTemp);
 
@@ -76,7 +87,7 @@ export function HotendSelection() {
 					.includes(needle);
 			})
 			.sort((a, b) => b.maxFlow - a.maxFlow);
-	}, [performance, search, ecosystem, maxPrice, minFlow, minTemp, heatbreakOnly, soldOnly]);
+	}, [performance, search, ecosystem, maxPrice, minFlow, minTemp, heatbreakOnly, soldOnly, money]);
 
 	const full = selected.length >= MAX_COMPARED_HOTENDS;
 	const tooCold = visible.filter((entry) => highestTemperature(entry.hotend) < printTemperature).length;
@@ -180,7 +191,7 @@ export function HotendSelection() {
 							inputMode="decimal"
 							min={0}
 							step={5}
-							placeholder="$ any"
+							placeholder={`${money.symbol} any`}
 							value={maxPrice}
 							onChange={(event) => setMaxPrice(event.target.value)}
 							className="h-7 w-24"
@@ -309,10 +320,10 @@ export function HotendSelection() {
 									<span className="flex-1 truncate">{hotendLabel(hotend)}</span>
 									{/* The two columns the filters act on, then the two that explain them */}
 									<span
-										className="text-xs text-muted-foreground tabular-nums shrink-0 w-14 text-right"
+										className={`text-xs text-muted-foreground tabular-nums shrink-0 text-right ${priceColumn}`}
 										title={hotend.price === null ? 'No price in the database yet' : undefined}
 									>
-										{hotend.price === null ? '—' : `$${formatNumber(hotend.price, 0)}`}
+										{hotend.price === null ? '—' : money.format(hotend.price)}
 									</span>
 									<span
 										className="text-xs tabular-nums shrink-0 w-20 text-right"

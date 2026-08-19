@@ -15,6 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import type { Money } from '@/lib/currency';
 import { formatNumber } from '@/lib/format';
 import {
 	BLOCK_MATERIAL_DERATE,
@@ -36,6 +37,7 @@ import {
 	currentHotendPricesAtom,
 	currentPrintSettingsAtom,
 	currentSelectedHotendsAtom,
+	moneyAtom,
 	performanceAtom,
 	printTemperatureAtom
 } from '@/state/atoms';
@@ -283,13 +285,22 @@ function nextSort(sort: Sort, column: Column): Sort {
  *
  * Committed on blur rather than per keystroke: the table can be sorted by this column, and a row
  * that reorders itself between two digits is unusable.
+ *
+ * The box reads and writes the reader's own currency, but what it stores is still dollars: the
+ * conversion is undone before the number leaves this component, so switching currency afterwards
+ * re-quotes a typed price rather than reinterpreting it as a different amount of money.
  */
 function PriceCell({
 	entry,
+	money,
+	width,
 	onCommit
 }: {
 	entry: HotendPerformance;
-	/** The bare-hotend price to store, or `null` to fall back to the database */
+	money: Money;
+	/** Characters the widest figure in the column needs, so the boxes line up */
+	width: number;
+	/** The bare-hotend price to store, in dollars, or `null` to fall back to the database */
 	onCommit: (base: number | null) => void;
 }) {
 	const [draft, setDraft] = useState<string | null>(null);
@@ -297,16 +308,17 @@ function PriceCell({
 	// state update lands, so the blur handler cannot see it in state
 	const abandoned = useRef(false);
 
-	const shown = entry.price === null ? '' : String(Number(entry.price.toFixed(2)));
+	const shown = entry.price === null ? '' : money.amount(entry.price);
 
 	function commit(raw: string) {
 		const value = Number(raw.trim());
 		// Anything unusable, including an emptied box, means "use the database figure"
 		if (raw.trim() === '' || !Number.isFinite(value) || value < 0) return onCommit(null);
 
-		// The box holds the total, so the options have to come back off before storing. Floored at
-		// zero: a total below what the fitted options cost has no bare price that produces it
-		onCommit(Math.max(value - entry.priceOfOptions, 0));
+		// The box holds the total in the reader's currency, so it comes back to dollars first and
+		// the options come off after. Floored at zero: a total below what the fitted options cost
+		// has no bare price that produces it
+		onCommit(Math.max(money.toUsd(value) - entry.priceOfOptions, 0));
 	}
 
 	return (
@@ -316,14 +328,16 @@ function PriceCell({
 			    the moment the field is actually clicked into */}
 			<TooltipTrigger asChild>
 				<span className="flex items-baseline justify-center gap-px">
-					<span className={entry.priceOverridden ? '' : 'text-muted-foreground'}>$</span>
+					<span className={entry.priceOverridden ? '' : 'text-muted-foreground'}>{money.symbol}</span>
 					<input
 						type="number"
 						min={0}
-						step={5}
+						// A yen box that steps by five is a box with no working arrows, so the step
+						// follows the size of the unit the same way the decimals do
+						step={[5, 10, 100][2 - money.fineDigits]}
 						value={draft ?? shown}
 						placeholder="—"
-						aria-label={`Price of ${hotendLabel(entry.hotend)} in dollars`}
+						aria-label={`Price of ${hotendLabel(entry.hotend)} in ${money.currency.name}`}
 						onFocus={(event) => event.currentTarget.select()}
 						onChange={(event) => setDraft(event.target.value)}
 						onKeyDown={(event) => {
@@ -340,7 +354,10 @@ function PriceCell({
 						}}
 						// The border is always drawn, not just on hover: a column of bare numbers gives
 						// no reason to try clicking one, and the whole feature is invisible until someone does
-						className={`w-9 rounded-sm border border-muted-foreground/25 bg-transparent px-0.5 text-right tabular-nums outline-none hover:border-muted-foreground/50 focus:border-muted-foreground/80 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${
+						// Sized to the column's widest figure rather than fixed: ¥13,000 needs half
+						// again the room $89 does, and a column of clipped prices is worse than a wide one
+						style={{ width: `${width + 1}ch` }}
+						className={`rounded-sm border border-muted-foreground/25 bg-transparent px-0.5 text-right tabular-nums outline-none hover:border-muted-foreground/50 focus:border-muted-foreground/80 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${
 							entry.priceOverridden ? '' : 'text-muted-foreground'
 						}`}
 					/>
@@ -472,6 +489,7 @@ export function HotendTable() {
 	const selected = useAtomValue(currentSelectedHotendsAtom);
 	const print = useAtomValue(currentPrintSettingsAtom);
 	const printTemperature = useAtomValue(printTemperatureAtom);
+	const money = useAtomValue(moneyAtom);
 	const [options, setOptions] = useAtom(currentHotendOptionsAtom);
 	const [prices, setPrices] = useAtom(currentHotendPricesAtom);
 	// Deliberately not in the configuration: how a table is ordered is how it is being read right
@@ -481,6 +499,13 @@ export function HotendTable() {
 	// The speed a hotend supports at the current layer height and line width
 	const crossSection = extrusionCrossSection(print.lineWidth, print.layerHeight);
 	const rows = sorted(performance, sort, crossSection);
+
+	// One width for the whole price column, taken from the longest figure actually in it. Measured
+	// on the formatted string so the thousands separators a large currency picks up are counted
+	const priceWidth = rows.reduce(
+		(widest, entry) => Math.max(widest, entry.price === null ? 0 : money.amount(entry.price).length),
+		3
+	);
 
 	function update(hotend: HotendDefinition, change: { block?: BlockMaterial; mze?: boolean; hfNozzle?: boolean }) {
 		setOptions({ ...options, [hotend.id]: { ...options[hotend.id], ...change } });
@@ -604,7 +629,12 @@ export function HotendTable() {
 										{/* No `title`: the cell carries a real tooltip, and a native one would fight
 										    it with its own second-long delay */}
 										<TableCell>
-											<PriceCell entry={entry} onCommit={(base) => updatePrice(entry.hotend, base)} />
+											<PriceCell
+												entry={entry}
+												money={money}
+												width={priceWidth}
+												onCommit={(base) => updatePrice(entry.hotend, base)}
+											/>
 										</TableCell>
 
 										{/* The toggle is its own centred block, so a hotend with a choice and one
