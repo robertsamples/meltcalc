@@ -7,6 +7,7 @@ import {
 	DEFAULT_DEBUG,
 	DEFAULT_ENERGY_PER_MATERIAL_START,
 	DEFAULT_ENERGY_PER_SECOND,
+	DEFAULT_FLOW_AS_SPEED,
 	DEFAULT_HIDDEN_FAMILIES,
 	DEFAULT_MATERIAL_FLOW_AS_SPEED,
 	DEFAULT_MATERIAL_FLOW_HOTEND,
@@ -127,6 +128,7 @@ const LegacyConfigurationSchema = z.object({
 	energyPerMaterialStart: z.boolean().default(DEFAULT_ENERGY_PER_MATERIAL_START),
 	materialFlowHotend: z.string().default(DEFAULT_MATERIAL_FLOW_HOTEND),
 	materialFlowAsSpeed: z.boolean().default(DEFAULT_MATERIAL_FLOW_AS_SPEED),
+	flowAsSpeed: z.boolean().default(DEFAULT_FLOW_AS_SPEED),
 	hiddenFamilies: z.array(z.string()).default(DEFAULT_HIDDEN_FAMILIES),
 	costBandMode: z.enum(['cost', 'value']).default(DEFAULT_COST_BAND_MODE),
 	costLabels: z.boolean().default(DEFAULT_COST_LABELS),
@@ -186,10 +188,14 @@ const CompactSchema = z.object({
 	k: z.string().optional(),
 	/** hiddenFamilies, by name — there are only eight, and a name cannot drift the way an index can */
 	q: z.array(z.string()).optional(),
-	/** energyPerSecond, energyPerMaterialStart, materialFlowAsSpeed, costBandMode, labels, unselected, debug */
+	/**
+	 * energyPerSecond, energyPerMaterialStart, materialFlowAsSpeed, flowAsSpeed, costBandMode,
+	 * labels, unselected, debug
+	 */
 	x: Flag.optional(),
 	y: Flag.optional(),
 	v: Flag.optional(),
+	f: Flag.optional(),
 	w: Flag.optional(),
 	l: Flag.optional(),
 	u: Flag.optional(),
@@ -295,6 +301,7 @@ function compact(config: ShareableConfiguration): Compact {
 		x: flag(config.energyPerSecond, DEFAULT_ENERGY_PER_SECOND),
 		y: flag(config.energyPerMaterialStart, DEFAULT_ENERGY_PER_MATERIAL_START),
 		v: flag(config.materialFlowAsSpeed, DEFAULT_MATERIAL_FLOW_AS_SPEED),
+		f: flag(config.flowAsSpeed, DEFAULT_FLOW_AS_SPEED),
 		w: flag(config.costBandMode === 'value', DEFAULT_COST_BAND_MODE === 'value'),
 		l: flag(config.costLabels, DEFAULT_COST_LABELS),
 		u: flag(config.costShowUnselected, DEFAULT_COST_SHOW_UNSELECTED),
@@ -354,6 +361,7 @@ function expand(payload: Compact): ShareableConfiguration {
 		energyPerSecond: payload.x === undefined ? DEFAULT_ENERGY_PER_SECOND : payload.x === 1,
 		energyPerMaterialStart: payload.y === undefined ? DEFAULT_ENERGY_PER_MATERIAL_START : payload.y === 1,
 		materialFlowAsSpeed: payload.v === undefined ? DEFAULT_MATERIAL_FLOW_AS_SPEED : payload.v === 1,
+		flowAsSpeed: payload.f === undefined ? DEFAULT_FLOW_AS_SPEED : payload.f === 1,
 		costBandMode: payload.w === undefined ? DEFAULT_COST_BAND_MODE : payload.w === 1 ? 'value' : 'cost',
 		costLabels: payload.l === undefined ? DEFAULT_COST_LABELS : payload.l === 1,
 		costShowUnselected:

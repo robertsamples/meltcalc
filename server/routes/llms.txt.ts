@@ -113,7 +113,7 @@ function document(baseUrl: string): string {
 		'| `speed` | print speed, mm/s |',
 		'| `flow` | volumetric flow, mm³/s — naming it overrides the three above |',
 		'| `for` | in the per-material flow view, the hotend to hold fixed |',
-		'| `as-speed` | `yes` to read that view in mm/s instead of mm³/s |',
+		'| `as-speed` | `yes` to read either flow view in mm/s instead of mm³/s |',
 		'| `bands` | price chart background: `cost` or `value` |',
 		'',
 		'Examples:',

@@ -155,6 +155,16 @@ export const DEFAULT_MATERIAL_FLOW_HOTEND = '';
 /** Whether that view reads in mm/s at the current layer height and line width, or in mm³/s */
 export const DEFAULT_MATERIAL_FLOW_AS_SPEED = false;
 
+/**
+ * The same choice for the hotend flow view, kept separate from the one above.
+ *
+ * Two settings rather than one because the two charts answer different questions and a reader is
+ * not necessarily thinking in the same units in both: mm/s is the number a slicer takes, and mm³/s
+ * is the number a hotend is sold on. Off by default in both, since mm³/s is what the model works in
+ * and what every other view is labelled with.
+ */
+export const DEFAULT_FLOW_AS_SPEED = false;
+
 /** Polymer families switched off in the material views, by name. Empty shows everything */
 export const DEFAULT_HIDDEN_FAMILIES: string[] = [];
 
@@ -205,6 +215,8 @@ export type ShareableConfiguration = {
 	/** Hotend id the per-material flow view is pinned to; `''` follows the comparison */
 	materialFlowHotend: string;
 	materialFlowAsSpeed: boolean;
+	/** Whether the hotend flow view reads in mm/s rather than mm³/s */
+	flowAsSpeed: boolean;
 	/** Polymer families hidden from the material comparisons */
 	hiddenFamilies: string[];
 	costBandMode: CostBandMode;
@@ -225,6 +237,7 @@ export const DEFAULT_CONFIGURATION: ShareableConfiguration = {
 	energyPerMaterialStart: DEFAULT_ENERGY_PER_MATERIAL_START,
 	materialFlowHotend: DEFAULT_MATERIAL_FLOW_HOTEND,
 	materialFlowAsSpeed: DEFAULT_MATERIAL_FLOW_AS_SPEED,
+	flowAsSpeed: DEFAULT_FLOW_AS_SPEED,
 	hiddenFamilies: DEFAULT_HIDDEN_FAMILIES,
 	costBandMode: DEFAULT_COST_BAND_MODE,
 	costLabels: DEFAULT_COST_LABELS,

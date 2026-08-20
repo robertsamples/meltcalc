@@ -125,6 +125,22 @@ export const AXIS_LINE = { stroke: 'currentColor', className: 'text-border' } as
 export const THRESHOLD_LINE = { stroke: '#a1a1aa', strokeDasharray: '4 4' } as const;
 
 /**
+ * How a bar draws the part of its length nobody would actually use.
+ *
+ * Two charts split a flow bar the same way — solid to what the material is typically run at, faded
+ * on to what the melt zone could melt — and they have to look identical, because a reader who has
+ * learned the convention on one is entitled to read the other with it. So the opacity and the
+ * hairline that separates the segments live here rather than being written out twice.
+ *
+ * The faded part is the same hue, not a second colour: it is the same quantity continued, and giving
+ * it a colour of its own would make it look like a different measurement.
+ */
+export const HEADROOM_OPACITY = 0.28;
+
+/** Painted between the segments so the pair reads as two blocks, not one bar fading out */
+export const SEGMENT_GAP = { stroke: '#09090b', strokeWidth: 1 } as const;
+
+/**
  * Path for a shape of the given size, centred on the origin.
  *
  * The triangles are drawn slightly oversized and centroid-centred: an equilateral triangle

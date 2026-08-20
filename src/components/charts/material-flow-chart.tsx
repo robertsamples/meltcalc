@@ -14,7 +14,7 @@ import { chartFootnotes, performanceLabel } from '@/lib/chart-labels';
 import { formatNumber } from '@/lib/format';
 import { blockMaterialFactor } from '@/lib/hotend';
 import { familyIndex } from '@/lib/material';
-import { AXIS_LINE, STATUS_COLORS, seriesColor, THRESHOLD_LINE } from '@/lib/series';
+import { AXIS_LINE, HEADROOM_OPACITY, SEGMENT_GAP, STATUS_COLORS, seriesColor, THRESHOLD_LINE } from '@/lib/series';
 import { energyPerVolume, extrusionCrossSection, meltZoneLimitedFlow } from '@/lib/thermal';
 import type { WattsPerMillimeter } from '@/lib/units';
 import {
@@ -45,12 +45,6 @@ const CHART_CONFIG = {
 	practical: { label: 'Typically run' },
 	headroom: { label: 'Melt zone allows' }
 } satisfies ChartConfig;
-
-/** The block past the recommended figure is the same quantity continued, so it is the same hue */
-const HEADROOM_OPACITY = 0.28;
-
-/** Painted between the segments so the pair reads as two blocks, not one fading bar */
-const SEGMENT_GAP = { stroke: '#09090b', strokeWidth: 1 } as const;
 
 
 type Row = {

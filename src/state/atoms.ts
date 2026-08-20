@@ -7,6 +7,7 @@ import {
 	DEFAULT_DEBUG,
 	DEFAULT_ENERGY_PER_MATERIAL_START,
 	DEFAULT_ENERGY_PER_SECOND,
+	DEFAULT_FLOW_AS_SPEED,
 	DEFAULT_HIDDEN_FAMILIES,
 	DEFAULT_HOTEND_IDS,
 	DEFAULT_HOTEND_PRICES,
@@ -196,6 +197,7 @@ const materialFlowAsSpeedAtom = atomWithLocalStorage<boolean>(
 	'materialFlowAsSpeed',
 	DEFAULT_MATERIAL_FLOW_AS_SPEED
 );
+const flowAsSpeedAtom = atomWithLocalStorage<boolean>('flowAsSpeed', DEFAULT_FLOW_AS_SPEED);
 const hiddenFamiliesAtom = atomWithLocalStorage<string[]>('hiddenFamilies', DEFAULT_HIDDEN_FAMILIES);
 const costBandModeAtom = atomWithLocalStorage<CostBandMode>('costBandMode', DEFAULT_COST_BAND_MODE);
 const costLabelsAtom = atomWithLocalStorage<boolean>('costLabels', DEFAULT_COST_LABELS);
@@ -213,6 +215,7 @@ const tempEnergyPerSecondAtom = atom<boolean | null>(null);
 const tempEnergyPerMaterialStartAtom = atom<boolean | null>(null);
 const tempMaterialFlowHotendAtom = atom<string | null>(null);
 const tempMaterialFlowAsSpeedAtom = atom<boolean | null>(null);
+const tempFlowAsSpeedAtom = atom<boolean | null>(null);
 const tempHiddenFamiliesAtom = atom<string[] | null>(null);
 const tempCostBandModeAtom = atom<CostBandMode | null>(null);
 const tempCostLabelsAtom = atom<boolean | null>(null);
@@ -236,6 +239,7 @@ export const currentMaterialFlowAsSpeedAtom = overridableAtom(
 	materialFlowAsSpeedAtom,
 	tempMaterialFlowAsSpeedAtom
 );
+export const currentFlowAsSpeedAtom = overridableAtom(flowAsSpeedAtom, tempFlowAsSpeedAtom);
 export const currentHiddenFamiliesAtom = overridableAtom(hiddenFamiliesAtom, tempHiddenFamiliesAtom);
 export const currentCostBandModeAtom = overridableAtom(costBandModeAtom, tempCostBandModeAtom);
 export const currentCostLabelsAtom = overridableAtom(costLabelsAtom, tempCostLabelsAtom);
@@ -405,6 +409,7 @@ export const currentConfigurationAtom = atom<ShareableConfiguration>((get) => ({
 	energyPerMaterialStart: get(currentEnergyPerMaterialStartAtom),
 	materialFlowHotend: get(currentMaterialFlowHotendAtom),
 	materialFlowAsSpeed: get(currentMaterialFlowAsSpeedAtom),
+	flowAsSpeed: get(currentFlowAsSpeedAtom),
 	hiddenFamilies: get(currentHiddenFamiliesAtom),
 	costBandMode: get(currentCostBandModeAtom),
 	costLabels: get(currentCostLabelsAtom),
@@ -424,6 +429,7 @@ export const loadImportedConfigurationAtom = atom(null, (_get, set, config: Shar
 	set(tempEnergyPerMaterialStartAtom, config.energyPerMaterialStart);
 	set(tempMaterialFlowHotendAtom, config.materialFlowHotend);
 	set(tempMaterialFlowAsSpeedAtom, config.materialFlowAsSpeed);
+	set(tempFlowAsSpeedAtom, config.flowAsSpeed);
 	set(tempHiddenFamiliesAtom, config.hiddenFamilies);
 	set(tempCostBandModeAtom, config.costBandMode);
 	set(tempCostLabelsAtom, config.costLabels);
@@ -447,6 +453,7 @@ export const saveImportedConfigurationAtom = atom(null, (get, set) => {
 	const energyPerMaterialStart = get(tempEnergyPerMaterialStartAtom);
 	const materialFlowHotend = get(tempMaterialFlowHotendAtom);
 	const materialFlowAsSpeed = get(tempMaterialFlowAsSpeedAtom);
+	const flowAsSpeed = get(tempFlowAsSpeedAtom);
 	const hiddenFamilies = get(tempHiddenFamiliesAtom);
 	const costBandMode = get(tempCostBandModeAtom);
 	const costLabels = get(tempCostLabelsAtom);
@@ -464,6 +471,7 @@ export const saveImportedConfigurationAtom = atom(null, (get, set) => {
 	if (energyPerMaterialStart !== null) set(energyPerMaterialStartAtom, energyPerMaterialStart);
 	if (materialFlowHotend !== null) set(materialFlowHotendAtom, materialFlowHotend);
 	if (materialFlowAsSpeed !== null) set(materialFlowAsSpeedAtom, materialFlowAsSpeed);
+	if (flowAsSpeed !== null) set(flowAsSpeedAtom, flowAsSpeed);
 	if (hiddenFamilies !== null) set(hiddenFamiliesAtom, hiddenFamilies);
 	if (costBandMode !== null) set(costBandModeAtom, costBandMode);
 	if (costLabels !== null) set(costLabelsAtom, costLabels);
@@ -486,6 +494,7 @@ export const discardImportedConfigurationAtom = atom(null, (_get, set) => {
 	set(tempEnergyPerMaterialStartAtom, null);
 	set(tempMaterialFlowHotendAtom, null);
 	set(tempMaterialFlowAsSpeedAtom, null);
+	set(tempFlowAsSpeedAtom, null);
 	set(tempHiddenFamiliesAtom, null);
 	set(tempCostBandModeAtom, null);
 	set(tempCostLabelsAtom, null);

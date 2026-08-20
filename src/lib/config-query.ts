@@ -265,8 +265,14 @@ export function parseReadableQuery(params: URLSearchParams): ImportedConfigurati
 		if (id) config.materialFlowHotend = id;
 	}
 
+	// Sets both flow views. They are separate settings because a reader can want different units in
+	// each, but somebody writing `as-speed` in a URL means "in mm/s" and should not have to know
+	// which of the two charts the parameter was originally written for
 	const asSpeed = readBoolean(params, 'as-speed', warnings);
-	if (asSpeed !== undefined) config.materialFlowAsSpeed = asSpeed;
+	if (asSpeed !== undefined) {
+		config.materialFlowAsSpeed = asSpeed;
+		config.flowAsSpeed = asSpeed;
+	}
 
 	const bands = params.get('bands');
 	if (bands === 'cost' || bands === 'value') {

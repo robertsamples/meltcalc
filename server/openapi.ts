@@ -107,7 +107,7 @@ export function buildOpenApi(baseUrl: string): Record<string, unknown> {
 							type: 'string',
 							enum: hotendSlugs()
 						}),
-						query('as-speed', 'Read the material-flow view in mm/s rather than mm³/s.', {
+						query('as-speed', 'Read either flow view in mm/s rather than mm³/s.', {
 							type: 'boolean'
 						}),
 						query('bands', 'Background of the price chart.', {

@@ -94,6 +94,14 @@ check('material flow, pinned hotend', {
 	costBandMode: 'value'
 });
 
+// The two speed toggles are separate settings that share one readable parameter, so a link has to
+// be able to carry them apart: one on and one off must survive the round trip as exactly that
+check('speed units, flow view only', {
+	...DEFAULT_CONFIGURATION,
+	flowAsSpeed: true,
+	materialFlowAsSpeed: false
+});
+
 // Version 2 named hotends with six-character codes in a JSON array. Links in that shape are
 // already out in the world, so they have to keep resolving to the same hotends
 const v2Hotends = ['E3D|V6', 'Phaetus|Rapido UHF', 'Slice Engineering|Mosquito Magnum'];
@@ -151,10 +159,13 @@ readable('readable: two hotends', '?hotend=e3d-v6,phaetus-rapido-uhf&material=pe
 	materialSettings: { ...DEFAULT_CONFIGURATION.materialSettings, materialId: 'petg' }
 });
 
+// `as-speed` sets both flow views: somebody writing it in a URL means mm/s and should not have to
+// know which of the two charts the parameter was first written for
 readable('readable: view + pinned', '?view=material-flow&for=phaetus-rapido-uhf&as-speed=yes', {
 	viewMode: 'materialFlow',
 	materialFlowHotend: 'Phaetus|Rapido UHF',
-	materialFlowAsSpeed: true
+	materialFlowAsSpeed: true,
+	flowAsSpeed: true
 });
 
 readable('readable: hyphens optional', '?view=meltZone', { viewMode: 'meltZone' });
