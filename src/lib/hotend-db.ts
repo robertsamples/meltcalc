@@ -800,9 +800,9 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
-		price: 105 as Dollars,
+		price: 80 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
-		notes: 'Fin nozzle'
+		notes: 'Fin nozzle, 4 pack pricing'
 	},
 	{
 		id: 'Lukes Lab|Pika (X1C)',
@@ -1184,29 +1184,6 @@ export const HOTEND_DB: HotendDefinition[] = [
 		notes: null
 	},
 	{
-		id: 'Phaetus|Dragon',
-		manufacturer: 'Phaetus',
-		name: 'Dragon',
-		ecosystem: 'Dragon',
-		mountingPattern: 'Dragon',
-		nozzle: 'V6',
-		mzeCompatible: true,
-		hfNozzleCompatible: true,
-		nonstructuralHeatbreak: true,
-		blockOptions: [
-			{ material: 'Cu', maxTemperature: 500 as Celsius },
-			{ material: 'Al', maxTemperature: 300 as Celsius }
-		],
-		meltZoneLength: 26 as Millimeter,
-		effectiveMeltZone: 26 as Millimeter,
-		filamentDiameter: 1.75 as Millimeter,
-		filamentPaths: 1,
-		stillSold: true,
-		price: 55 as Dollars,
-		hfNozzlePrice: 15 as Dollars,
-		notes: null
-	},
-	{
 		id: 'Phaetus|Dragon HF',
 		manufacturer: 'Phaetus',
 		name: 'Dragon HF',
@@ -1217,11 +1194,10 @@ export const HOTEND_DB: HotendDefinition[] = [
 		hfNozzleCompatible: true,
 		nonstructuralHeatbreak: true,
 		blockOptions: [
-			{ material: 'Cu', maxTemperature: 500 as Celsius },
-			{ material: 'Al', maxTemperature: 300 as Celsius }
+			{ material: 'Cu', maxTemperature: 500 as Celsius }
 		],
-		meltZoneLength: 33.5 as Millimeter,
-		effectiveMeltZone: 33.5 as Millimeter,
+		meltZoneLength: 26 as Millimeter,
+		effectiveMeltZone: 26 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
@@ -1230,13 +1206,81 @@ export const HOTEND_DB: HotendDefinition[] = [
 		notes: null
 	},
 	{
+		id: 'Phaetus|Dragon ST',
+		manufacturer: 'Phaetus',
+		name: 'Dragon ST',
+		ecosystem: 'Dragon',
+		mountingPattern: 'Dragon',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 500 as Celsius }
+		],
+		meltZoneLength: 18.5 as Millimeter,
+		effectiveMeltZone: 18.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 55 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: null
+	},
+	{
+		id: 'Phaetus|Dragon UHF',
+		manufacturer: 'Phaetus',
+		name: 'Dragon UHF',
+		ecosystem: 'Dragon',
+		mountingPattern: 'Dragon',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 500 as Celsius },
+			{ material: 'Al', maxTemperature: 300 as Celsius }
+		],
+		meltZoneLength: 35.5 as Millimeter,
+		effectiveMeltZone: 35.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 65 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: null
+	},
+	{
+		id: 'Phaetus|Dragon UUHF',
+		manufacturer: 'Phaetus',
+		name: 'Dragon UUHF',
+		ecosystem: 'Dragon',
+		mountingPattern: 'Dragon',
+		nozzle: 'V6',
+		mzeCompatible: false,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 500 as Celsius },
+			{ material: 'Al', maxTemperature: 300 as Celsius }
+		],
+		meltZoneLength: 43 as Millimeter,
+		effectiveMeltZone: 43 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 85 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: 'Unofficial, UHF w/ HF HB'
+	},
+	{
 		id: 'Phaetus|Dragon Volcano',
 		manufacturer: 'Phaetus',
 		name: 'Dragon Volcano',
 		ecosystem: 'Dragon',
 		mountingPattern: 'Dragon',
-		nozzle: 'V6 Volcano',
-		mzeCompatible: false,
+		nozzle: 'V6',
+		mzeCompatible: true,
 		hfNozzleCompatible: true,
 		nonstructuralHeatbreak: true,
 		blockOptions: [
@@ -1250,53 +1294,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		stillSold: true,
 		price: 65 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
-		notes: null
-	},
-	{
-		id: 'Phaetus|Dragon Volcano UHF',
-		manufacturer: 'Phaetus',
-		name: 'Dragon Volcano UHF',
-		ecosystem: 'Dragon',
-		mountingPattern: 'Dragon',
-		nozzle: 'V6 Volcano',
-		mzeCompatible: false,
-		hfNozzleCompatible: true,
-		nonstructuralHeatbreak: true,
-		blockOptions: [
-			{ material: 'Cu', maxTemperature: 500 as Celsius },
-			{ material: 'Al', maxTemperature: 300 as Celsius }
-		],
-		meltZoneLength: 35.5 as Millimeter,
-		effectiveMeltZone: 35.5 as Millimeter,
-		filamentDiameter: 1.75 as Millimeter,
-		filamentPaths: 1,
-		stillSold: true,
-		price: 70 as Dollars,
-		hfNozzlePrice: 15 as Dollars,
-		notes: null
-	},
-	{
-		id: 'Phaetus|Dragon Volcano UUHF',
-		manufacturer: 'Phaetus',
-		name: 'Dragon Volcano UUHF',
-		ecosystem: 'Dragon',
-		mountingPattern: 'Dragon',
-		nozzle: 'V6 Volcano',
-		mzeCompatible: false,
-		hfNozzleCompatible: true,
-		nonstructuralHeatbreak: true,
-		blockOptions: [
-			{ material: 'Cu', maxTemperature: 500 as Celsius },
-			{ material: 'Al', maxTemperature: 300 as Celsius }
-		],
-		meltZoneLength: 43 as Millimeter,
-		effectiveMeltZone: 43 as Millimeter,
-		filamentDiameter: 1.75 as Millimeter,
-		filamentPaths: 1,
-		stillSold: true,
-		price: 75 as Dollars,
-		hfNozzlePrice: 15 as Dollars,
-		notes: null
+		notes: 'Unofficial, UHF w/o MZE'
 	},
 	{
 		id: 'Phaetus|Dragonfly BMO',
@@ -1382,7 +1380,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
-		price: 90 as Dollars,
+		price: 80 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
@@ -1404,7 +1402,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
-		price: 79 as Dollars,
+		price: 72 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
@@ -1426,7 +1424,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
-		price: 85 as Dollars,
+		price: 72 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
@@ -1436,7 +1434,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		name: 'Rapido UHF',
 		ecosystem: 'Rapido',
 		mountingPattern: 'Dragon',
-		nozzle: 'V6 Volcano',
+		nozzle: 'V6',
 		mzeCompatible: true,
 		hfNozzleCompatible: true,
 		nonstructuralHeatbreak: true,
@@ -1448,7 +1446,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
-		price: 90 as Dollars,
+		price: 80 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
@@ -1626,7 +1624,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		stillSold: true,
 		price: 423 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
-		notes: null
+		notes: 'Unofficial, UHF w/ HF HB'
 	},
 	{
 		id: 'Slice Engineering|Mosquito Prime',
@@ -1648,7 +1646,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		stillSold: true,
 		price: 1577 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
-		notes: 'Bult in HF geometry'
+		notes: 'Built in HF geometry'
 	},
 	{
 		id: 'Snapmaker|U1 OEM',
@@ -1670,7 +1668,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		stillSold: true,
 		price: 12.5 as Dollars,
 		hfNozzlePrice: null,
-		notes: null
+		notes: '4 pack pricing'
 	},
 	{
 		id: 'Trianglelab|CHC',
@@ -1778,7 +1776,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
-		price: 80 as Dollars,
+		price: 65 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
@@ -1800,7 +1798,95 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
-		price: 85 as Dollars,
+		price: 75 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: null
+	},
+	{
+		id: 'Trianglelab|Dragon V2 HF',
+		manufacturer: 'Trianglelab',
+		name: 'Dragon V2 HF',
+		ecosystem: 'Dragon',
+		mountingPattern: 'Dragon',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 350 as Celsius }
+		],
+		meltZoneLength: 26 as Millimeter,
+		effectiveMeltZone: 26 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 65 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: null
+	},
+	{
+		id: 'Trianglelab|Dragon V2 SF',
+		manufacturer: 'Trianglelab',
+		name: 'Dragon V2 SF',
+		ecosystem: 'Dragon',
+		mountingPattern: 'Dragon',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 350 as Celsius }
+		],
+		meltZoneLength: 18.5 as Millimeter,
+		effectiveMeltZone: 18.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 60 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: null
+	},
+	{
+		id: 'Trianglelab|Rapido ACE HF',
+		manufacturer: 'Trianglelab',
+		name: 'Rapido ACE HF',
+		ecosystem: 'Rapido',
+		mountingPattern: 'Dragon',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 350 as Celsius }
+		],
+		meltZoneLength: 35 as Millimeter,
+		effectiveMeltZone: 35 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 63 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: null
+	},
+	{
+		id: 'Trianglelab|Rapido ACE UHF',
+		manufacturer: 'Trianglelab',
+		name: 'Rapido ACE UHF',
+		ecosystem: 'Rapido',
+		mountingPattern: 'Dragon',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 350 as Celsius }
+		],
+		meltZoneLength: 43.4 as Millimeter,
+		effectiveMeltZone: 43.4 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 78 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
@@ -1823,6 +1909,50 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentPaths: 1,
 		stillSold: true,
 		price: 116.5 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: null
+	},
+	{
+		id: 'Trianglelab|T-Volcano Dragon HF',
+		manufacturer: 'Trianglelab',
+		name: 'T-Volcano Dragon HF',
+		ecosystem: 'Dragon',
+		mountingPattern: 'Dragon',
+		nozzle: 'V6 Volcano',
+		mzeCompatible: false,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 350 as Celsius }
+		],
+		meltZoneLength: 34.5 as Millimeter,
+		effectiveMeltZone: 34.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 70 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: null
+	},
+	{
+		id: 'Trianglelab|T-Volcano Dragon SF',
+		manufacturer: 'Trianglelab',
+		name: 'T-Volcano Dragon SF',
+		ecosystem: 'Dragon',
+		mountingPattern: 'Dragon',
+		nozzle: 'V6 Volcano',
+		mzeCompatible: false,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 350 as Celsius }
+		],
+		meltZoneLength: 27 as Millimeter,
+		effectiveMeltZone: 27 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 67 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
 	},
