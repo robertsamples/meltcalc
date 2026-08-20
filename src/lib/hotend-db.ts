@@ -515,6 +515,138 @@ export const HOTEND_DB: HotendDefinition[] = [
 		notes: 'Proprietary nozzle'
 	},
 	{
+		id: 'Elegoo|Neptune 2',
+		manufacturer: 'Elegoo',
+		name: 'Neptune 2',
+		ecosystem: 'MK8',
+		mountingPattern: 'MK8',
+		nozzle: 'MK8',
+		mzeCompatible: false,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Al', maxTemperature: 245 as Celsius }
+		],
+		meltZoneLength: 18.5 as Millimeter,
+		effectiveMeltZone: 18.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: false,
+		price: 12 as Dollars,
+		hfNozzlePrice: null,
+		notes: 'PFTE-lined'
+	},
+	{
+		id: 'Elegoo|Neptune 3',
+		manufacturer: 'Elegoo',
+		name: 'Neptune 3',
+		ecosystem: 'MK8',
+		mountingPattern: 'Strain Gauge',
+		nozzle: 'MK8',
+		mzeCompatible: false,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Al', maxTemperature: 245 as Celsius }
+		],
+		meltZoneLength: 18.5 as Millimeter,
+		effectiveMeltZone: 18.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: false,
+		price: 12 as Dollars,
+		hfNozzlePrice: null,
+		notes: 'PFTE-lined'
+	},
+	{
+		id: 'Elegoo|Neptune 3 Pro',
+		manufacturer: 'Elegoo',
+		name: 'Neptune 3 Pro',
+		ecosystem: 'Neptune',
+		mountingPattern: 'Neptune 3/4',
+		nozzle: 'MK8',
+		mzeCompatible: false,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Al', maxTemperature: 245 as Celsius }
+		],
+		meltZoneLength: 18.5 as Millimeter,
+		effectiveMeltZone: 18.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 12 as Dollars,
+		hfNozzlePrice: null,
+		notes: 'PFTE-lined'
+	},
+	{
+		id: 'Elegoo|Neptune 4',
+		manufacturer: 'Elegoo',
+		name: 'Neptune 4',
+		ecosystem: 'Neptune',
+		mountingPattern: 'Neptune 3/4',
+		nozzle: 'Proprietary',
+		mzeCompatible: false,
+		hfNozzleCompatible: false,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Al', maxTemperature: 300 as Celsius }
+		],
+		meltZoneLength: 23.5 as Millimeter,
+		effectiveMeltZone: 23.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 20 as Dollars,
+		hfNozzlePrice: null,
+		notes: null
+	},
+	{
+		id: 'Elegoo|Neptune 4 Plus/Max',
+		manufacturer: 'Elegoo',
+		name: 'Neptune 4 Plus/Max',
+		ecosystem: 'Neptune',
+		mountingPattern: 'Neptune 3/4',
+		nozzle: 'Proprietary',
+		mzeCompatible: false,
+		hfNozzleCompatible: false,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Al', maxTemperature: 300 as Celsius }
+		],
+		meltZoneLength: 28 as Millimeter,
+		effectiveMeltZone: 28 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 22 as Dollars,
+		hfNozzlePrice: null,
+		notes: null
+	},
+	{
+		id: 'Elegoo|Orangestorm Giga',
+		manufacturer: 'Elegoo',
+		name: 'Orangestorm Giga',
+		ecosystem: 'Neptune',
+		mountingPattern: 'Neptune 3/4',
+		nozzle: 'Proprietary',
+		mzeCompatible: false,
+		hfNozzleCompatible: false,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Al', maxTemperature: 350 as Celsius }
+		],
+		meltZoneLength: 39.5 as Millimeter,
+		effectiveMeltZone: 39.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 33 as Dollars,
+		hfNozzlePrice: null,
+		notes: 'Proprietary nozzle'
+	},
+	{
 		id: 'Generic|MK8',
 		manufacturer: 'Generic',
 		name: 'MK8',
