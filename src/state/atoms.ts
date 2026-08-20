@@ -33,7 +33,7 @@ import {
 	money
 } from '@/lib/currency';
 import { FLOW_CLASSES, type FlowClassBand } from '@/lib/flow-class';
-import { HOTEND_DB, type HotendDefinition, type HotendOptions, resolveHotends } from '@/lib/hotend';
+import { findHotend, HOTEND_DB, type HotendDefinition, type HotendOptions, resolveHotends } from '@/lib/hotend';
 import { defaultMaterial, findMaterial, MATERIAL_DB, type MaterialDefinition } from '@/lib/material';
 import { fitAgainstLogX, type LogTrend } from '@/lib/regression';
 import {
@@ -68,16 +68,27 @@ export const showImportWarningAtom = atom<boolean>(false);
 /** Anything a shared link referenced that this build could not resolve */
 export const importWarningsAtom = atom<string[]>([]);
 
-function atomWithLocalStorage<T>(key: string, initialValue: T) {
+/**
+ * `revive` is applied to whatever came out of storage, before anything reads it.
+ *
+ * Storage outlives the build that wrote it. Anything keyed by hotend id is the case that bites:
+ * renaming a hotend in the CSV changes its id, and the old one sits in a reader's browser forever —
+ * counted against the comparison cap, given a marker slot that shifts the colours of every hotend
+ * after it, and carried into every share link they make. Pruning on the way in is the only place
+ * that fixes all three at once, because everything downstream reads the same atom.
+ */
+function atomWithLocalStorage<T>(key: string, initialValue: T, revive?: (stored: T) => T) {
 	const getInitialValue = () => {
 		const item = localStorage.getItem(key);
 		if (item !== null) {
 			const parsed = JSON.parse(item) as T;
 			// A stored object from an older build can be missing keys that exist now
-			if (typeof initialValue === 'object' && initialValue !== null && !Array.isArray(initialValue)) {
-				return { ...initialValue, ...parsed };
-			}
-			return parsed;
+			const merged =
+				typeof initialValue === 'object' && initialValue !== null && !Array.isArray(initialValue)
+					? ({ ...initialValue, ...parsed } as T)
+					: parsed;
+
+			return revive ? revive(merged) : merged;
 		}
 		return initialValue;
 	};
@@ -184,9 +195,27 @@ export function storeRates(rates: ExchangeRates): void {
 const printSettingsAtom = atomWithLocalStorage<PrintSettings>('printSettings', DEFAULT_PRINT_SETTINGS);
 const materialSettingsAtom = atomWithLocalStorage<MaterialSettings>('materialSettings', DEFAULT_MATERIAL_SETTINGS);
 const thermalSettingsAtom = atomWithLocalStorage<ThermalSettings>('thermalSettings', DEFAULT_THERMAL_SETTINGS);
-const selectedHotendsAtom = atomWithLocalStorage<string[]>('selectedHotends', DEFAULT_HOTEND_IDS);
-const hotendOptionsAtom = atomWithLocalStorage<Record<string, HotendOptions>>('hotendOptions', {});
-const hotendPricesAtom = atomWithLocalStorage<Record<string, number>>('hotendPrices', DEFAULT_HOTEND_PRICES);
+/** Hotends this build still has. A stored id that names none of them is dead weight, not a hotend */
+function knownHotends(ids: string[]): string[] {
+	return [...new Set(ids)].filter((id) => findHotend(id) !== undefined);
+}
+
+/** The same for anything keyed by hotend id, so a rename cannot leave an orphan in a share link */
+function keyedByKnownHotend<T>(entries: Record<string, T>): Record<string, T> {
+	return Object.fromEntries(Object.entries(entries).filter(([id]) => findHotend(id) !== undefined));
+}
+
+const selectedHotendsAtom = atomWithLocalStorage<string[]>('selectedHotends', DEFAULT_HOTEND_IDS, knownHotends);
+const hotendOptionsAtom = atomWithLocalStorage<Record<string, HotendOptions>>(
+	'hotendOptions',
+	{},
+	keyedByKnownHotend
+);
+const hotendPricesAtom = atomWithLocalStorage<Record<string, number>>(
+	'hotendPrices',
+	DEFAULT_HOTEND_PRICES,
+	keyedByKnownHotend
+);
 const viewModeAtom = atomWithLocalStorage<ViewMode>('viewMode', DEFAULT_VIEW_MODE);
 const energyPerSecondAtom = atomWithLocalStorage<boolean>('energyPerSecond', DEFAULT_ENERGY_PER_SECOND);
 const energyPerMaterialStartAtom = atomWithLocalStorage<boolean>(

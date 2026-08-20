@@ -63,9 +63,9 @@ Dragon,Generic,Trianglelab,STD6-LC,V6,Y,Y,Al,300,Y,51.5,51.5,,,116.5,15,Y,
 Dyze,Dynze,Dyze,Typhoon,Proprietary,N,N,Cu,500,Y,114,114,2.85,,2700,,Y,Proprietary nozzle
 H2,H2,Bambulab,H2 Hotend,Integrated,N,Y,Cu,350,Y,33,33,,,18,32,Y,Integrated nozzle
 Dragon,Generic,Mellow,ALPS,V6,Y,Y,Cu,400,Y,38.2,38.2,,,45,15,Y,
-Dragon,Vzbot,Mellow,Dual Velo,Proprietary,Y,Y,Cu,400,Y,51.8,93.6,,2,143,15,Y,Proprietary nozzle (brass only) · 2 filaments
+Dragon,Vzbot,Mellow,Dual Velo,Proprietary,Y,Y,Cu,400,Y,51.8,88.6,,2,143,15,Y,Proprietary nozzle (brass only) · 2 filaments
 X1C,X1C,Mellow,Fluxheat,V6,Y,Y,Cu,350,Y,34.3,34.3,,,35,15,Y,
-,DIY,Monika McWuff,Pawsitron Hotend,V6,Y,Y,St,500,Y,51.3,176.2,,4,,15,N,4 filaments · DIY SLM hotend
+,DIY,Monika McWuff,Pawsitron Hotend,V6,Y,Y,St,500,Y,51.3,160.2,,4,,15,N,4 filaments · DIY SLM hotend
 U1,U1,Lukes Lab,Pika (U1),Fin,N,Y,Cu,350,Y,35.6,35.6,,,80,15,Y,"Fin nozzle, 4 pack pricing"
 U1,U1,Snapmaker,U1 OEM,Integrated,N,N,St,300,N,24.2,24.2,,,12.5,,Y,4 pack pricing
 A1,A1,E3D,A1 HF ObXidian,Integrated,N,N,Cu,300,Y,27.2,35.7,,,62,,Y,"Integrated nozzle, CHT"
