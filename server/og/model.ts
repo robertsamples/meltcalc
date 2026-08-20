@@ -2,9 +2,9 @@ import { performanceLabel, shortPerformanceLabel } from '@/lib/chart-labels';
 import { decodeConfig } from '@/lib/config-sharing';
 import { type CostBandMode, DEFAULT_CONFIGURATION, type ShareableConfiguration } from '@/lib/configuration';
 import { type BandSpec, costBands, valueBands } from '@/lib/cost-bands';
-import { blockMaterialFactor, HOTEND_DB, resolveHotends } from '@/lib/hotend';
+import { blockMaterialFactor, HOTEND_DB, resolveHotends, shortManufacturer } from '@/lib/hotend';
 import { findMaterial, MATERIAL_DB } from '@/lib/material';
-import { fitAgainstLogX } from '@/lib/regression';
+import { fitAgainstLogX, trendAt } from '@/lib/regression';
 import { type SeriesMarkerSpec, seriesMarker } from '@/lib/series';
 import {
 	energyPerVolume,
@@ -68,6 +68,33 @@ export type OgScatter = {
 	yLabel: string;
 };
 
+/** One maker's spread of value indices, ready to draw. Sorted best median first by the builder */
+export type OgBox = {
+	label: string;
+	count: number;
+	min: number;
+	q1: number;
+	median: number;
+	q3: number;
+	max: number;
+	/** Every hotend in that maker's set, with the marker the app gives it */
+	points: { value: number; marker: SeriesMarkerSpec | null }[];
+};
+
+/**
+ * The manufacturer card: box and whisker, because that is what is on screen.
+ *
+ * A bar of medians would fit the existing renderer and would be a worse card — the spread is half
+ * of what the view says, and a maker with a tight box and one with a bargain and a disaster in it
+ * are not the same recommendation however close their medians land.
+ */
+export type OgBoxPlot = {
+	boxes: OgBox[];
+	/** Where the going rate falls, which every box is read against. Always 1 for the value index */
+	reference: number;
+	xLabel: string;
+};
+
 export type OgModel = {
 	/** `generic` is the fallback card: no config, or one we could not decode */
 	variant: 'config' | 'generic';
@@ -85,6 +112,8 @@ export type OgModel = {
 	target: { value: number; label: string } | null;
 	/** Drawn instead of the bars when present */
 	scatter?: OgScatter;
+	/** Drawn instead of the bars when present. Never set at the same time as `scatter` */
+	boxPlot?: OgBoxPlot;
 };
 
 /** The last resort: a card with no picture, for when even the default configuration will not draw */
@@ -229,11 +258,21 @@ function buildFromConfiguration(config: ShareableConfiguration): OgModel | null 
 		meltEnergy: energy.toMelt
 	};
 
-	// The cost card plots the whole database, not just the comparison, so it needs every hotend
-	// The manufacturer view has no card of its own, and the price cloud is the picture its index is
-	// computed from — closer to what a reader clicking the link will see than a bar chart of flow
+	// Both price cards reach past the comparison: the cost one plots the whole database, and the
+	// manufacturer one fits its trend over it
 	if (viewMode === 'cost' || viewMode === 'manufacturerValue') {
 		const everything = HOTEND_DB.map((hotend) => hotendPerformance(hotend, performanceInput));
+
+		// The full selection, not the eight `performance` is capped to for the bar cards: a link
+		// comparing twenty hotends must not have three quarters of them silently missing from its box plot
+		if (viewMode === 'manufacturerValue') {
+			return buildManufacturerModel(
+				performance,
+				common,
+				everything,
+				hotends.map((hotend) => hotend.id)
+			);
+		}
 
 		// Every selected hotend, not the eight the bar cards cap at: a marker costs nothing on a
 		// scatter, and dropping the rest to anonymous grey loses the whole point of the picture
@@ -422,6 +461,112 @@ function buildCostModel(
 		target: null,
 		scatter
 	};
+}
+
+/**
+ * The manufacturer tab: how each maker's hotends sit against the market trend.
+ *
+ * The same population the view uses — the hotends in the comparison, measured against a trend
+ * fitted over every priced hotend in the database. A card built from the whole database instead
+ * would be the same picture for every link, which is the one thing an unfurl must not be.
+ *
+ * No winner in the headline. The point of a box plot is that a median alone is not the finding, and
+ * a card that reduced it to "X is the best manufacturer" would be contradicting the chart under it.
+ */
+function buildManufacturerModel(
+	performance: Performance[],
+	common: CommonInput,
+	all: Performance[],
+	order: string[]
+): OgModel {
+	const cloud = all.filter((entry) => entry.price !== null && Number.isFinite(entry.maxFlow));
+	const trend = fitAgainstLogX(cloud.map((entry) => ({ x: entry.price as number, y: entry.maxFlow })));
+
+	const chosen = all.filter((entry) => order.includes(entry.hotend.id));
+	const priced = chosen.filter(
+		(entry) => entry.price !== null && Number.isFinite(entry.maxFlow) && trend && trendAt(trend, entry.price) > 0
+	);
+
+	// Nothing to measure, or nothing to measure it against: the price cloud still says something
+	if (!trend || priced.length === 0) return buildFlowModel(performance, common);
+
+	const index = (entry: Performance) => entry.maxFlow / trendAt(trend, entry.price as number);
+
+	const byMaker = new Map<string, Performance[]>();
+	for (const entry of priced) {
+		byMaker.set(entry.hotend.manufacturer, [...(byMaker.get(entry.hotend.manufacturer) ?? []), entry]);
+	}
+
+	const ranked = [...byMaker.entries()]
+		.map(([manufacturer, entries]) => {
+			const values = entries.map(index).sort((a, b) => a - b);
+
+			return { manufacturer, entries, values, median: quantile(values, 0.5) };
+		})
+		.sort((first, second) => second.median - first.median);
+
+	const boxes: OgBox[] = ranked.map(({ manufacturer, entries, values, median }) => ({
+		label: truncate(shortManufacturer(manufacturer), 22),
+		count: values.length,
+		min: values[0],
+		q1: quantile(values, 0.25),
+		median,
+		q3: quantile(values, 0.75),
+		max: values[values.length - 1],
+		points: entries.map((entry) => ({
+			value: index(entry),
+			// The slot the app would give it, so a hotend keeps the marker it wears on screen
+			marker: seriesMarker(Math.max(order.indexOf(entry.hotend.id), 0))
+		}))
+	}));
+
+	const subtitle = [
+		common.materialName,
+		`${priced.length} of ${chosen.length} priced`,
+		`${ranked.length} manufacturer${ranked.length === 1 ? '' : 's'}`
+	].join(' · ');
+
+	const series: OgSeries[] = ranked.map(({ manufacturer, median, values }) => ({
+		label: truncate(shortManufacturer(manufacturer)),
+		name: manufacturer,
+		value: median,
+		// The median alone would not be the finding, so the text carries the spread with it
+		text: `${formatNumber(median, 2)} · ${formatNumber(values[0], 2)}–${formatNumber(values[values.length - 1], 2)}`,
+		tone: 'accent' as OgTone
+	}));
+
+	return {
+		variant: 'config',
+		// Descriptive, never a verdict: see the note above
+		title: `Value index across ${ranked.length} manufacturer${ranked.length === 1 ? '' : 's'}`,
+		subtitle,
+		description:
+			`${subtitle}. How each manufacturer's hotends compare to the price/flow trend at the flow ` +
+			'rate they perform at, where 1 is the going rate.',
+		alt: `Value index by manufacturer for ${ranked.map((entry) => entry.manufacturer).join(', ')}`,
+		heading: `Value index by manufacturer in ${common.materialName}`,
+		facts: [
+			{ label: 'Material', value: truncate(common.materialName) },
+			{ label: 'Compared', value: `${priced.length} hotend${priced.length === 1 ? '' : 's'}` },
+			{ label: 'Manufacturers', value: String(ranked.length) },
+			{ label: 'Trend fitted over', value: `${cloud.length} priced` }
+		],
+		series,
+		target: null,
+		// The dashed line is already labelled 1.00 where it stands, so the axis only has to name itself
+		boxPlot: { boxes, reference: 1, xLabel: 'value index' }
+	};
+}
+
+/** The quantile as a spreadsheet computes it, matching the chart the card is standing in for */
+function quantile(sorted: number[], at: number): number {
+	if (sorted.length === 0) return Number.NaN;
+
+	const position = (sorted.length - 1) * at;
+	const below = Math.floor(position);
+	const above = Math.ceil(position);
+
+	return sorted[below] + (position - below) * (sorted[above] - sorted[below]);
 }
 
 /** The heater tab: the cartridge each hotend needs to be fed at its own maximum, biggest first */

@@ -351,6 +351,141 @@ function formatWhole(value: number): string {
 	return String(Math.round(value));
 }
 
+/**
+ * The manufacturer card: box and whisker, one row per maker.
+ *
+ * Turned on its side against the chart on screen. The card is twice as wide as it is tall and
+ * already has a label column the bar cards use, so lying the boxes down puts the maker names where
+ * a reader's eye already goes and gives the index the long axis — which is the one that has to
+ * carry a spread from a third of the going rate to twice it.
+ */
+const BOX_COLORS = {
+	fill: '#3f3f46',
+	stroke: '#a1a1aa',
+	median: '#e4e4e7'
+};
+
+/**
+ * This card's own header, which is shorter than every other card's.
+ *
+ * No subtitle and no facts row: a box per manufacturer is what the view says, and with twenty-odd
+ * makers the rows are what the height has to be spent on. The facts are still on the model, so the
+ * meta description and the markdown representation keep them — they are just not drawn.
+ */
+const BOX_TITLE_SIZE = 40;
+const BOX_TITLE_Y = 92;
+const BOX_RULE_Y = 112;
+/** Leaves room under the rule for the reference line's own label */
+const BOX_CHART_TOP = 152;
+
+function renderBoxPlot(plot: NonNullable<OgModel['boxPlot']>): string {
+	if (plot.boxes.length === 0) return '';
+
+	const plotLeft = PADDING_X + LABEL_WIDTH;
+	// Room on the right for the median printed after each row, the same way a bar carries its value
+	const plotWidth = OG_WIDTH - PADDING_X - plotLeft - 96;
+
+	const values = plot.boxes.flatMap((box) => [box.min, box.max]);
+	const low = Math.min(...values, plot.reference);
+	const high = Math.max(...values, plot.reference);
+	// A little air either side so a whisker cap never lands on the plot edge, and never a negative
+	// floor: the index is a ratio and cannot go below zero
+	const pad = Math.max((high - low) * 0.08, 0.05);
+	const from = Math.max(low - pad, 0);
+	const to = high + pad;
+	const scale = (value: number) => plotLeft + ((value - from) / (to - from)) * plotWidth;
+
+	const available = CHART_BOTTOM - BOX_CHART_TOP;
+	const rowHeight = Math.min(available / plot.boxes.length, 46);
+	const boxHeight = Math.max(rowHeight * 0.52, 7);
+	// The markers have to come down with the rows, or at twenty makers a dot would reach into the
+	// row above and below it
+	const markerSize = Math.min(12, rowHeight * 0.62);
+	const labelSize = Math.min(20, Math.max(rowHeight * 0.78, 12));
+	// Centred rather than hung from the top: four makers at the capped row height would otherwise
+	// leave the bottom half of the card empty
+	const chartTop = BOX_CHART_TOP + (available - rowHeight * plot.boxes.length) / 2;
+
+	const rows = plot.boxes.map((box, index) => {
+		const middle = chartTop + index * rowHeight + rowHeight / 2;
+		const top = middle - boxHeight / 2;
+		const capTop = middle - boxHeight * 0.35;
+		const capBottom = middle + boxHeight * 0.35;
+		const left = scale(box.q1);
+		const right = scale(box.q3);
+
+		// Only where the quartiles were computed from enough hotends to mean anything. Below that the
+		// row is its points and its whisker alone, exactly as the app draws it
+		const body =
+			box.count >= 3
+				? [
+						`<line x1="${scale(box.min)}" y1="${middle}" x2="${scale(box.max)}" y2="${middle}" stroke="${BOX_COLORS.stroke}" stroke-width="1.5" />`,
+						`<line x1="${scale(box.min)}" y1="${capTop}" x2="${scale(box.min)}" y2="${capBottom}" stroke="${BOX_COLORS.stroke}" stroke-width="1.5" />`,
+						`<line x1="${scale(box.max)}" y1="${capTop}" x2="${scale(box.max)}" y2="${capBottom}" stroke="${BOX_COLORS.stroke}" stroke-width="1.5" />`,
+						`<rect x="${left}" y="${top}" width="${Math.max(right - left, 2)}" height="${boxHeight}" rx="3" fill="${BOX_COLORS.fill}" fill-opacity="0.7" stroke="${BOX_COLORS.stroke}" stroke-width="1.5" />`,
+						`<line x1="${scale(box.median)}" y1="${top}" x2="${scale(box.median)}" y2="${top + boxHeight}" stroke="${BOX_COLORS.median}" stroke-width="3" />`
+					]
+				: [];
+
+		// Drawn last, over the box, in the markers the app gives them
+		const dots = box.points.map((point) => {
+			const x = scale(point.value);
+			if (!point.marker) return `<circle cx="${x}" cy="${middle}" r="${markerSize / 3}" fill="${COLORS.muted}" />`;
+
+			// `markerPaint` returns a props object; there is no JSX here, so each attribute has to be
+			// written out. The same expansion the scatter above does
+			const paint = markerPaint(point.marker.color, point.marker.filled);
+
+			return `<path d="${shapePath(point.marker.shape, markerSize)}" transform="translate(${x} ${middle})" fill="${paint.fill}" stroke="${paint.stroke}" stroke-width="${paint.strokeWidth * 1.2}" />`;
+		});
+
+		return [
+			text(fitText(`${box.label} ${box.count}`, labelSize, LABEL_WIDTH - 16), {
+				x: plotLeft - 16,
+				y: middle + labelSize / 3,
+				size: labelSize,
+				fill: COLORS.foreground,
+				anchor: 'end'
+			}),
+			...body,
+			...dots,
+			text(formatIndex(box.median), {
+				x: plotLeft + plotWidth + 12,
+				y: middle + labelSize / 3,
+				size: Math.min(VALUE_SIZE, labelSize),
+				fill: COLORS.muted
+			})
+		].join(SVG_JOIN);
+	});
+
+	const chartBottom = chartTop + plot.boxes.length * rowHeight;
+	const referenceX = scale(plot.reference);
+
+	return [
+		// The going rate, drawn like every other threshold on these cards
+		`<line x1="${referenceX}" y1="${chartTop - 12}" x2="${referenceX}" y2="${chartBottom + 4}" stroke="${COLORS.foreground}" stroke-width="2" stroke-dasharray="5 5" />`,
+		text(formatIndex(plot.reference), {
+			x: referenceX,
+			y: chartTop - 22,
+			size: 17,
+			fill: COLORS.muted,
+			anchor: 'middle'
+		}),
+		...rows,
+		text(plot.xLabel, {
+			x: plotLeft,
+			y: OG_HEIGHT - 18,
+			size: 17,
+			fill: COLORS.dim
+		})
+	].join(SVG_JOIN);
+}
+
+/** Two decimals, matching the axis on screen */
+function formatIndex(value: number): string {
+	return value.toFixed(2);
+}
+
 function renderFacts(model: OgModel): string {
 	if (model.facts.length === 0) return '';
 
@@ -389,6 +524,19 @@ export function renderOgSvg(model: OgModel, siteName: string): string {
 	<rect width="${OG_WIDTH}" height="${OG_HEIGHT}" fill="${COLORS.background}" />
 	${renderScatter(model.scatter, model, siteName)}
 	<rect x="0" y="0" width="${OG_WIDTH}" height="8" fill="${COLORS.accent}" />
+</svg>`;
+	}
+
+	// The box card keeps the title and gives everything else to the chart, because the chart is a row
+	// per manufacturer and there can be twenty of them
+	if (model.boxPlot) {
+		return `<svg xmlns="http://www.w3.org/2000/svg" width="${OG_WIDTH}" height="${OG_HEIGHT}" viewBox="0 0 ${OG_WIDTH} ${OG_HEIGHT}">
+	<rect width="${OG_WIDTH}" height="${OG_HEIGHT}" fill="${COLORS.background}" />
+	<rect x="0" y="0" width="${OG_WIDTH}" height="8" fill="${COLORS.accent}" />
+	${text(siteName, { x: PADDING_X, y: 52, size: 22, fill: COLORS.muted })}
+	${text(fitText(model.title, BOX_TITLE_SIZE, contentWidth, true), { x: PADDING_X, y: BOX_TITLE_Y, size: BOX_TITLE_SIZE, fill: COLORS.foreground, weight: 'bold' })}
+	<line x1="${PADDING_X}" y1="${BOX_RULE_Y}" x2="${OG_WIDTH - PADDING_X}" y2="${BOX_RULE_Y}" stroke="${COLORS.dim}" stroke-opacity="0.5" />
+	${renderBoxPlot(model.boxPlot)}
 </svg>`;
 	}
 
