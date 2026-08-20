@@ -1,5 +1,5 @@
 Mounting Pattern,Ecosystem,Manufacturer,Hotend,Nozzle,MZE compatible,HF nozzle compatible,Block Material,Max temp,Nonstructural heatbreak,Melt zone,Effective melt zone,Filament (mm),Filament paths,Price (USD),CHT price (USD),Still sold,Notes
-CC,CC,Elegoo,Centauri Carbon,Proprietary,N,N,Br,350,N,35.5,35.5,,,9,,Y,Proprietary nozzle
+CC,CC,Elegoo,Centauri Carbon,Proprietary,N,N,Br,350,N,35.5,35.5,,,12,,Y,Proprietary nozzle
 Dragon,Chube,Lukes Lab,Chube Compact,V6,Y,Y,Cu,500,Y,38.5,38.5,,,165,15,Y,
 Dragon,Chube,Lukes Lab,Chube Air,V6,Y,Y,Cu,500,Y,46,46,,,260,15,Y,
 Dragon,Chube,Lukes Lab,Chube Conduction,V6,Y,Y,Cu,500,Y,56,56,,,320,15,Y,

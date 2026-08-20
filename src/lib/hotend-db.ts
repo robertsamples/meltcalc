@@ -510,7 +510,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
-		price: 9 as Dollars,
+		price: 12 as Dollars,
 		hfNozzlePrice: null,
 		notes: 'Proprietary nozzle'
 	},
