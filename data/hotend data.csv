@@ -15,7 +15,7 @@ Dragon,Generic,Generic,TZ2.0-V6 HF (MZE+V6),V6,N,Y,Cu,350,Y,35.65,35.65,,,22,15,
 Lancer,Lancer,Peopoly,Lancer Short,V6 Volcano,N,Y,Al,300,Y,28,28,,,22.5,15,Y,
 Lancer,Lancer,Peopoly,Lancer Standard,V6 Volcano,N,Y,Al,300,Y,36.5,36.5,,,30,15,Y,
 Lancer,Lancer,Peopoly,Lancer Long,V6 Volcano,N,Y,Al,300,Y,45,45,,,37.5,15,Y,
-MK8,MK8,,MK8,MK8,N,Y,Al/Cu,500/300,N,18.8,18.8,,,8,15,Y,
+MK8,MK8,Generic,MK8,MK8,N,Y,Al/Cu,500/300,N,18.8,18.8,,,8,15,Y,
 Mosquito,Mosquito,Mellow,NF Crazy,V6,Y,Y,Cu/Al,500/300,Y,18.5,18.5,,,41,15,Y,
 Mosquito,Mosquito,Mellow,NF Crazy HF,V6,Y,Y,Cu/Al,500/300,Y,25,25,,,44,15,Y,
 Mosquito,Mosquito,Mellow,NF Crazy Volcano,V6 Volcano,N,Y,Cu/Al,500/300,Y,28,28,,,48,15,Y,
@@ -41,9 +41,9 @@ Various,Various,Microswiss,Flowtech,Proprietary,N,Y,Cu,300,Y,28.6,28.6,,,80,5,Y,
 ,DIY,Brumpo Tungus,Brumpo WC Hotend,V6,Y,Y,Cu,500,Y,50,50,,,,15,N,DIY SLM hotend
 ,DIY,Brumpo Tungus,Brumpo Hotend,V6,Y,Y,Cu,500,Y,74.5,74.5,,,,15,N,DIY SLM hotend
 X1C,X1C,Generic,TZ HF (MZE+V6),V6,N,Y,Cu,350,Y,34.5,34.5,,,22,15,Y,MZE+V6 nozzle addition
-Dragon,Generic,,V9,V6,Y,Y,Cu,500,Y,39.5,39.5,,,220,15,N,
-Dragon,Generic,,Tricorn,V6,Y,Y,Cu,500,Y,53,53,,,200,15,Y,
-,DIY,,Lattice Hotend,V6,Y,Y,Cu,500,Y,57.9,57.9,,,,15,N,DIY SLM hotend
+Dragon,Generic,v9hotend,V9,V6,Y,Y,Cu,500,Y,39.5,39.5,,,220,15,N,
+Dragon,Generic,Generic,Tricorn,V6,Y,Y,Cu,500,Y,53,53,,,200,15,Y,
+,DIY,DIY,Lattice Hotend,V6,Y,Y,Cu,500,Y,57.9,57.9,,,,15,N,DIY SLM hotend
 INDX,INDX,Bondtech,INDX,Integrated,N,Y,St,300,N,28,28,,,45,0,Y,Integrated nozzle
 X1C,X1C,Trianglelab,CHC XP1,V6,Y,Y,Cu,300,Y,35,35,,,44,15,Y,
 ,Generic,Plasmics,INo Trident,V6,N,Y,Cu,500,Y,17.5,17.5,,,450,15,N,

@@ -291,6 +291,28 @@ export const HOTEND_DB: HotendDefinition[] = [
 		notes: 'discontinued'
 	},
 	{
+		id: 'DIY|Lattice Hotend',
+		manufacturer: 'DIY',
+		name: 'Lattice Hotend',
+		ecosystem: 'DIY',
+		mountingPattern: null,
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 500 as Celsius }
+		],
+		meltZoneLength: 57.9 as Millimeter,
+		effectiveMeltZone: 57.9 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: false,
+		price: null,
+		hfNozzlePrice: 15 as Dollars,
+		notes: 'DIY SLM hotend'
+	},
+	{
 		id: 'Dyze|DyzEnd Pro',
 		manufacturer: 'Dyze',
 		name: 'DyzEnd Pro',
@@ -491,6 +513,51 @@ export const HOTEND_DB: HotendDefinition[] = [
 		price: 9 as Dollars,
 		hfNozzlePrice: null,
 		notes: 'Proprietary nozzle'
+	},
+	{
+		id: 'Generic|MK8',
+		manufacturer: 'Generic',
+		name: 'MK8',
+		ecosystem: 'MK8',
+		mountingPattern: 'MK8',
+		nozzle: 'MK8',
+		mzeCompatible: false,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Al', maxTemperature: 500 as Celsius },
+			{ material: 'Cu', maxTemperature: 300 as Celsius }
+		],
+		meltZoneLength: 18.8 as Millimeter,
+		effectiveMeltZone: 18.8 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 8 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: null
+	},
+	{
+		id: 'Generic|Tricorn',
+		manufacturer: 'Generic',
+		name: 'Tricorn',
+		ecosystem: 'Generic',
+		mountingPattern: 'Dragon',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Cu', maxTemperature: 500 as Celsius }
+		],
+		meltZoneLength: 53 as Millimeter,
+		effectiveMeltZone: 53 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 200 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: null
 	},
 	{
 		id: 'Generic|TZ HF (MZE+V6)',
@@ -1669,75 +1736,8 @@ export const HOTEND_DB: HotendDefinition[] = [
 		notes: null
 	},
 	{
-		id: 'Unknown|Lattice Hotend',
-		manufacturer: 'Unknown',
-		name: 'Lattice Hotend',
-		ecosystem: 'DIY',
-		mountingPattern: null,
-		nozzle: 'V6',
-		mzeCompatible: true,
-		hfNozzleCompatible: true,
-		nonstructuralHeatbreak: true,
-		blockOptions: [
-			{ material: 'Cu', maxTemperature: 500 as Celsius }
-		],
-		meltZoneLength: 57.9 as Millimeter,
-		effectiveMeltZone: 57.9 as Millimeter,
-		filamentDiameter: 1.75 as Millimeter,
-		filamentPaths: 1,
-		stillSold: false,
-		price: null,
-		hfNozzlePrice: 15 as Dollars,
-		notes: 'DIY SLM hotend'
-	},
-	{
-		id: 'Unknown|MK8',
-		manufacturer: 'Unknown',
-		name: 'MK8',
-		ecosystem: 'MK8',
-		mountingPattern: 'MK8',
-		nozzle: 'MK8',
-		mzeCompatible: false,
-		hfNozzleCompatible: true,
-		nonstructuralHeatbreak: false,
-		blockOptions: [
-			{ material: 'Al', maxTemperature: 500 as Celsius },
-			{ material: 'Cu', maxTemperature: 300 as Celsius }
-		],
-		meltZoneLength: 18.8 as Millimeter,
-		effectiveMeltZone: 18.8 as Millimeter,
-		filamentDiameter: 1.75 as Millimeter,
-		filamentPaths: 1,
-		stillSold: true,
-		price: 8 as Dollars,
-		hfNozzlePrice: 15 as Dollars,
-		notes: null
-	},
-	{
-		id: 'Unknown|Tricorn',
-		manufacturer: 'Unknown',
-		name: 'Tricorn',
-		ecosystem: 'Generic',
-		mountingPattern: 'Dragon',
-		nozzle: 'V6',
-		mzeCompatible: true,
-		hfNozzleCompatible: true,
-		nonstructuralHeatbreak: true,
-		blockOptions: [
-			{ material: 'Cu', maxTemperature: 500 as Celsius }
-		],
-		meltZoneLength: 53 as Millimeter,
-		effectiveMeltZone: 53 as Millimeter,
-		filamentDiameter: 1.75 as Millimeter,
-		filamentPaths: 1,
-		stillSold: true,
-		price: 200 as Dollars,
-		hfNozzlePrice: 15 as Dollars,
-		notes: null
-	},
-	{
-		id: 'Unknown|V9',
-		manufacturer: 'Unknown',
+		id: 'v9hotend|V9',
+		manufacturer: 'v9hotend',
 		name: 'V9',
 		ecosystem: 'Generic',
 		mountingPattern: 'Dragon',
