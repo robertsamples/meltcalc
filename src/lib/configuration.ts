@@ -68,7 +68,15 @@ export const DEFAULT_THERMAL_SETTINGS: ThermalSettings = {
 };
 
 /** Which analysis is on screen */
-export type ViewMode = 'flow' | 'residence' | 'energy' | 'meltZone' | 'cost' | 'heater' | 'materialFlow';
+export type ViewMode =
+	| 'flow'
+	| 'residence'
+	| 'energy'
+	| 'meltZone'
+	| 'cost'
+	| 'heater'
+	| 'materialFlow'
+	| 'manufacturerValue';
 
 /**
  * The views, in two groups, because they answer two different questions: three of them hold the
@@ -86,6 +94,10 @@ export const VIEW_GROUPS: { label: string; modes: { value: ViewMode; label: stri
 			{ value: 'heater', label: 'Heater' },
 			{ value: 'cost', label: 'Cost' }
 		]
+	},
+	{
+		label: 'Compare manufacturers',
+		modes: [{ value: 'manufacturerValue', label: 'Value' }]
 	},
 	{
 		label: 'Compare materials',

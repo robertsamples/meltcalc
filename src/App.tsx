@@ -5,6 +5,7 @@ import { AttributionCard } from '@/components/attribution';
 import { CostPerFlowChart, PriceVsFlowScatter } from '@/components/charts/cost-charts';
 import { EnergyChart } from '@/components/charts/energy-chart';
 import { HeaterChart } from '@/components/charts/heater-chart';
+import { ManufacturerValueChart } from '@/components/charts/manufacturer-chart';
 import { MaterialFlowChart } from '@/components/charts/material-flow-chart';
 import { MaxFlowChart } from '@/components/charts/max-flow-chart';
 import { MeltZoneLandscape, SpecificPowerChart } from '@/components/charts/melt-zone-charts';
@@ -103,6 +104,7 @@ export function App() {
 							<CostPerFlowChart />
 						</>
 					) : null}
+					{viewMode === 'manufacturerValue' ? <ManufacturerValueChart /> : null}
 					{viewMode === 'meltZone' ? (
 						<>
 							<SpecificPowerChart />

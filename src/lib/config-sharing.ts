@@ -75,7 +75,8 @@ const VIEW_MODE_CODES: Record<ViewMode, string> = {
 	meltZone: 'z',
 	cost: 'c',
 	heater: 'h',
-	materialFlow: 'a'
+	materialFlow: 'a',
+	manufacturerValue: 'v'
 };
 const VIEW_MODE_BY_CODE = Object.fromEntries(
 	Object.entries(VIEW_MODE_CODES).map(([mode, code]) => [code, mode as ViewMode])
@@ -122,7 +123,16 @@ const LegacyConfigurationSchema = z.object({
 		.default({}),
 	hotendPrices: z.record(z.string(), z.number()).default({}),
 	viewMode: z
-		.enum(['flow', 'residence', 'energy', 'meltZone', 'cost', 'heater', 'materialFlow'])
+		.enum([
+			'flow',
+			'residence',
+			'energy',
+			'meltZone',
+			'cost',
+			'heater',
+			'materialFlow',
+			'manufacturerValue'
+		])
 		.default(DEFAULT_VIEW_MODE),
 	energyPerSecond: z.boolean().default(DEFAULT_ENERGY_PER_SECOND),
 	energyPerMaterialStart: z.boolean().default(DEFAULT_ENERGY_PER_MATERIAL_START),

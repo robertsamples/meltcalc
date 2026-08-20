@@ -29,9 +29,9 @@ Dragon,Rapido,Phaetus,Rapido UHF,V6 Volcano,Y,Y,Cu,290,Y,34,34,,,90,15,Y,
 Revo,Revo,E3D,Revo,Revo,N,Y,Br/Cu,300/500,N,19.6,19.6,,,95,20,Y,Proprietary Revo nozzle
 A3DP,Takoto,A3DP,HE20,V6,Y,Y,Al,300,Y,26,26,,,160,15,Y,
 A3DP,Takoto,A3DP,HE50,V6,Y,Y,Al,300,Y,53,53,,,210,15,Y,
-Groove,V6,E3D,V6,V6,Y,Y,Al/Cu,300/500,N,17.5,17.5,,,8,15,Y,
-Groove,V6,E3D,Supervolcano,V6 Supervolcano,N,Y,Al/Cu,300/500,N,57.5,57.5,,,30,15,Y,Only clones available
-Groove,V6,E3D,V6 Volcano,V6 Volcano,N,Y,Al/Cu,300/500,N,26,26,,,12,15,Y,
+Groove,V6,E3D,V6,V6,Y,Y,Al/Cu,300/500,N,17.5,17.5,,,75,15,Y,Official product
+Groove,V6,E3D,Supervolcano,V6 Supervolcano,N,Y,Al/Cu,300/500,N,57.5,57.5,,,113,15,N,"Official product, discontinued"
+Groove,V6,E3D,V6 Volcano,V6 Volcano,N,Y,Al/Cu,300/500,N,26,26,,,75,15,Y,Official product
 Groove,V6,Metaform,Pico Hotend,V6,Y,Y,Al/Cu,300/500,N,20.55,20.55,,,100,15,Y,
 Dragon,Vzbot,Mellow,Goliath,V6,Y,Y,Cu,500,Y,51.15,51.15,,,120,15,Y,
 X1C,X1C,Bambulab,X1C OEM,Integrated,N,N,Al,300,N,24.2,24.2,,,20,,Y,Integrated nozzle
@@ -78,3 +78,7 @@ Groove,Dragonfly,Phaetus,Dragonfly BMO,V6,Y,Y,Cu,500,N,19.5,19.5,,,52,15,N,disco
 Dragon,Rapido,Phaetus,Rapido HF,V6,Y,Y,Cu,290,Y,25.5,25.5,,,85,15,Y,
 ,Dropeffect,Phaetus,Dropeffect XG,V6,Y,Y,Cu,300,Y,18,18,,,79,15,Y,
 Dragon,Dropeffect,Phaetus,Dropeffect neXtG,V6,Y,Y,Cu,350,Y,25,25,,,90,15,Y,
+MK8,MK8,Microswiss,Microswiss All Metal,MK8,N,Y,Al,300,Y,19,19,,,63,15,Y,Ti heatbreak
+Groove,V6,Generic,V6 Clone,V6,Y,Y,Al/Cu,300/500,N,17.5,17.5,,,8,15,Y,Clone
+Groove,V6,Generic,Supervolcano  Clone,V6 Supervolcano,N,Y,Al/Cu,300/500,N,57.5,57.5,,,30,15,Y,Clone
+Groove,V6,Generic,V6 Volcano  Clone,V6 Volcano,N,Y,Al/Cu,300/500,N,26,26,,,12,15,Y,Clone

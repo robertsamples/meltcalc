@@ -230,7 +230,9 @@ function buildFromConfiguration(config: ShareableConfiguration): OgModel | null 
 	};
 
 	// The cost card plots the whole database, not just the comparison, so it needs every hotend
-	if (viewMode === 'cost') {
+	// The manufacturer view has no card of its own, and the price cloud is the picture its index is
+	// computed from — closer to what a reader clicking the link will see than a bar chart of flow
+	if (viewMode === 'cost' || viewMode === 'manufacturerValue') {
 		const everything = HOTEND_DB.map((hotend) => hotendPerformance(hotend, performanceInput));
 
 		// Every selected hotend, not the eight the bar cards cap at: a marker costs nothing on a

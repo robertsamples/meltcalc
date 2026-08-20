@@ -8,14 +8,15 @@ import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import type { AxisMap } from '@/lib/chart-axes';
 import { chartFootnotes, performanceLabel, shortPerformanceLabel } from '@/lib/chart-labels';
 import type { CostBandMode } from '@/lib/configuration';
 import { BAND_SAMPLES, type BandSpec, costBands, valueBands } from '@/lib/cost-bands';
 import { roundLinearTicks, roundTicks } from '@/lib/currency';
-import { FLOW_CLASSES, type FlowClassBand, flowClassOrigin, flowClassRange } from '@/lib/flow-class';
+import { type FlowClassBand, flowClassOrigin, flowClassRange } from '@/lib/flow-class';
 import { formatFlow, formatNumber } from '@/lib/format';
 import { labelMetrics, placeLabels } from '@/lib/point-labels';
-import { fitAgainstLogX, type LogTrend, trendAt } from '@/lib/regression';
+import { type LogTrend, trendAt } from '@/lib/regression';
 import { AXIS_LINE, STATUS_COLORS, seriesMarker, shapePath } from '@/lib/series';
 import {
 	allPerformanceAtom,
@@ -25,7 +26,8 @@ import {
 	currentSelectedHotendsAtom,
 	flowClassBandsAtom,
 	moneyAtom,
-	performanceAtom
+	performanceAtom,
+	priceFlowTrendAtom
 } from '@/state/atoms';
 
 /**
@@ -172,8 +174,7 @@ export function CostPerFlowChart() {
 
 const SCATTER_CONFIG = { maxFlow: { label: 'Max flow' } } satisfies ChartConfig;
 
-type Scale = { domain: () => number[]; (value: number): number };
-type AxisMap = Record<string, { scale: Scale }>;
+
 
 /**
  * The background itself, whichever question it is answering.
@@ -495,8 +496,9 @@ export function PriceVsFlowScatter() {
 	}, [points]);
 
 	// Fitted over every priced hotend, selected or not: the question is what the market charges for
-	// this much flow, which the six hotends someone happens to be comparing cannot answer
-	const trend = useMemo(() => fitAgainstLogX(points.map((point) => ({ x: point.price, y: point.maxFlow }))), [points]);
+	// this much flow, which the six hotends someone happens to be comparing cannot answer. Shared
+	// with the by-manufacturer chart below, so the two cannot disagree about where the line is
+	const trend = useAtomValue(priceFlowTrendAtom);
 
 	const spec = useMemo(
 		() => (mode === 'value' ? valueBands(trend) : costBands(costBounds, (usd) => money.format(usd, 'fine'))),
@@ -650,26 +652,6 @@ export function PriceVsFlowScatter() {
 					<span className="flex items-center gap-1.5">
 						<SeriesMarker index={0} />
 						Selected for comparison
-					</span>
-					{/* The strip carries its own labels, so this only has to say where the lines come
-					    from — the lengths are the definition, and a reader who knows the classes will
-					    want to check them against the ones they know */}
-					<span className="flex items-center gap-1.5">
-						<span className="flex h-2 w-8 overflow-hidden rounded-[2px]">
-							{FLOW_CLASSES.map((entry) => (
-								<span key={entry.label} className="flex-1" style={{ background: entry.color }} />
-							))}
-						</span>
-						<span
-							title={
-								'Quoted for PLA: ' +
-								`${FLOW_CLASSES.map((entry) => `${entry.label} ${flowClassOrigin(entry)}`).join(' · ')}. ` +
-								'Scaled for whatever is being printed, so the bands move with the material ' +
-								'and a hotend stays in the same class.'
-							}
-						>
-							Community flow classes
-						</span>
 					</span>
 					{hidden > 0 ? (
 						<span className="opacity-70">

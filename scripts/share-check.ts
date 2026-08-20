@@ -1,6 +1,11 @@
-import { hotendSlug, parseReadableQuery } from '@/lib/config-query';
+import { hotendSlug, parseReadableQuery, viewSlug } from '@/lib/config-query';
 import { decodeConfig, encodeConfig } from '@/lib/config-sharing';
-import { DEFAULT_CONFIGURATION, MAX_COMPARED_HOTENDS, type ShareableConfiguration } from '@/lib/configuration';
+import {
+	DEFAULT_CONFIGURATION,
+	MAX_COMPARED_HOTENDS,
+	type ShareableConfiguration,
+	VIEW_MODES
+} from '@/lib/configuration';
 import { CURRENCIES, FALLBACK_RATES, money } from '@/lib/currency';
 import { FLOW_CLASSES, flowClassAt, flowClassOfReferenceFlow } from '@/lib/flow-class';
 import { ABBREVIATED_IDS, findHotend, HOTEND_DB, hotendCode } from '@/lib/hotend';
@@ -66,6 +71,13 @@ check('6 hotends + options', {
 		startTemperature: 160 as Celsius
 	},
 	viewMode: 'cost'
+});
+
+// A view added to the app needs a code in the share format, and a mode with no code silently
+// decodes back to the default — a link to it would open somewhere else
+check('manufacturer value view', {
+	...DEFAULT_CONFIGURATION,
+	viewMode: 'manufacturerValue'
 });
 
 // The worst case a link can carry: the app will not let more than this be selected, and the
@@ -302,4 +314,11 @@ console.log(
 	);
 	console.log(`${wrong.length === 0 ? 'OK  ' : 'FAIL'} flow bands classify edges   ${bands.length} bands`);
 	for (const band of wrong) console.log(`  ${band.flowClass.label} does not own its own edge`);
+}
+
+// Every view has to be reachable by name as well as by code, since `/llms.txt` publishes the slugs
+{
+	const missing = VIEW_MODES.filter(({ value }) => parseReadableQuery(new URLSearchParams(`?view=${viewSlug(value)}`))?.config.viewMode !== value);
+	console.log(`${missing.length === 0 ? 'OK  ' : 'FAIL'} every view slug resolves    ${VIEW_MODES.length - missing.length}/${VIEW_MODES.length}`);
+	for (const mode of missing) console.log(`  "${viewSlug(mode.value)}" does not come back as ${mode.value}`);
 }

@@ -441,10 +441,10 @@ export const HOTEND_DB: HotendDefinition[] = [
 		effectiveMeltZone: 57.5 as Millimeter,
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
-		stillSold: true,
-		price: 30 as Dollars,
+		stillSold: false,
+		price: 113 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
-		notes: 'Only clones available'
+		notes: 'Official product, discontinued'
 	},
 	{
 		id: 'E3D|V6',
@@ -465,9 +465,9 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
-		price: 8 as Dollars,
+		price: 75 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
-		notes: null
+		notes: 'Official product'
 	},
 	{
 		id: 'E3D|V6 Volcano',
@@ -488,9 +488,9 @@ export const HOTEND_DB: HotendDefinition[] = [
 		filamentDiameter: 1.75 as Millimeter,
 		filamentPaths: 1,
 		stillSold: true,
-		price: 12 as Dollars,
+		price: 75 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
-		notes: null
+		notes: 'Official product'
 	},
 	{
 		id: 'Elegoo|Centauri Carbon',
@@ -536,6 +536,29 @@ export const HOTEND_DB: HotendDefinition[] = [
 		price: 8 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: null
+	},
+	{
+		id: 'Generic|Supervolcano  Clone',
+		manufacturer: 'Generic',
+		name: 'Supervolcano  Clone',
+		ecosystem: 'V6',
+		mountingPattern: 'Groove',
+		nozzle: 'V6 Supervolcano',
+		mzeCompatible: false,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Al', maxTemperature: 300 as Celsius },
+			{ material: 'Cu', maxTemperature: 500 as Celsius }
+		],
+		meltZoneLength: 57.5 as Millimeter,
+		effectiveMeltZone: 57.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 30 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: 'Clone'
 	},
 	{
 		id: 'Generic|Tricorn',
@@ -646,6 +669,52 @@ export const HOTEND_DB: HotendDefinition[] = [
 		price: 22 as Dollars,
 		hfNozzlePrice: 15 as Dollars,
 		notes: 'MZE+V6 nozzle addition'
+	},
+	{
+		id: 'Generic|V6 Clone',
+		manufacturer: 'Generic',
+		name: 'V6 Clone',
+		ecosystem: 'V6',
+		mountingPattern: 'Groove',
+		nozzle: 'V6',
+		mzeCompatible: true,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Al', maxTemperature: 300 as Celsius },
+			{ material: 'Cu', maxTemperature: 500 as Celsius }
+		],
+		meltZoneLength: 17.5 as Millimeter,
+		effectiveMeltZone: 17.5 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 8 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: 'Clone'
+	},
+	{
+		id: 'Generic|V6 Volcano  Clone',
+		manufacturer: 'Generic',
+		name: 'V6 Volcano  Clone',
+		ecosystem: 'V6',
+		mountingPattern: 'Groove',
+		nozzle: 'V6 Volcano',
+		mzeCompatible: false,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: false,
+		blockOptions: [
+			{ material: 'Al', maxTemperature: 300 as Celsius },
+			{ material: 'Cu', maxTemperature: 500 as Celsius }
+		],
+		meltZoneLength: 26 as Millimeter,
+		effectiveMeltZone: 26 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 12 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: 'Clone'
 	},
 	{
 		id: 'Lukes Lab|Chube Air',
@@ -981,6 +1050,28 @@ export const HOTEND_DB: HotendDefinition[] = [
 		price: 80 as Dollars,
 		hfNozzlePrice: 5 as Dollars,
 		notes: 'Proprietary nozzle'
+	},
+	{
+		id: 'Microswiss|Microswiss All Metal',
+		manufacturer: 'Microswiss',
+		name: 'Microswiss All Metal',
+		ecosystem: 'MK8',
+		mountingPattern: 'MK8',
+		nozzle: 'MK8',
+		mzeCompatible: false,
+		hfNozzleCompatible: true,
+		nonstructuralHeatbreak: true,
+		blockOptions: [
+			{ material: 'Al', maxTemperature: 300 as Celsius }
+		],
+		meltZoneLength: 19 as Millimeter,
+		effectiveMeltZone: 19 as Millimeter,
+		filamentDiameter: 1.75 as Millimeter,
+		filamentPaths: 1,
+		stillSold: true,
+		price: 63 as Dollars,
+		hfNozzlePrice: 15 as Dollars,
+		notes: 'Ti heatbreak'
 	},
 	{
 		id: 'Microswiss|Microswiss H2 HF',

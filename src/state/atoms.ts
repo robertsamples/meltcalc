@@ -35,6 +35,7 @@ import {
 import { FLOW_CLASSES, type FlowClassBand } from '@/lib/flow-class';
 import { HOTEND_DB, type HotendDefinition, type HotendOptions, resolveHotends } from '@/lib/hotend';
 import { defaultMaterial, findMaterial, MATERIAL_DB, type MaterialDefinition } from '@/lib/material';
+import { fitAgainstLogX, type LogTrend } from '@/lib/regression';
 import {
 	type EnergyBreakdown,
 	energyPerVolume,
@@ -396,6 +397,36 @@ export const flowClassBandsAtom = atom<FlowClassBand[]>((get) => {
 		to: flowClass.max * scale
 	}));
 });
+
+/**
+ * Every hotend the price views can plot: one with a price, and a flow to divide it by.
+ *
+ * Shared rather than filtered again in each chart, because it is also the population the trend is
+ * fitted over — two charts disagreeing about who is in the market would be two charts disagreeing
+ * about what the market charges.
+ */
+export const pricedPerformanceAtom = atom<HotendPerformance[]>((get) =>
+	get(allPerformanceAtom).filter((entry) => entry.price !== null && entry.costPerFlow !== null)
+);
+
+/**
+ * What the market charges for flow: flow fitted against log price over every priced hotend.
+ *
+ * Over the whole database rather than the current comparison, deliberately. The question it answers
+ * is what this much flow normally costs, and the handful of hotends somebody happens to be looking
+ * at cannot answer that — they are the thing being measured against it.
+ *
+ * An atom rather than a `useMemo` in each chart because two views now read it, and a trend line that
+ * differed between the scatter and the box plot beneath it would make both of them wrong.
+ */
+export const priceFlowTrendAtom = atom<LogTrend | null>((get) =>
+	fitAgainstLogX(
+		get(pricedPerformanceAtom).map((entry) => ({
+			x: entry.price as number,
+			y: Number.isFinite(entry.maxFlow) ? entry.maxFlow : 0
+		}))
+	)
+);
 
 export const currentConfigurationAtom = atom<ShareableConfiguration>((get) => ({
 	printSettings: get(currentPrintSettingsAtom),

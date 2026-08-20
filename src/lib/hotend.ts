@@ -319,6 +319,11 @@ const ABBREVIATED_NAMES: Record<string, string> = {
 export const ABBREVIATED_IDS = Object.keys(ABBREVIATED_NAMES);
 
 /** The same label with any abbreviation applied, for the table */
+/** The maker's name as a chart axis has room for it */
+export function shortManufacturer(manufacturer: string): string {
+	return ABBREVIATED_MANUFACTURERS[manufacturer] ?? manufacturer;
+}
+
 export function shortHotendLabel(hotend: HotendDefinition): string {
 	const name = ABBREVIATED_NAMES[hotend.id] ?? hotend.name;
 	if (hotend.manufacturer === 'Unknown') return name;
