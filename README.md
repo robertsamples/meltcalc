@@ -32,6 +32,9 @@ comparisons with a particular hotend very often.
 
 ## How it works
 
+A full description of the model and the design notes behind it is in [theory.md](theory.md).
+What follows is the short version.
+
 Melting a cubic millimetre costs a fixed amount of energy, and a melt zone can only couple so much
 power into the filament per millimetre of heated length. Those two facts set a ceiling on volumetric
 flow, and everything on the site follows from it.

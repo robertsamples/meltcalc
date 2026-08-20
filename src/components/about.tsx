@@ -14,6 +14,9 @@ import {
 import { cn } from '@/lib/utils';
 import { currentThermalSettingsAtom, specificPowerLimitAtom } from '@/state/atoms';
 
+/** The long version of everything below, kept in the repository rather than in the app */
+const THEORY = 'https://github.com/robertsamples/meltcalc/blob/main/theory.md';
+
 /**
  * The model, stated as a methods section.
  *
@@ -38,6 +41,19 @@ export function AboutCard({ className }: { className?: string }) {
 					<CardTitle className="text-base">How this works</CardTitle>
 				</summary>
 				<CardContent className="space-y-2 pb-6 text-xs text-muted-foreground leading-relaxed">
+					<p>
+						For a full technical discussion, including derivations, limitations and the reasoning
+						behind each approximation, see{' '}
+						<a
+							href={THEORY}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="underline underline-offset-2 transition-colors hover:text-foreground focus:text-foreground"
+						>
+							theory.md
+						</a>
+						.
+					</p>
 					<p>
 						<span className="text-foreground">Melt enthalpy.</span> Energy per unit volume is taken as{' '}
 						<code>E = ρ (c_p ΔT + h_f)</code>, with <code>c_p</code> averaged over the solid-to-melt
