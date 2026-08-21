@@ -115,6 +115,30 @@ bonding against a chamber well below its melting point, crystallisation, warping
 longer melt zone fixes none of that, so folding it into the flow number would make the hotend
 comparison answer a question it isn't measuring.
 
+## Validation
+
+The model is checked against published max flow tests at
+[meltcalc.baconmilkshake.com/validation](https://meltcalc.baconmilkshake.com/validation). As it
+stands that is 70 tests from 4 sources: the centre sits at 1.01x measured over predicted, R2 is
+0.76, and about half the tests land within 25% of the prediction.
+
+The per term results matter more than the overall number. The CHT credit measures 1.59x against the
+1.53x modelled, which is close. The temperature term comes out softer than modelled, an exponent
+near 0.50 against 0.58. Nozzle diameter still has no term in the model and stock nozzles do not
+appear to need one, but CHT nozzles gain with diameter in a way the model does not capture.
+
+More data would help, so if you have run a max flow test I would like it. Open an issue with:
+
+- extruder
+- hotend, and whether the nozzle is CHT/HF or a regular one
+- nozzle diameter
+- filament type and brand
+- the max flow rate you measured
+
+If you ran an Orca flow or temperature tower, the most useful pair of numbers is the rough flow
+where the surface first goes matte or starts looking slightly underextruded, and the flow where it
+obviously fails. Either one on its own is fine.
+
 ## Data
 
 The project is open source, so if you want to contribute more hotends or materials that aren't

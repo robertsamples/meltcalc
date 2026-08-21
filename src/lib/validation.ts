@@ -369,6 +369,50 @@ export const COMPOSITE_MODES: { value: CompositeMode; label: string }[] = [
 	{ value: 'diameter', label: 'By nozzle diameter' }
 ];
 
+/** The same three variables named as a colour choice, which is what the parity scatter uses them for */
+export const COLOUR_MODES: { value: CompositeMode; label: string }[] = [
+	{ value: 'nozzle', label: 'Nozzle type' },
+	{ value: 'material', label: 'Material' },
+	{ value: 'diameter', label: 'Nozzle diameter' }
+];
+
+export type PointSeries = { key: string; label: string; count: number; points: ValidationPoint[] };
+
+/**
+ * The set split by one variable, for a chart that plots the measurements themselves.
+ *
+ * Nothing is divided out here — unlike `compositeSeries`, which measures every point against its
+ * own configuration first — so this is a colouring and never a comparison: a series sitting off the
+ * model is not that variable's effect, since everything else varies inside it too.
+ *
+ * Order is how each variable is read: diameter ascending, stock before CHT, materials
+ * most-measured first. Colour follows that order, so a series keeps its hue as the set is filtered.
+ */
+export function splitPoints(points: ValidationPoint[], mode: CompositeMode): PointSeries[] {
+	if (mode === 'diameter') {
+		const diameter = (point: ValidationPoint) => String(point.measurement.nozzleDiameter);
+
+		return [...groupBy(points, diameter)]
+			.map(([key, group]) => ({ key, label: `${key} mm`, count: group.length, points: group }))
+			.sort((a, b) => Number(a.key) - Number(b.key));
+	}
+
+	if (mode === 'nozzle') {
+		return [...groupBy(points, (point) => (point.measurement.cht ? 'cht' : 'standard'))]
+			.map(([key, group]) => ({
+				key,
+				label: key === 'cht' ? 'CHT nozzle' : 'Stock nozzle',
+				count: group.length,
+				points: group
+			}))
+			.sort((a, b) => b.key.localeCompare(a.key));
+	}
+
+	return [...groupBy(points, (point) => point.material.id)]
+		.map(([key, group]) => ({ key, label: group[0].material.name, count: group.length, points: group }))
+		.sort((a, b) => b.count - a.count);
+}
+
 /** The dropdown's unfiltered entry: every test in the mode, coloured by the mode's own variable */
 export const ALL = 'all';
 

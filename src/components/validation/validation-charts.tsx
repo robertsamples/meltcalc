@@ -32,6 +32,7 @@ import {
 	type Fit,
 	type NormalisedPoint,
 	type NormalisedSeries,
+	type PointSeries,
 	predictedOn,
 	ratioOn,
 	type Summary,
@@ -388,13 +389,24 @@ const densityTooltip = pointTooltip<DensityPoint>((row) =>
 	) : null
 );
 
-export function ParityChart({ points, basis }: { points: ValidationPoint[]; basis: Basis }) {
-	const drawable = points.filter((point) => point.predicted > 0);
-	const plain = drawable.filter((point) => !point.measurement.cht);
-	const cht = drawable.filter((point) => point.measurement.cht);
+/**
+ * Every test against what the model allowed for it, split by whichever variable is being coloured.
+ *
+ * The split is identity only: colour comes from the series' place in `splitPoints`, so a group
+ * keeps its hue when another one empties out, and no series is ever read as an effect.
+ */
+export function ParityChart({ series, basis }: { series: PointSeries[]; basis: Basis }) {
+	const drawable = series
+		.map((entry, index) => ({
+			...entry,
+			color: seriesColor(index),
+			points: entry.points.filter((point) => point.predicted > 0)
+		}))
+		.filter((entry) => entry.points.length > 0);
+	const plotted = drawable.flatMap((entry) => entry.points);
 	const top =
 		Math.ceil(
-			Math.max(...drawable.map((point) => Math.max(predictedOn(point, basis), point.measurement.flow))) / 5
+			Math.max(...plotted.map((point) => Math.max(predictedOn(point, basis), point.measurement.flow))) / 5
 		) * 5;
 
 	return (
@@ -436,8 +448,15 @@ export function ParityChart({ points, basis }: { points: ValidationPoint[]; basi
 					{...THRESHOLD_LINE}
 				/>
 				<ChartTooltip content={ratioTooltip(basis)} cursor={false} />
-				<Scatter name="Stock nozzle" data={plain} fill={MEASURED} isAnimationActive={false} />
-				<Scatter name="CHT nozzle" data={cht} fill={SECOND} isAnimationActive={false} />
+				{drawable.map((entry) => (
+					<Scatter
+						key={entry.key}
+						name={entry.label}
+						data={entry.points}
+						fill={entry.color}
+						isAnimationActive={false}
+					/>
+				))}
 			</ScatterChart>
 		</ChartContainer>
 	);

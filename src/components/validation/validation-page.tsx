@@ -34,6 +34,7 @@ import {
 	type Basis,
 	byHotend,
 	byMaterial,
+	COLOUR_MODES,
 	COMPOSITE_MODES,
 	type CompositeMode,
 	chtPairs,
@@ -48,6 +49,7 @@ import {
 	normalisedCurve,
 	overall,
 	pooledSuperheatFit,
+	splitPoints,
 	superheatSweeps,
 	sweepLabel,
 	validationPoints
@@ -149,6 +151,9 @@ export function ValidationPage() {
 	];
 
 	const { summary, errors, density } = analysis;
+	// Colour on the parity scatter, which is a split of the same set and not a comparison
+	const [parityColour, setParityColour] = useState<CompositeMode>('nozzle');
+	const parity = splitPoints(summary.comparable, parityColour);
 	const modelExponent = Math.log2(SUPERHEAT_AT_DOUBLE);
 	// The calibration is stored per browser, so two people — or one person on two machines — can be
 	// reading different numbers off this page. Whichever one is in force says so at the top
@@ -239,15 +244,37 @@ export function ValidationPage() {
 							/>
 						</div>
 
-						<ChartKey entries={NOZZLE_KEY} dashed="model = measurement" />
-						<ParityChart points={summary.points} basis={basis} />
+						<Select value={parityColour} onValueChange={(value) => setParityColour(value as CompositeMode)}>
+							<SelectTrigger
+								id="parity-colour"
+								size="sm"
+								className="h-8 w-full text-xs sm:w-auto sm:min-w-44"
+							>
+								<span className="truncate">
+									Colour by{' '}
+									{COLOUR_MODES.find((mode) => mode.value === parityColour)?.label.toLowerCase()}
+								</span>
+							</SelectTrigger>
+							<SelectContent>
+								{COLOUR_MODES.map((mode) => (
+									<SelectItem key={mode.value} value={mode.value} className="text-xs">
+										{mode.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+
+						<ChartKey entries={seriesKey(parity)} dashed="model = measurement" />
+						<ParityChart series={parity} basis={basis} />
 
 						<Note>
 							Implied calibration {formatNumber(referenceFlowPerMeltZoneMm * summary.centre, 2)} mm³/s per
 							mm against the {formatNumber(referenceFlowPerMeltZoneMm, 2)} in use. R² is taken about the
 							model's own answer rather than a fitted line, so being high or low counts against it;
 							recalibrated is the best a single scale factor can reach, which is the ceiling on what
-							moving the calibration buys. The per-term tabs are the ones that carry information.
+							moving the calibration buys. Colour splits the same tests by one variable and controls for
+							nothing else, so a series sitting off parity is not that variable's effect — the per-term
+							tabs are the ones that carry information.
 						</Note>
 						{summary.zeroFlow.length > 0 ? (
 							<Note>
