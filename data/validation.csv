@@ -1,0 +1,71 @@
+Extruder,Filament,Subtype,Filament manufacturer,Nozzle diameter (mm),Temperature,Hotend,Nozzle,MZE,CHT,Start (mm3/s),Median (mm3/s),End (mm3/s),Citation
+clockwork 2,PLA,,voxel,0.4,215,Revo,Brass,N,N,,17,,https://www.cnckitchen.com/blog/e3d-revo-high-flow-review
+clockwork 2,PLA,,voxel,0.4,215,V6,Brass,N,Y,,22.5,,https://www.cnckitchen.com/blog/e3d-revo-high-flow-review
+clockwork 2,PLA,,voxel,0.4,215,Revo,Revo HF,N,Y,,24,,https://www.cnckitchen.com/blog/e3d-revo-high-flow-review
+LGX,PLA,X-PLA,add-north,0.6,205,Copperhead,Brass,N,N,,,19.5,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,0.7,205,Copperhead,Brass,N,N,,,25,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,1,205,Copperhead,Brass,N,N,,,21,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,1.4,205,Copperhead,Brass,N,N,,,21,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,1.8,205,Copperhead,Brass,N,N,,,21,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,0.6,225,Copperhead,Brass,N,N,,,20,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,0.8,225,Copperhead,Brass,N,N,,,26,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,1,225,Copperhead,Brass,N,N,,,24.5,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,1.4,225,Copperhead,Brass,N,N,,,24.5,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,1.8,225,Copperhead,Brass,N,N,,,23,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,0.6,245,Copperhead,Brass,N,N,,,31.5,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,0.8,245,Copperhead,Brass,N,N,,,29.5,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,1,245,Copperhead,Brass,N,N,,,25.5,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,1.4,245,Copperhead,Brass,N,N,,,25,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,1.8,245,Copperhead,Brass,N,N,,,23.5,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,0.6,205,Copperhead,Brass,N,Y,,,30.5,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,0.8,205,Copperhead,Brass,N,Y,,,32.5,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,1,205,Copperhead,Brass,N,Y,,,36.5,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,1.4,205,Copperhead,Brass,N,Y,,,38.5,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,1.8,205,Copperhead,Brass,N,Y,,,40.5,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,0.6,225,Copperhead,Brass,N,Y,,,33,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,0.8,225,Copperhead,Brass,N,Y,,,38,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,1,225,Copperhead,Brass,N,Y,,,38.5,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,1.4,225,Copperhead,Brass,N,Y,,,39,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,1.8,225,Copperhead,Brass,N,Y,,,41.5,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,0.6,245,Copperhead,Brass,N,Y,,,35.5,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,0.8,245,Copperhead,Brass,N,Y,,,38,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,1,245,Copperhead,Brass,N,Y,,,38,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,1.4,245,Copperhead,Brass,N,Y,,,43,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+LGX,PLA,X-PLA,add-north,1.8,245,Copperhead,Brass,N,Y,,,44,https://www.bondtech.se/intranet/white-paper-max-flow-rate/?v=0b3b97fa6688
+Nextruder,PLA,easyfil,formfutura,0.4,190,V6 Clone,Brass,N,N,,6,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PLA,easyfil,formfutura,0.4,200,V6 Clone,Brass,N,N,,8,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PLA,easyfil,formfutura,0.4,210,V6 Clone,Brass,N,N,,8,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PLA,easyfil,formfutura,0.4,220,V6 Clone,Brass,N,N,,12,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PLA,easyfil,formfutura,0.4,230,V6 Clone,Brass,N,N,,14,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PLA,easyfil,formfutura,0.4,240,V6 Clone,Brass,N,N,,15,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PETG,XT (CF),ColorFabb,0.4,240,V6 Clone,Brass,N,N,,4,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PETG,XT (CF),ColorFabb,0.4,250,V6 Clone,Brass,N,N,,7.5,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PETG,XT (CF),ColorFabb,0.4,260,V6 Clone,Brass,N,N,,8.5,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PETG,XT (CF),ColorFabb,0.4,270,V6 Clone,Brass,N,N,,10,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PETG,XT (CF),ColorFabb,0.4,280,V6 Clone,Brass,N,N,,12,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PETG,,Prusa,0.4,210,V6 Clone,Brass,N,N,,3,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PETG,,Prusa,0.4,220,V6 Clone,Brass,N,N,,4.5,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PETG,,Prusa,0.4,230,V6 Clone,Brass,N,N,,6.5,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PETG,,Prusa,0.4,240,V6 Clone,Brass,N,N,,8,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PETG,,Prusa,0.4,250,V6 Clone,Brass,N,N,,9,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PETG,,Prusa,0.4,260,V6 Clone,Brass,N,N,,11,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PETG,,Prusa,0.4,270,V6 Clone,Brass,N,N,,13,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,ABS,TitanX,formfutura,0.4,230,V6 Clone,Brass,N,N,,10,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,ABS,TitanX,formfutura,0.4,240,V6 Clone,Brass,N,N,,12,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,ABS,TitanX,formfutura,0.4,250,V6 Clone,Brass,N,N,,14,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,ABS,TitanX,formfutura,0.4,260,V6 Clone,Brass,N,N,,15,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,ABS,TitanX,formfutura,0.4,270,V6 Clone,Brass,N,N,,16,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,ABS,TitanX,formfutura,0.4,280,V6 Clone,Brass,N,N,,17,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PETG,nGen,ColorFabb,0.4,210,V6 Clone,Brass,N,N,,8,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PETG,nGen,ColorFabb,0.4,220,V6 Clone,Brass,N,N,,10,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PETG,nGen,ColorFabb,0.4,230,V6 Clone,Brass,N,N,,12,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PETG,nGen,ColorFabb,0.4,240,V6 Clone,Brass,N,N,,14,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PETG,nGen,ColorFabb,0.4,250,V6 Clone,Brass,N,N,,15.5,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,TPU,armadillo,ninjatek,0.4,220,V6 Clone,Brass,N,N,,4,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,TPU,armadillo,ninjatek,0.4,230,V6 Clone,Brass,N,N,,6,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,TPU,armadillo,ninjatek,0.4,240,V6 Clone,Brass,N,N,,7.5,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PP,centaur,formfutura,0.4,220,V6 Clone,Brass,N,N,,16,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PP,centaur,formfutura,0.4,230,V6 Clone,Brass,N,N,,16,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Nextruder,PP,centaur,formfutura,0.4,240,V6 Clone,Brass,N,N,,20,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
+Centauri Carbon,PETG,,Kingroon,0.4,260,Centauri Carbon,Bimetal Br/St,N,N,23,,32,author
+Centauri Carbon,PETG,,Kingroon,0.4,260,TZ HF (MZE+V6),Tungsten Carbide,N,N,33,,43,author

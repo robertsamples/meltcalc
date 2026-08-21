@@ -1,11 +1,11 @@
 Family,Material,Density (g/cm3),Specific heat capacity (J/gK),Heat of fusion (J/g),Melt temp (C),Print temp (C),Start temp (C),Practical flow factor,Notes
-Polyester,PLA,1.24,1.8,45,160,220,25,1.0,Tm 155-170; ~35-40% crystallinity of the 93 J/g fully crystalline value
+Polyester,PLA,1.24,1.8,45,160,220,25,1,Tm 155-170; ~35-40% crystallinity of the 93 J/g fully crystalline value
 Polyester,PET,1.38,1.55,50,250,275,60,0.8,"Tm 250 °C; crystallises readily, unlike its glycol-modified cousins"
-Polyester,PETG,1.27,1.7,0,210,240,25,1.0,Amorphous - no Tm. Tg 80 °C; 210 °C is where it flows well enough to extrude
-Polyester,PCTG,1.23,1.75,0,220,250,25,1.0,"Amorphous copolyester, tougher than PETG"
-Styrenic,ABS,1.04,1.95,0,215,260,60,1.0,"Amorphous, Tg ~105 °C. Start temp assumes a warm enclosure"
-Styrenic,ASA,1.07,1.9,0,220,260,60,1.0,"Amorphous, Tg ~108 °C. Start temp assumes a warm enclosure"
-Styrenic,HIPS,1.04,1.9,0,210,240,50,1.0,"Amorphous, Tg ~100 °C"
+Polyester,PETG,1.27,1.7,0,210,240,25,1,Amorphous - no Tm. Tg 80 °C; 210 °C is where it flows well enough to extrude
+Polyester,PCTG,1.23,1.75,0,220,250,25,1,"Amorphous copolyester, tougher than PETG"
+Styrenic,ABS,1.04,1.95,0,215,260,60,1,"Amorphous, Tg ~105 °C. Start temp assumes a warm enclosure"
+Styrenic,ASA,1.07,1.9,0,220,260,60,1,"Amorphous, Tg ~108 °C. Start temp assumes a warm enclosure"
+Styrenic,HIPS,1.04,1.9,0,210,240,50,1,"Amorphous, Tg ~100 °C"
 Polyamide,PA6,1.13,2,70,220,265,70,0.8,Tm 220 °C; ~30% crystallinity of the 230 J/g fully crystalline value
 Polyamide,PA12,1.01,2.1,95,178,250,60,0.8,"Tm 178 °C, higher crystallinity than PA6"
 Polyamide,PPA,1.15,1.9,55,295,320,80,0.6,Semi-aromatic polyamide (PA6T/66 family); Tm ~290-300 °C
@@ -15,16 +15,16 @@ Polyurethane,TPU,1.2,1.8,18,175,235,40,0.5,Hard-segment domains melt over a broa
 Engineering,PC,1.2,1.75,0,260,290,80,0.8,"Amorphous, Tg 147 °C; needs ~260 °C before it flows, and a hot chamber"
 Engineering,POM (Acetal),1.41,1.85,150,165,215,50,0.6,Tm 165 °C and highly crystalline; dense and fusion-heavy
 Engineering,PVDF,1.78,1.4,45,172,250,60,0.6,Tm 172 °C. Very dense; low cp partly offsets it
-Vinylic,PVB,1.1,1.6,0,190,215,25,1.0,"Amorphous, Tg ~70 °C; solvent-smoothable"
+Vinylic,PVB,1.1,1.6,0,190,215,25,1,"Amorphous, Tg ~70 °C; solvent-smoothable"
 Superpolymer,PPS,1.35,1.8,45,280,320,65,0.3,"Tm 280 °C. Start temp is the spool, not the chamber: printed in a hot chamber it stays semi-crystalline rather than annealing on the plate"
 Superpolymer,PEKK,1.3,2,30,305,360,130,0.3,Tm ~305 °C; slower-crystallising than PEEK
 Superpolymer,PEEK,1.3,2.2,45,343,400,150,0.3,"Tm 343 °C, ~35% crystallinity. Chamber at 150 °C+ is what makes it printable"
 Superpolymer,PEI (ULTEM 9085),1.34,1.9,0,330,380,150,0.6,"Amorphous, Tg 186 °C; flows around 330 °C. Hot chamber assumed"
 Superpolymer,PPSU,1.29,1.4,0,330,370,150,0.6,"Amorphous polysulfone, Tg 220 °C. Hot chamber assumed"
-Vinylic,PVA,1.23,1.7,0,165,200,25,1.0,"Amorphous, Tg ~80 °C; water-soluble. Printing grades are partially hydrolysed and plasticised, so there is no lattice to melt"
+Vinylic,PVA,1.23,1.7,0,165,200,25,1,"Amorphous, Tg ~80 °C; water-soluble. Printing grades are partially hydrolysed and plasticised, so there is no lattice to melt"
 Polyester,PHA,1.25,1.8,80,160,205,25,0.6,Tm 155-175; ~55% crystallinity of the 146 J/g fully crystalline value. Narrow window - degrades near 200 °C
-Polyester,PCL,1.15,2,65,60,120,25,1.0,"Tm 60 °C, the low-melt outlier; ~50% crystallinity of the 139 J/g fully crystalline value"
-Vinylic,PMMA (acrylic),1.185,1.47,0,215,250,60,1.0,"Amorphous, Tg 105 °C; flows around 215 °C, much like ABS at the same Tg"
+Polyester,PCL,1.15,2,65,60,120,25,1,"Tm 60 °C, the low-melt outlier; ~50% crystallinity of the 139 J/g fully crystalline value"
+Vinylic,PMMA (acrylic),1.185,1.47,0,215,250,60,1,"Amorphous, Tg 105 °C; flows around 215 °C, much like ABS at the same Tg"
 Polyamide,PA66,1.14,1.9,75,260,285,70,0.8,Tm 260 °C; ~30% crystallinity of the 255 J/g fully crystalline value. Hotter and faster-crystallising than PA6
 Polyamide,PEBA,1.01,2,30,170,235,40,0.8,"Polyether block amide (Pebax). Only the polyamide hard blocks melt, so fusion stays small like TPU's"
 Polyester,PBT,1.31,1.7,50,225,255,60,0.8,"Tm 225 °C; ~35% crystallinity of the 140 J/g fully crystalline value. Crystallises fast, so it warps"
@@ -33,5 +33,5 @@ Superpolymer,PES,1.37,1.3,0,335,375,150,0.6,"Amorphous polyethersulfone, Tg 225 
 Superpolymer,PEI (ULTEM 1010),1.27,1.9,0,350,390,150,0.6,"Amorphous, Tg 217 °C. Unblended PEI: stiffer and ~20 K hotter to run than 9085"
 Superpolymer,TPI,1.33,2,15,388,420,160,0.3,Thermoplastic polyimide (AURUM PL450C). Tg 249 °C and Tm 388 °C - the highest melting point here
 Superpolymer,LCP,1.4,1.4,5,280,300,80,0.3,"Thermotropic LCP (Vectra-type). The melt keeps its nematic order, so there is almost no lattice to break down and fusion is near zero"
-Styrenic,PPE+PS,1.06,1.8,0,240,275,80,1.0,"Noryl-type PPE/PS blend, Tg ~145 °C. Amorphous; the polyphenylene ether is what carries the heat resistance"
-Vinylic,BVOH,1.25,1.7,0,170,200,25,1.0,Butenediol vinyl alcohol copolymer: an amorphous water-soluble support that dissolves faster and takes a wider window than PVA
+Styrenic,PPE+PS,1.06,1.8,0,240,275,80,1,"Noryl-type PPE/PS blend, Tg ~145 °C. Amorphous; the polyphenylene ether is what carries the heat resistance"
+Vinylic,BVOH,1.25,1.7,0,170,200,25,1,Butenediol vinyl alcohol copolymer: an amorphous water-soluble support that dissolves faster and takes a wider window than PVA

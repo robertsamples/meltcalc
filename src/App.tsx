@@ -1,5 +1,5 @@
 import { useAtom, useSetAtom } from 'jotai';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AboutCard } from '@/components/about';
 import { AttributionCard } from '@/components/attribution';
 import { CostPerFlowChart, PriceVsFlowScatter } from '@/components/charts/cost-charts';
@@ -16,14 +16,18 @@ import { ImportWarning } from '@/components/import-warning';
 import { MaterialSettingsCard, ModelSettingsCard, PrintSettingsCard } from '@/components/settings';
 import { ShareConfigButton } from '@/components/share-config';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { ValidationButton } from '@/components/validation/validation-button';
+import { ValidationPage } from '@/components/validation/validation-page';
 import { comparesMaterials, VIEW_GROUPS, type ViewMode } from '@/lib/configuration';
 import { clearUrlConfig, parseConfigFromUrl } from '@/lib/share-url';
+import { isValidationPath } from '@/lib/validation-route';
 import { currentViewModeAtom, importWarningsAtom, loadImportedConfigurationAtom } from '@/state/atoms';
 
 export function App() {
 	const [viewMode, setViewMode] = useAtom(currentViewModeAtom);
 	const loadImportedConfig = useSetAtom(loadImportedConfigurationAtom);
 	const setImportWarnings = useSetAtom(importWarningsAtom);
+	const [validation, setValidation] = useState(isValidationPath);
 
 	// A shared link is applied once, then taken out of the address bar: the config lives in state
 	// from here on, and a stale `?config=` would be re-imported on every reload
@@ -35,6 +39,16 @@ export function App() {
 			clearUrlConfig();
 		}
 	}, [loadImportedConfig, setImportWarnings]);
+
+	// The whole of the routing: `/validation` is its own page, everything else is the calculator
+	useEffect(() => {
+		const sync = () => setValidation(isValidationPath());
+		window.addEventListener('popstate', sync);
+
+		return () => window.removeEventListener('popstate', sync);
+	}, []);
+
+	if (validation) return <ValidationPage />;
 
 	return (
 		<div className="max-w-7xl mx-auto p-2 space-y-2">
@@ -48,6 +62,7 @@ export function App() {
 				</div>
 				<div className="flex items-center gap-3">
 					<CurrencySelect />
+					<ValidationButton />
 					<ShareConfigButton />
 				</div>
 			</header>
