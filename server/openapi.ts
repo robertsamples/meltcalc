@@ -60,8 +60,8 @@ export function buildOpenApi(baseUrl: string): Record<string, unknown> {
 				'material slug and worked example links.',
 			version: API_VERSION,
 			license: {
-				name: 'CC BY-NC-SA 4.0',
-				url: 'https://creativecommons.org/licenses/by-nc-sa/4.0/'
+				name: 'CC BY 4.0',
+				url: 'https://creativecommons.org/licenses/by/4.0/'
 			},
 			contact: { name: 'Source and issues', url: 'https://github.com/robertsamples/meltcalc' }
 		},

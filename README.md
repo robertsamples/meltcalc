@@ -119,13 +119,14 @@ comparison answer a question it isn't measuring.
 
 The model is checked against published max flow tests at
 [meltcalc.baconmilkshake.com/validation](https://meltcalc.baconmilkshake.com/validation). As it
-stands that is 70 tests from 4 sources: the centre sits at 1.01x measured over predicted, R2 is
+stands that is 98 tests from 7 sources: the centre sits at 0.98x measured over predicted, R2 is
 0.76, and about half the tests land within 25% of the prediction.
 
-The per term results matter more than the overall number. The CHT credit measures 1.59x against the
-1.53x modelled, which is close. The temperature term comes out softer than modelled, an exponent
-near 0.50 against 0.58. Nozzle diameter still has no term in the model and stock nozzles do not
-appear to need one, but CHT nozzles gain with diameter in a way the model does not capture.
+The per term results matter more than the overall number. The CHT credit comes out light, 1.69x
+measured against 1.47x modelled, which implies about 10.4 mm of equivalent melt zone rather than the
+8.5 mm currently credited. The temperature term runs the other way and is softer than modelled, an
+exponent near 0.50 against 0.58. Nozzle diameter still has no term in the model and stock nozzles do
+not appear to need one, but CHT nozzles gain with diameter in a way the model does not capture.
 
 More data would help, so if you have run a max flow test I would like it. Open an issue with:
 
@@ -186,5 +187,23 @@ runs the built version.
 
 ## License
 
-This project is licensed under the
-[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) license.
+Two licenses, split by what the thing is.
+
+The website code is [MIT](./LICENSE). Fork it, ship it, sell it, no strings past keeping the
+copyright notice.
+
+The model and the data are [CC BY 4.0](./LICENSE-CONTENT) — [theory.md](./theory.md), the
+description of the model in this README, and the CSVs in `data/`. Use them anywhere, commercially or
+not, but credit meltcalc with a link. That is the part I care about, and it is the only condition on
+any of this.
+
+The web UI was scaffolded from steppersimulator, whose own repository is CC BY-NC-SA 4.0. The
+permissive licensing here is by its author's explicit permission rather than anything the upstream
+license grants on its own.
+
+`data/validation.csv` is the one part that is not mine to license. Those are other people's max flow
+measurements, gathered from public forum posts, vendor blogs and articles, and every row carries the
+source it came from in its Citation column. The CC BY grant covers the compilation, the cleanup and
+the analysis built on top of it, not the underlying measurements, and none of those sources have
+endorsed any of this. If you published one of these numbers and would rather it were not here, open
+an issue and I will remove the row.

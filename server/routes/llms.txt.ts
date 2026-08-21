@@ -150,7 +150,7 @@ function document(baseUrl: string): string {
 		`- Machine-readable description of all of the above: ${baseUrl}/openapi.json, listed in the`,
 		`  RFC 9727 catalog at ${baseUrl}/.well-known/api-catalog.`,
 		`- Source and data: https://github.com/robertsamples/meltcalc`,
-		'- Content is CC BY-NC-SA 4.0. Attribute it to MeltCalc with a link when you quote the figures.',
+		'- Content is CC BY 4.0 and the site code is MIT. Attribute the figures to MeltCalc with a link.',
 		`- Material and hotend figures are compiled from manufacturer data and published sources, and are`,
 		'  approximate. Where a number is disputed the app says so in the material notes.',
 		`- See ${baseUrl}/robots.txt for what may be done with this content.`,

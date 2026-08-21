@@ -69,3 +69,31 @@ Nextruder,PP,centaur,formfutura,0.4,230,V6 Clone,Brass,N,N,,16,,https://forum.pr
 Nextruder,PP,centaur,formfutura,0.4,240,V6 Clone,Brass,N,N,,20,,https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-general-discussion-announcements-and-releases/automated-method-from-cnc-kitchen-to-evalute-the-maximum-volumetric-speed/
 Centauri Carbon,PETG,,Kingroon,0.4,260,Centauri Carbon,Bimetal Br/St,N,N,23,,32,author
 Centauri Carbon,PETG,,Kingroon,0.4,260,TZ HF (MZE+V6),Tungsten Carbide,N,N,33,,43,author
+LGX lite,PLA,,,0.4,220,Rapido UHF,Copper,N,Y,,50,,https://www.facebook.com/groups/voroncorexy/posts/1664197464008813/
+LGX lite,PLA,,,0.4,200,Goliath,Copper,N,N,,52,,https://www.facebook.com/groups/voroncorexy/posts/1664197464008813/
+LGX lite,PLA,,,0.4,220,Goliath,Copper,N,N,,57,,https://www.facebook.com/groups/voroncorexy/posts/1664197464008813/
+bowden,PLA,,,0.6,220,MK8,Al,N,N,,9,,https://www.reddit.com/r/ender3v2/comments/12fnqrc/flow_rate_testing_new_creality_high_flow_kit_vs/
+bowden,PLA,,,0.6,220,MK8,Al,N,N,,10,,https://www.reddit.com/r/ender3v2/comments/12fnqrc/flow_rate_testing_new_creality_high_flow_kit_vs/
+sprite pro,PLA,,,0.6,220,MK8,Al,N,N,,14,,https://www.reddit.com/r/ender3v2/comments/12fnqrc/flow_rate_testing_new_creality_high_flow_kit_vs/
+sprite pro,PLA,,,0.6,220,MK8,Al,N,Y,,21.6,,https://www.reddit.com/r/ender3v2/comments/12fnqrc/flow_rate_testing_new_creality_high_flow_kit_vs/
+sprite pro,PLA,,,0.6,220,MK8,Copper,N,N,,16,,https://www.reddit.com/r/ender3v2/comments/12fnqrc/flow_rate_testing_new_creality_high_flow_kit_vs/
+sprite pro,PLA,,,0.6,220,MK8,Copper,N,Y,,14,,https://www.reddit.com/r/ender3v2/comments/12fnqrc/flow_rate_testing_new_creality_high_flow_kit_vs/
+sprite pro,PLA,,,0.6,220,MK8,Copper,N,N,,14,,https://www.reddit.com/r/ender3v2/comments/12fnqrc/flow_rate_testing_new_creality_high_flow_kit_vs/
+sprite pro,PLA,,,0.6,220,MK8,Copper,N,Y,,21,,https://www.reddit.com/r/ender3v2/comments/12fnqrc/flow_rate_testing_new_creality_high_flow_kit_vs/
+Bambu X1c,PLA,Basic,Bambulab,0.4,220,X1C OEM,Al,N,N,7,,10,https://forum.bambulab.com/t/h2d-max-flowrate-of-standard-0-4-nozzles/165082/11
+Bambu X1c,PLA,Basic,Bambulab,0.4,240,X1C OEM,Al,N,N,15,,18,https://forum.bambulab.com/t/h2d-max-flowrate-of-standard-0-4-nozzles/165082/11
+Bambu X1c,PLA,Basic,Bambulab,0.4,220,X1C OEM,obxidian,N,Y,10,,20,https://forum.bambulab.com/t/h2d-max-flowrate-of-standard-0-4-nozzles/165082/11
+Bambu X1c,PLA,Basic,Bambulab,0.4,240,X1C OEM,obxidian,N,Y,21,,40,https://forum.bambulab.com/t/h2d-max-flowrate-of-standard-0-4-nozzles/165082/11
+Bambu X1c,PLA,hyper,creality,0.4,220,X1C OEM,Al,N,N,14.8,,22,https://www.reddit.com/media?url=https%3A%2F%2Fpreview.redd.it%2Fyour-experience-fussing-with-the-max-volumetric-speed-v0-soffqi1ezl8d1.png%3Fwidth%3D2994%26format%3Dpng%26auto%3Dwebp%26s%3De28aec64cf402721b925dab0bc33cef24190ca0f
+Bambu X1c,PLA,plus wh,Ankermake,0.4,220,X1C OEM,Al,N,N,7.5,,14.8,https://www.reddit.com/media?url=https%3A%2F%2Fpreview.redd.it%2Fyour-experience-fussing-with-the-max-volumetric-speed-v0-soffqi1ezl8d1.png%3Fwidth%3D2994%26format%3Dpng%26auto%3Dwebp%26s%3De28aec64cf402721b925dab0bc33cef24190ca0f
+Bambu X1c,PLA,Basic or,Bambulab,0.4,220,X1C OEM,Al,N,N,14.8,,16.8,https://www.reddit.com/media?url=https%3A%2F%2Fpreview.redd.it%2Fyour-experience-fussing-with-the-max-volumetric-speed-v0-soffqi1ezl8d1.png%3Fwidth%3D2994%26format%3Dpng%26auto%3Dwebp%26s%3De28aec64cf402721b925dab0bc33cef24190ca0f
+Bambu X1c,PLA,plus or,Ankermake,0.4,220,X1C OEM,Al,N,N,14.8,,16.8,https://www.reddit.com/media?url=https%3A%2F%2Fpreview.redd.it%2Fyour-experience-fussing-with-the-max-volumetric-speed-v0-soffqi1ezl8d1.png%3Fwidth%3D2994%26format%3Dpng%26auto%3Dwebp%26s%3De28aec64cf402721b925dab0bc33cef24190ca0f
+Bambu X1c,PLA,basic viol,Bambulab,0.4,220,X1C OEM,Al,N,N,14.8,,16.8,https://www.reddit.com/media?url=https%3A%2F%2Fpreview.redd.it%2Fyour-experience-fussing-with-the-max-volumetric-speed-v0-soffqi1ezl8d1.png%3Fwidth%3D2994%26format%3Dpng%26auto%3Dwebp%26s%3De28aec64cf402721b925dab0bc33cef24190ca0f
+Bambu X1c,PLA,plus viol,Ankermake,0.4,220,X1C OEM,Al,N,N,11.1,,16.8,https://www.reddit.com/media?url=https%3A%2F%2Fpreview.redd.it%2Fyour-experience-fussing-with-the-max-volumetric-speed-v0-soffqi1ezl8d1.png%3Fwidth%3D2994%26format%3Dpng%26auto%3Dwebp%26s%3De28aec64cf402721b925dab0bc33cef24190ca0f
+Bambu X1c,PLA,basic grn,Bambulab,0.4,220,X1C OEM,Al,N,N,16.5,,22.2,https://www.reddit.com/media?url=https%3A%2F%2Fpreview.redd.it%2Fyour-experience-fussing-with-the-max-volumetric-speed-v0-soffqi1ezl8d1.png%3Fwidth%3D2994%26format%3Dpng%26auto%3Dwebp%26s%3De28aec64cf402721b925dab0bc33cef24190ca0f
+Bambu X1c,PLA,plus grn,Ankermake,0.4,220,X1C OEM,Al,N,N,11.1,,16.8,https://www.reddit.com/media?url=https%3A%2F%2Fpreview.redd.it%2Fyour-experience-fussing-with-the-max-volumetric-speed-v0-soffqi1ezl8d1.png%3Fwidth%3D2994%26format%3Dpng%26auto%3Dwebp%26s%3De28aec64cf402721b925dab0bc33cef24190ca0f
+clockwork 2,PLA,grey,ovurture,0.4,220,Rapido UHF,Steel,N,N,,37.5,,https://www.facebook.com/groups/voroncorexy/posts/1646055699156323/
+clockwork 2,PLA,grey,ovurture,0.4,220,Rapido UHF,Steel,N,N,,50,,https://www.facebook.com/groups/voroncorexy/posts/1646055699156323/
+hemera,PLA,,Dasfilamenut,0.6,215,V6,Brass,N,N,,15,,https://www.cnckitchen.com/blog/bondtech-cht-high-flow-nozzle-reviewed
+hemera,PLA,,Dasfilamenut,0.6,215,V6 Volcano,Brass,N,N,,33,,https://www.cnckitchen.com/blog/bondtech-cht-high-flow-nozzle-reviewed
+hemera,PLA,,Dasfilamenut,0.6,215,V6,Brass,N,Y,,42,,https://www.cnckitchen.com/blog/bondtech-cht-high-flow-nozzle-reviewed

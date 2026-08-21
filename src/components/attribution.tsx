@@ -97,9 +97,9 @@ export function AttributionCard({ className }: { className?: string }) {
 				</CardHeader>
 				<CardContent className="flex flex-col gap-3 text-xs text-muted-foreground leading-relaxed">
 					<p>
-						This page is licensed under the{' '}
-						<Link href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</Link>{' '}
-						license.
+						The model and the figures on this page are{' '}
+						<Link href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</Link> — use them
+						anywhere, commercially or not, with a link back. The site code is MIT.
 					</p>
 
 					<p>

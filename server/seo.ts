@@ -89,7 +89,7 @@ export function buildStructuredData(baseUrl: string): string {
 		browserRequirements: 'Requires JavaScript',
 		isAccessibleForFree: true,
 		offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-		license: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+		license: 'https://creativecommons.org/licenses/by/4.0/',
 		author: { '@type': 'Person', name: 'Robert Samples', url: 'https://github.com/robertsamples' },
 		codeRepository: 'https://github.com/robertsamples/meltcalc',
 		featureList: [
