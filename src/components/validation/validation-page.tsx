@@ -26,6 +26,7 @@ import {
 	TEST_KEY
 } from '@/components/validation/validation-charts';
 import { ValidationTable } from '@/components/validation/validation-table';
+import { DEFAULT_THERMAL_SETTINGS } from '@/lib/configuration';
 import { formatNumber } from '@/lib/format';
 import { HF_NOZZLE_EQUIVALENT_LENGTH } from '@/lib/hotend';
 import { SUPERHEAT_AT_DOUBLE } from '@/lib/thermal';
@@ -149,6 +150,9 @@ export function ValidationPage() {
 
 	const { summary, errors, density } = analysis;
 	const modelExponent = Math.log2(SUPERHEAT_AT_DOUBLE);
+	// The calibration is stored per browser, so two people — or one person on two machines — can be
+	// reading different numbers off this page. Whichever one is in force says so at the top
+	const tuned = referenceFlowPerMeltZoneMm !== DEFAULT_THERMAL_SETTINGS.referenceFlowPerMeltZoneMm;
 
 	return (
 		<div className="max-w-5xl mx-auto p-2 space-y-2">
@@ -156,8 +160,9 @@ export function ValidationPage() {
 				<div>
 					<h1 className="text-lg font-semibold leading-tight">Model validation</h1>
 					<p className="text-xs text-muted-foreground leading-snug">
-						{summary.points.length} published max-flow tests from {summary.sources} sources, against this
-						site's model. Ratios are measured ÷ model.
+						{summary.points.length} published max-flow tests from {summary.sources} sources, against the
+						model at {formatNumber(referenceFlowPerMeltZoneMm, 2)} mm³/s per mm
+						{tuned ? ' — your own calibration, from Model settings' : ''}. Ratios are measured ÷ model.
 					</p>
 				</div>
 				<Button size="sm" variant="outline" onClick={() => navigate('/')}>
@@ -221,11 +226,7 @@ export function ValidationPage() {
 								value={`${formatNumber(summary.centre, 2)}×`}
 								note={`95% CI ${formatNumber(summary.stats.low, 2)}–${formatNumber(summary.stats.high, 2)}×`}
 							/>
-							<Stat
-								label="Spread"
-								value={`×/÷ ${formatNumber(summary.stats.spread, 2)}`}
-								note="1 s.d., in log space"
-							/>
+							<Stat label="Median" value={`${formatNumber(summary.median, 2)}×`} />
 							<Stat
 								label="R²"
 								value={formatNumber(summary.r2, 2)}
