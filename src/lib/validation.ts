@@ -1,5 +1,12 @@
 import z from 'zod/v4';
-import { effectiveMeltZoneLength, findHotend, type HotendDefinition, type HotendOptions } from '@/lib/hotend';
+import {
+	BLOCK_MATERIAL_LABELS,
+	BlockMaterial,
+	effectiveMeltZoneLength,
+	findHotend,
+	type HotendDefinition,
+	type HotendOptions
+} from '@/lib/hotend';
 import { findMaterial, type MaterialDefinition } from '@/lib/material';
 import {
 	energyPerVolume,
@@ -26,6 +33,8 @@ export const ValidationMeasurement = z.object({
 	id: z.string(),
 	hotendId: z.string(),
 	materialId: z.string(),
+	/** Block variant the test ran on; `null` is the stock option, which is nearly every row */
+	block: BlockMaterial.nullable(),
 	/** Grade, filler or brand line: `CF`, `nGen`, `X-PLA`. The model represents none of them */
 	subtype: z.string().nullable(),
 	brand: z.string().nullable(),
@@ -67,6 +76,18 @@ export type ValidationPoint = {
 /** The share either side of the model inside which a measurement counts as agreeing with it */
 export const AGREEMENT_BAND = 0.25;
 
+/**
+ * The hardware a test ran on, as a chart reads it.
+ *
+ * The block appears only where the row named one, since blank means stock and spelling out a
+ * default on every entry would bury the builds that actually differ.
+ */
+export function configurationLabel(point: ValidationPoint): string {
+	const block = point.measurement.block ? ` (${BLOCK_MATERIAL_LABELS[point.measurement.block]})` : '';
+
+	return `${point.hotend.name}${block}${point.measurement.cht ? ' + CHT' : ''}`;
+}
+
 export function measurementLabel(measurement: ValidationMeasurement, material: MaterialDefinition): string {
 	const grade = measurement.subtype ? ` ${measurement.subtype}` : '';
 
@@ -84,7 +105,12 @@ export function evaluate(measurement: ValidationMeasurement, limit: WattsPerMill
 	const material = findMaterial(measurement.materialId);
 	if (!hotend || !material) return null;
 
-	const options: HotendOptions = { mze: measurement.mze, hfNozzle: measurement.cht };
+	// `resolveBlock` falls back to the stock option on `undefined`, which is what a blank cell means
+	const options: HotendOptions = {
+		block: measurement.block ?? undefined,
+		mze: measurement.mze,
+		hfNozzle: measurement.cht
+	};
 	const energy = energyPerVolume(material, material.startTemperature, measurement.temperature);
 	const superheat = superheatFactor(material.meltTemperature, material.printTemperature, measurement.temperature);
 
@@ -275,6 +301,7 @@ function conditions(point: ValidationPoint, ...except: ('temperature' | 'diamete
 		measurement.subtype ?? '',
 		measurement.brand ?? '',
 		point.hotend.id,
+		measurement.block ?? '',
 		except.includes('diameter') ? '' : measurement.nozzleDiameter,
 		except.includes('temperature') ? '' : measurement.temperature,
 		except.includes('cht') ? '' : measurement.cht
@@ -326,11 +353,7 @@ export function superheatSweeps(points: ValidationPoint[], minimumPoints = 3): S
 export function sweepLabel(sweep: Sweep): string {
 	const { measurement } = sweep.first;
 
-	return [
-		sweep.first.label,
-		`${sweep.first.hotend.name}${measurement.cht ? ' + CHT' : ''}`,
-		`${measurement.nozzleDiameter} mm`
-	].join(' · ');
+	return [sweep.first.label, configurationLabel(sweep.first), `${measurement.nozzleDiameter} mm`].join(' · ');
 }
 
 /** One exponent for the whole set, taken within sweeps */
@@ -697,11 +720,16 @@ export function byMaterial(points: ValidationPoint[]): Summary[] {
 	);
 }
 
-/** Keyed on the configuration: a CHT nozzle moves the effective melt zone, so it is its own entry */
+/**
+ * Keyed on the configuration rather than the hotend.
+ *
+ * A CHT nozzle moves the effective melt zone and a block swap moves the derate, so each build is
+ * its own entry: pooling them would average two different predictions into one bar.
+ */
 export function byHotend(points: ValidationPoint[]): Summary[] {
 	return summarise(
-		groupBy(points, (point) => `${point.hotend.id}|${point.measurement.cht}`),
-		(group) => `${group[0].hotend.name}${group[0].measurement.cht ? ' + CHT' : ''}`
+		groupBy(points, (point) => `${point.hotend.id}|${point.measurement.block ?? ''}|${point.measurement.cht}`),
+		(group) => configurationLabel(group[0])
 	);
 }
 

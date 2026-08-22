@@ -297,14 +297,45 @@ async function generateMaterials() {
 }
 
 type Named = { id: string; name: string };
+type Blocked = Named & { blockOptions: { material: string }[] };
 
 /** Tests name a hotend or a filament the way their source did, so the match is case-insensitive */
-function resolve(entries: Named[], name: string, kind: string, context: string): string {
+function resolve<T extends Named>(entries: T[], name: string, kind: string, context: string): T {
 	const wanted = name.trim().toLowerCase();
 	const match = entries.find((entry) => entry.name.toLowerCase() === wanted);
 	if (!match) throw new Error(`${context}: no ${kind} named "${name}"`);
 
-	return match.id;
+	return match;
+}
+
+/**
+ * Which block variant the test ran on, or `null` for whatever that hotend ships as.
+ *
+ * Blank is the ordinary case and means the stock option, which is already what the model falls back
+ * to, so no row has to restate a default. A filled cell has to name a variant the hotend is actually
+ * sold in: a copper Revo is not a thing, and quietly modelling one would put a prediction on the
+ * charts that no hardware could have produced.
+ */
+function parseBlock(row: Record<string, string>, hotend: Blocked, context: string): string | null {
+	const value = optional(row, 'Block');
+	if (!value) return null;
+
+	const wanted = value.trim().toLowerCase();
+	const key = Object.keys(BLOCK_MATERIALS).find(
+		(code) => code.toLowerCase() === wanted || BLOCK_MATERIALS[code] === wanted
+	);
+	if (!key) {
+		throw new Error(
+			`${context}: unknown block material "${value}" (expected ${Object.keys(BLOCK_MATERIALS).join(', ')})`
+		);
+	}
+
+	if (!hotend.blockOptions.some((option) => option.material === key)) {
+		const sold = hotend.blockOptions.map((option) => BLOCK_MATERIALS[option.material]).join(', ');
+		throw new Error(`${context}: ${hotend.name} has no ${BLOCK_MATERIALS[key]} block (it comes in ${sold})`);
+	}
+
+	return key;
 }
 
 /**
@@ -343,20 +374,22 @@ function citationSource(citation: string): string {
 	}
 }
 
-async function generateValidation(hotends: Named[], materials: Named[]) {
+async function generateValidation(hotends: Blocked[], materials: Named[]) {
 	const rows = rowsWithHeaders(await readFile(VALIDATION_CSV, 'utf8'));
 
 	const measurements = rows.map((row, index) => {
 		const context = `validation row ${index + 2}`;
 		const { flow, basis } = measuredFlow(row, context);
 		const citation = required(row, 'Citation', context);
+		const hotend = resolve(hotends, required(row, 'Hotend', context), 'hotend', context);
 
 		return {
 			// Positional: nothing outside the file references these, and two tests can otherwise
 			// differ only in a figure that is the thing being compared
 			id: `v${index + 1}`,
-			hotendId: resolve(hotends, required(row, 'Hotend', context), 'hotend', context),
-			materialId: resolve(materials, required(row, 'Filament', context), 'material', context),
+			hotendId: hotend.id,
+			materialId: resolve(materials, required(row, 'Filament', context), 'material', context).id,
+			block: parseBlock(row, hotend, context),
 			subtype: optional(row, 'Subtype'),
 			brand: optional(row, 'Filament manufacturer'),
 			extruder: optional(row, 'Extruder'),
@@ -378,6 +411,7 @@ async function generateValidation(hotends: Named[], materials: Named[]) {
 				`\t\tid: ${str(measurement.id)},\n` +
 				`\t\thotendId: ${str(measurement.hotendId)},\n` +
 				`\t\tmaterialId: ${str(measurement.materialId)},\n` +
+				`\t\tblock: ${literal(measurement.block)},\n` +
 				`\t\tsubtype: ${literal(measurement.subtype)},\n` +
 				`\t\tbrand: ${literal(measurement.brand)},\n` +
 				`\t\textruder: ${literal(measurement.extruder)},\n` +

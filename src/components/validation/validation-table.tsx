@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatNumber } from '@/lib/format';
 import { seriesColor } from '@/lib/series';
-import { AGREEMENT_BAND, groupBy, type ValidationPoint } from '@/lib/validation';
+import { AGREEMENT_BAND, configurationLabel, groupBy, type ValidationPoint } from '@/lib/validation';
 
 /**
  * Every measurement, and the model beside it.
@@ -90,10 +90,7 @@ export function ValidationTable({ points }: { points: ValidationPoint[] }) {
 					<TableBody>
 						{rows.map((point) => (
 							<TableRow key={point.measurement.id}>
-								<TableCell className="whitespace-nowrap">
-									{point.hotend.name}
-									{point.measurement.cht ? ' + CHT' : ''}
-								</TableCell>
+								<TableCell className="whitespace-nowrap">{configurationLabel(point)}</TableCell>
 								<TableCell className="whitespace-nowrap">{point.label}</TableCell>
 								<TableCell className="text-right tabular-nums">
 									{formatNumber(point.measurement.temperature, 0)}
