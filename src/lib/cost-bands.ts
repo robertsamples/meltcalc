@@ -21,16 +21,7 @@ import { type LogTrend, trendAt } from '@/lib/regression';
  * Used in its natural direction, cost rising with the ramp: the cheap corner sits dark and almost
  * unlit, and the dearer the flow gets the hotter the ground glows.
  */
-const BAND_COLORS = [
-	'#251433',
-	'#531e4d',
-	'#841e5a',
-	'#b71657',
-	'#e03143',
-	'#f26948',
-	'#f69e75',
-	'#f7cdb1'
-] as const;
+const BAND_COLORS = ['#251433', '#531e4d', '#841e5a', '#b71657', '#e03143', '#f26948', '#f69e75', '#f7cdb1'] as const;
 
 const BAND_COUNT = BAND_COLORS.length;
 
@@ -129,11 +120,7 @@ export function costBands(
 
 	return {
 		// Open-ended at both ends: everything cheaper than the first boundary, dearer than the last
-		edges: [
-			() => Number.POSITIVE_INFINITY,
-			...boundaries.map((cost) => (price: number) => price / cost),
-			() => 0
-		],
+		edges: [() => Number.POSITIVE_INFINITY, ...boundaries.map((cost) => (price: number) => price / cost), () => 0],
 		bands,
 		legend: {
 			caption: 'Cost per mm³/s',
@@ -145,6 +132,29 @@ export function costBands(
 			}))
 		}
 	};
+}
+
+/**
+ * How much flow a hotend gives for its price, against what that price normally buys.
+ *
+ * The flow it delivers over the flow the market trend expects at that price, so `1` is the going
+ * rate, `0.5` is half the flow the money usually gets and `2` is twice it. Dividing by the trend is
+ * what makes a $12 clone and a $370 Mosquito comparable at all: both are asked the same question,
+ * and the answers share a scale however far apart the two prices are.
+ *
+ * `null` where the question does not apply — no price on record, no trend to measure against, or a
+ * price the fit extrapolates to no flow at all, none of which is a bad value index but an absent
+ * one. Callers filtering on it drop those rather than treating them as zero.
+ *
+ * Kept here rather than in the chart that draws it because the picker now filters on the same
+ * number, and two definitions of value would be two different answers to the same question.
+ */
+export function valueIndex(trend: LogTrend | null, price: number | null, maxFlow: number): number | null {
+	if (!trend || price === null || !Number.isFinite(maxFlow)) return null;
+
+	const expected = trendAt(trend, price);
+
+	return expected > 0 ? maxFlow / expected : null;
 }
 
 /**

@@ -7,17 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
 import type { AxisMap } from '@/lib/chart-axes';
 import { performanceLabel } from '@/lib/chart-labels';
+import { valueIndex } from '@/lib/cost-bands';
 import { formatFlow, formatNumber } from '@/lib/format';
 import { shortManufacturer } from '@/lib/hotend';
 import { trendAt } from '@/lib/regression';
 import { AXIS_LINE, seriesMarker, shapePath, THRESHOLD_LINE } from '@/lib/series';
 import type { HotendPerformance } from '@/lib/thermal';
-import {
-	currentSelectedHotendsAtom,
-	moneyAtom,
-	performanceAtom,
-	priceFlowTrendAtom
-} from '@/state/atoms';
+import { currentSelectedHotendsAtom, moneyAtom, performanceAtom, priceFlowTrendAtom } from '@/state/atoms';
 
 /**
  * Which makers give more flow for the money, and how consistently.
@@ -163,73 +159,75 @@ function Boxes({ xAxisMap, yAxisMap, boxes }: { xAxisMap?: AxisMap; yAxisMap?: A
 
 	return (
 		<g>
-			{boxes.filter((box) => box.count >= MIN_FOR_BOX).map((box) => {
-				const left = xScale(box.at - BOX_HALF_WIDTH);
-				const right = xScale(box.at + BOX_HALF_WIDTH);
-				const centre = xScale(box.at);
-				const capLeft = xScale(box.at - CAP_HALF_WIDTH);
-				const capRight = xScale(box.at + CAP_HALF_WIDTH);
-				const top = yScale(box.q3);
-				const bottom = yScale(box.q1);
+			{boxes
+				.filter((box) => box.count >= MIN_FOR_BOX)
+				.map((box) => {
+					const left = xScale(box.at - BOX_HALF_WIDTH);
+					const right = xScale(box.at + BOX_HALF_WIDTH);
+					const centre = xScale(box.at);
+					const capLeft = xScale(box.at - CAP_HALF_WIDTH);
+					const capRight = xScale(box.at + CAP_HALF_WIDTH);
+					const top = yScale(box.q3);
+					const bottom = yScale(box.q1);
 
-				return (
-					<g key={box.manufacturer}>
-						<title>
-							{`${box.manufacturer}: ${box.count} hotends, median ${index(box.median)}, ` +
-								`middle half ${index(box.q1)} to ${index(box.q3)}, ` +
-								`range ${index(box.min)} to ${index(box.max)}`}
-						</title>
-						{/* Whiskers to the full range: the best and the worst the maker sells, not a
+					return (
+						<g key={box.manufacturer}>
+							<title>
+								{`${box.manufacturer}: ${box.count} hotends, median ${index(box.median)}, ` +
+									`middle half ${index(box.q1)} to ${index(box.q3)}, ` +
+									`range ${index(box.min)} to ${index(box.max)}`}
+							</title>
+							{/* Whiskers to the full range: the best and the worst the maker sells, not a
 						    statistical cutoff. With three or four hotends in a box there is no such thing
 						    as an outlier worth trimming — every model is the range */}
-						<line
-							x1={centre}
-							x2={centre}
-							y1={yScale(box.max)}
-							y2={yScale(box.min)}
-							stroke={BOX_STROKE}
-							strokeWidth={1}
-						/>
-						<line
-							x1={capLeft}
-							x2={capRight}
-							y1={yScale(box.max)}
-							y2={yScale(box.max)}
-							stroke={BOX_STROKE}
-							strokeWidth={1}
-						/>
-						<line
-							x1={capLeft}
-							x2={capRight}
-							y1={yScale(box.min)}
-							y2={yScale(box.min)}
-							stroke={BOX_STROKE}
-							strokeWidth={1}
-						/>
-						{/* The middle half. Filled, so it reads as a body rather than an outline */}
-						<rect
-							x={left}
-							y={top}
-							width={right - left}
-							height={Math.max(bottom - top, 1)}
-							fill={BOX_FILL}
-							fillOpacity={0.55}
-							stroke={BOX_STROKE}
-							strokeWidth={1}
-							rx={2}
-						/>
-						{/* Brighter and thicker than the box: it is the one number most readers want */}
-						<line
-							x1={left}
-							x2={right}
-							y1={yScale(box.median)}
-							y2={yScale(box.median)}
-							stroke={MEDIAN_STROKE}
-							strokeWidth={2}
-						/>
-					</g>
-				);
-			})}
+							<line
+								x1={centre}
+								x2={centre}
+								y1={yScale(box.max)}
+								y2={yScale(box.min)}
+								stroke={BOX_STROKE}
+								strokeWidth={1}
+							/>
+							<line
+								x1={capLeft}
+								x2={capRight}
+								y1={yScale(box.max)}
+								y2={yScale(box.max)}
+								stroke={BOX_STROKE}
+								strokeWidth={1}
+							/>
+							<line
+								x1={capLeft}
+								x2={capRight}
+								y1={yScale(box.min)}
+								y2={yScale(box.min)}
+								stroke={BOX_STROKE}
+								strokeWidth={1}
+							/>
+							{/* The middle half. Filled, so it reads as a body rather than an outline */}
+							<rect
+								x={left}
+								y={top}
+								width={right - left}
+								height={Math.max(bottom - top, 1)}
+								fill={BOX_FILL}
+								fillOpacity={0.55}
+								stroke={BOX_STROKE}
+								strokeWidth={1}
+								rx={2}
+							/>
+							{/* Brighter and thicker than the box: it is the one number most readers want */}
+							<line
+								x1={left}
+								x2={right}
+								y1={yScale(box.median)}
+								y2={yScale(box.median)}
+								stroke={MEDIAN_STROKE}
+								strokeWidth={2}
+							/>
+						</g>
+					);
+				})}
 		</g>
 	);
 }
@@ -277,14 +275,15 @@ export function ManufacturerValueChart() {
 
 		const byMaker = new Map<string, HotendPerformance[]>();
 		for (const entry of performance) {
-			if (entry.price === null || !Number.isFinite(entry.maxFlow)) continue;
-			// A price the fit extrapolates to no flow at all has no meaningful ratio to expectation
-			if (!(trendAt(trend, entry.price) > 0)) continue;
+			// No price, no flow, or a price the fit extrapolates to no flow at all: each of those is
+			// an absent index rather than a poor one, and `valueIndex` answers `null` to all three
+			if (valueIndex(trend, entry.price, entry.maxFlow) === null) continue;
 
 			byMaker.set(entry.hotend.manufacturer, [...(byMaker.get(entry.hotend.manufacturer) ?? []), entry]);
 		}
 
-		const against = (entry: HotendPerformance) => entry.maxFlow / trendAt(trend, entry.price as number);
+		// Non-null by the loop above, which admitted only entries the index exists for
+		const against = (entry: HotendPerformance) => valueIndex(trend, entry.price, entry.maxFlow) as number;
 
 		// Best value first, which is the order somebody scanning for a maker to trust reads in. Ties
 		// broken by the spread, so the steadier of two equal medians comes first
@@ -346,8 +345,8 @@ export function ManufacturerValueChart() {
 				</CardHeader>
 				<CardContent>
 					<p className="text-sm text-muted-foreground">
-						Select a hotend with a price to compare. The index needs both a price and a trend to
-						measure it against.
+						Select a hotend with a price to compare. The index needs both a price and a trend to measure it
+						against.
 					</p>
 				</CardContent>
 			</Card>
@@ -471,8 +470,8 @@ export function ManufacturerValueChart() {
 				</div>
 
 				<p className="text-[11px] text-muted-foreground">
-					Value index is determined based on how all a manufacturer's hotends compare to the trend
-					at the flow rate at which they perform.
+					Value index is determined based on how all a manufacturer's hotends compare to the trend at the flow
+					rate at which they perform.
 				</p>
 			</CardContent>
 		</Card>
