@@ -1192,7 +1192,7 @@ export const HOTEND_DB: HotendDefinition[] = [
 		nozzle: 'MK8',
 		mzeCompatible: false,
 		hfNozzleCompatible: true,
-		nonstructuralHeatbreak: true,
+		nonstructuralHeatbreak: false,
 		blockOptions: [
 			{ material: 'Al', maxTemperature: 300 as Celsius }
 		],
