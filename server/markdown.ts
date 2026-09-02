@@ -1,6 +1,7 @@
 import { HOTEND_DB } from '@/lib/hotend';
 import { MATERIAL_DB } from '@/lib/material';
 import type { OgModel } from './og/model';
+import type { PageMeta } from './pages';
 import { SITE_NAME } from './site';
 
 /**
@@ -37,8 +38,31 @@ function round(value: number, decimals = 1): string {
 	return Number.isFinite(value) ? String(Number(value.toFixed(decimals))) : '?';
 }
 
-export function buildMarkdown(model: OgModel, { canonicalUrl, baseUrl }: { canonicalUrl: string; baseUrl: string }): string {
-	const lines: string[] = [`# ${model.title}`, ''];
+/** The same footer on every document: what this page is elsewhere, and what may be done with it */
+function elsewhere(canonicalUrl: string, baseUrl: string): string[] {
+	return [
+		'## Elsewhere',
+		'',
+		`- Interactive version of this page: ${canonicalUrl}`,
+		`- Every hotend, material and view, and how to build a link to any configuration: ${baseUrl}/llms.txt`,
+		`- What may be done with this content: ${baseUrl}/robots.txt`,
+		'- Source and data: https://github.com/robertsamples/meltcalc',
+		''
+	];
+}
+
+export function buildMarkdown(
+	model: OgModel,
+	{ canonicalUrl, baseUrl, page }: { canonicalUrl: string; baseUrl: string; page?: PageMeta | null }
+): string {
+	const lines: string[] = page ? [`# ${page.heading}`, '', page.lead, ''] : [`# ${model.title}`, ''];
+
+	if (page) {
+		for (const paragraph of page.body) lines.push(paragraph, '');
+		lines.push(...elsewhere(canonicalUrl, baseUrl));
+
+		return lines.join('\n');
+	}
 
 	// For a configured link the description is the subtitle plus a sentence, so printing both would
 	// repeat the first half of it
@@ -87,15 +111,9 @@ export function buildMarkdown(model: OgModel, { canonicalUrl, baseUrl }: { canon
 		'brand-specific measurements.',
 		'',
 		`Covering ${HOTEND_DB.length} hotends and ${MATERIAL_DB.length} filament materials.`,
-		'',
-		'## Elsewhere',
-		'',
-		`- Interactive version of this page: ${canonicalUrl}`,
-		`- Every hotend, material and view, and how to build a link to any configuration: ${baseUrl}/llms.txt`,
-		`- What may be done with this content: ${baseUrl}/robots.txt`,
-		'- Source and data: https://github.com/robertsamples/meltcalc',
 		''
 	);
+	lines.push(...elsewhere(canonicalUrl, baseUrl));
 
 	return lines.join('\n');
 }

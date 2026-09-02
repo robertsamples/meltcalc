@@ -1,6 +1,8 @@
 import { HOTEND_DB } from '@/lib/hotend';
 import { MATERIAL_DB } from '@/lib/material';
+import { VALIDATION_PATH } from '@/lib/validation';
 import type { OgModel } from './og/model';
+import type { PageMeta } from './pages';
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE } from './site';
 
 /**
@@ -28,6 +30,11 @@ function escapeHtml(value: string): string {
 		.replace(/"/g, '&quot;');
 }
 
+/** The one place a tag is written rather than escaped, so the text either side of it still is */
+function link(href: string, text: string): string {
+	return `<a href="${escapeHtml(href)}">${escapeHtml(text)}</a>`;
+}
+
 /** Counts quoted in the prose, so they cannot drift from the data as rows are added */
 function databaseSummary(): string {
 	const manufacturers = new Set(HOTEND_DB.map((hotend) => hotend.manufacturer)).size;
@@ -41,9 +48,11 @@ function databaseSummary(): string {
 
 /**
  * The body content. For a shared link it leads with what that link is about, because that is what
- * the page will show once it renders.
+ * the page will show once it renders; for a page of its own it says what that page says.
  */
-export function buildSeoBody(model: OgModel): string {
+export function buildSeoBody(model: OgModel, page?: PageMeta | null): string {
+	if (page) return buildPageSeoBody(page);
+
 	const heading = model.variant === 'config' ? model.title : SITE_TITLE_HEADING;
 	const lead = model.variant === 'config' ? model.description : SITE_DESCRIPTION;
 
@@ -59,7 +68,21 @@ export function buildSeoBody(model: OgModel): string {
 		`<p>${escapeHtml(
 			'Views: maximum flow rate, residence time, power per mm of melt zone, heater cartridge sizing, ' +
 				'cost per mm³/s, melt energy by material, and maximum flow by material for one hotend.'
-		)}</p>`
+		)}</p>`,
+		// The only link out of the calculator that a crawler can follow. `/validation` is in the
+		// sitemap, but a page nothing links to is one a crawler has no reason to believe in, and
+		// the app's own link to it exists only once React has run
+		`<p>${link(VALIDATION_PATH, 'Validation: the model against measured flow tests')}</p>`
+	].join('\n\t\t');
+}
+
+/** A page of its own: its words, and a link back to the calculator the figures come from */
+function buildPageSeoBody(page: PageMeta): string {
+	return [
+		`<h1>${escapeHtml(page.heading)}</h1>`,
+		`<p>${escapeHtml(page.lead)}</p>`,
+		...page.body.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`),
+		`<p>${link('/', SITE_TITLE_HEADING)}</p>`
 	].join('\n\t\t');
 }
 

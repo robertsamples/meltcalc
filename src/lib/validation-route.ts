@@ -6,7 +6,9 @@
  * catch-all already serves the shell for any path, and the page is chosen from `location.pathname`.
  */
 
-export const VALIDATION_PATH = '/validation';
+import { VALIDATION_PATH } from '@/lib/validation';
+
+export { VALIDATION_PATH };
 
 export function isValidationPath(): boolean {
 	return window.location.pathname.replace(/\/$/, '') === VALIDATION_PATH;

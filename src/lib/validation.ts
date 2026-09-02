@@ -29,6 +29,12 @@ import { VALIDATION_DB } from '@/lib/validation-db';
  * midpoint, as the two ends of the transition, or as a single figure at one end; the converter
  * reduces whichever they filled in to one number, so nothing here is split by reporting convention.
  */
+/**
+ * The validation page's address, next to the data it shows rather than in the app's routing:
+ * the server names the same path when it builds the page's meta tags and its sitemap entry.
+ */
+export const VALIDATION_PATH = '/validation';
+
 export const ValidationMeasurement = z.object({
 	id: z.string(),
 	hotendId: z.string(),

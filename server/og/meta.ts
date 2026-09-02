@@ -1,3 +1,4 @@
+import type { PageMeta } from '../pages';
 import { buildStructuredData } from '../seo';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../site';
 import { OG_HEIGHT, OG_WIDTH } from './card';
@@ -35,7 +36,8 @@ export function buildOgTags({
 	pageUrl,
 	canonicalUrl,
 	baseUrl,
-	siteName
+	siteName,
+	page
 }: {
 	configParam: string | null | undefined;
 	/** The URL that was shared, tags and all */
@@ -45,6 +47,8 @@ export function buildOgTags({
 	/** Origin the image is served from */
 	baseUrl: string;
 	siteName: string;
+	/** Set for a page that is not the calculator, whose words are its own */
+	page?: PageMeta | null;
 }): string {
 	const model = buildOgModel(configParam);
 	const imageUrl =
@@ -54,7 +58,12 @@ export function buildOgTags({
 
 	// The tab and the search result want the tool named and explained; the card wants a headline.
 	// A shared link's own title still leads, because that is what the reader asked about
-	const pageTitle = model.variant === 'config' ? `${model.title} · ${siteName}` : SITE_TITLE;
+	const pageTitle = page ? page.title : model.variant === 'config' ? `${model.title} · ${siteName}` : SITE_TITLE;
+
+	// A page of its own is described by its own words everywhere the text is read. The card is
+	// still the site's, so `og:image:alt` keeps describing the picture that is actually served
+	const cardTitle = page ? page.ogTitle : model.title;
+	const cardDescription = page ? page.description : model.description;
 
 	return [
 		`<title>${escapeAttribute(pageTitle)}</title>`,
@@ -65,13 +74,17 @@ export function buildOgTags({
 		 * canonicals, so unfurls keep their own titles and images.
 		 */
 		`<link rel="canonical" href="${escapeAttribute(canonicalUrl)}" />`,
-		meta('property', 'og:title', model.title),
-		meta('name', 'twitter:title', model.title),
+		meta('property', 'og:title', cardTitle),
+		meta('name', 'twitter:title', cardTitle),
 
 		// The search snippet wants the fuller sentence; the card's own description stays short
-		meta('name', 'description', model.variant === 'config' ? model.description : SITE_DESCRIPTION),
-		meta('property', 'og:description', model.description),
-		meta('name', 'twitter:description', model.description),
+		meta(
+			'name',
+			'description',
+			page ? page.description : model.variant === 'config' ? model.description : SITE_DESCRIPTION
+		),
+		meta('property', 'og:description', cardDescription),
+		meta('name', 'twitter:description', cardDescription),
 
 		meta('property', 'og:url', pageUrl),
 		meta('property', 'og:type', 'website'),

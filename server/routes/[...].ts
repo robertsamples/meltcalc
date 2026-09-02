@@ -7,6 +7,7 @@ import { buildMarkdown } from '../markdown';
 import { estimateTokens, prefersMarkdown } from '../negotiate';
 import { buildOgTags, injectOgTags } from '../og/meta';
 import { buildOgModel } from '../og/model';
+import { resolvePage } from '../pages';
 import { buildSeoBody, injectSeoBody } from '../seo';
 import { resolveBaseUrl, SITE_NAME } from '../site';
 
@@ -37,6 +38,9 @@ export default defineEventHandler(async (event) => {
 	// already speaks, so it gets the same title, description, body and card as a shared one
 	const configParam = url.searchParams.get('config') ?? packReadableQuery(url.searchParams);
 	const model = buildOgModel(configParam);
+	// `/validation` is a different page, not a configuration of this one: served the calculator's
+	// title and body it reads as a duplicate of the homepage under a second URL
+	const page = resolvePage(url.pathname);
 	const canonicalUrl = `${baseUrl}${url.pathname}`;
 	const pageUrl = `${baseUrl}${url.pathname}${url.search}`;
 	const markdown = prefersMarkdown(getRequestHeader(event, 'accept'));
@@ -54,7 +58,7 @@ export default defineEventHandler(async (event) => {
 	);
 
 	if (markdown) {
-		const body = buildMarkdown(model, { canonicalUrl, baseUrl });
+		const body = buildMarkdown(model, { canonicalUrl, baseUrl, page });
 
 		setResponseHeader(event, 'content-type', 'text/markdown; charset=utf-8');
 		// So an agent can budget context before reading the body
@@ -78,10 +82,11 @@ export default defineEventHandler(async (event) => {
 				// Without the query, so the unbounded set of `?config=` URLs consolidates onto one page
 				canonicalUrl,
 				baseUrl,
-				siteName: SITE_NAME
+				siteName: SITE_NAME,
+				page
 			})
 		),
-		buildSeoBody(model)
+		buildSeoBody(model, page)
 	);
 
 	// The shell is tiny and its tags depend on the query string; revalidating beats serving a
