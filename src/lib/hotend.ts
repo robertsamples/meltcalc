@@ -1,6 +1,11 @@
 import z from 'zod/v4';
+import { BlockMaterial } from '@/lib/block-material';
+import type { Calibration } from '@/lib/calibration';
 import { HOTEND_DB } from '@/lib/hotend-db';
-import { Celsius, Dollars, Millimeter, type Percent } from '@/lib/units';
+import { Celsius, Dollars, Millimeter } from '@/lib/units';
+
+// Re-exported so the hotend module stays the one place the rest of the app asks about blocks
+export { BLOCK_MATERIAL_LABELS, BLOCK_MATERIALS, BlockMaterial } from '@/lib/block-material';
 
 /**
  * A hotend, described by the one dimension that decides how much plastic it can melt: the length
@@ -9,68 +14,6 @@ import { Celsius, Dollars, Millimeter, type Percent } from '@/lib/units';
  *
  * The data comes from `data/hotend data.csv` via `pnpm data:update-db`.
  */
-
-export const BLOCK_MATERIALS = ['Cu', 'Br', 'Al', 'St'] as const;
-export const BlockMaterial = z.enum(BLOCK_MATERIALS);
-export type BlockMaterial = z.infer<typeof BlockMaterial>;
-
-export const BLOCK_MATERIAL_LABELS: Record<BlockMaterial, string> = {
-	Cu: 'Copper',
-	Br: 'Brass',
-	Al: 'Aluminium',
-	St: 'Steel'
-};
-
-/**
- * How much flow each block material gives up against copper.
- *
- * Copper is the reference the calibration is expressed in, so it is unpenalised; the others
- * conduct heat into the melt zone less well and lose a fixed share of the flow a copper block of
- * the same length would sustain. Steel is treated as brass.
- */
-export const BLOCK_MATERIAL_DERATE: Record<BlockMaterial, Percent> = {
-	Cu: 0 as Percent,
-	Br: 30 as Percent,
-	Al: 20 as Percent,
-	St: 30 as Percent
-};
-
-export function blockMaterialFactor(material: BlockMaterial): number {
-	return 1 - BLOCK_MATERIAL_DERATE[material] / 100;
-}
-
-/**
- * A melt zone extender adds a fixed length of heated channel.
- *
- * A high-flow nozzle adds the same again, but for a different reason: a CHT-style nozzle splits
- * the flow into parallel channels, so the plastic sees far more hot wall per millimetre than a
- * plain bore does. Modelling that as extra length is a convenience — it buys the same melting
- * capacity, which is why every chart calls the result an *effective* melt zone and marks the
- * hotends where the physical channel is shorter than the number shown.
- */
-export const MZE_LENGTH = 8.5 as Millimeter;
-export const HF_NOZZLE_EQUIVALENT_LENGTH = 8.5 as Millimeter;
-
-/**
- * Heated length at the nozzle end that does not earn its keep.
- *
- * Measured from the tip, this lands about halfway along the hex of a V6 nozzle, which is roughly
- * where the bore starts narrowing to the orifice. Past that point there is little wall area left
- * against the filament and the pressure behaviour stops helping, so the length is there without
- * melting much.
- *
- * A fixed deduction rather than a percentage, because the taper is the same size whatever the block
- * behind it is. It is also what brings long melt zones back in line: they were reading optimistic
- * against measurements, and scaling the whole length would have moved the short ones with them.
- *
- * Applied here rather than baked into the database, so the CSV keeps describing the hardware and
- * this stays a modelling decision that can be changed in one place.
- *
- * Deducted once, not once per filament path. A multi-bore block does end in that many nozzles, so
- * there is an argument for scaling it, but the effective lengths for those are entered by hand and
- * already carry their own correction; scaling here would deduct twice from the same tapers.
- */
-export const NOZZLE_TAPER_ALLOWANCE = 3.5 as Millimeter;
 
 /**
  * What an extender costs to add.
@@ -189,9 +132,9 @@ export function stockBlock(hotend: HotendDefinition): BlockOption {
  * Every hotend's switch then reads the same way round — the conductive option is always on the
  * right — instead of following whichever variant happens to ship as stock.
  */
-export function orderedBlockOptions(hotend: HotendDefinition): BlockOption[] {
+export function orderedBlockOptions(hotend: HotendDefinition, calibration: Calibration): BlockOption[] {
 	return [...hotend.blockOptions].sort(
-		(a, b) => BLOCK_MATERIAL_DERATE[b.material] - BLOCK_MATERIAL_DERATE[a.material]
+		(a, b) => calibration.blockDerate[b.material] - calibration.blockDerate[a.material]
 	);
 }
 
@@ -220,8 +163,12 @@ export function hasHfNozzle(hotend: HotendDefinition, options: HotendOptions | u
  * The gap between this and the effective figure is exactly what the model is crediting a hotend
  * with beyond its dimensions, whether that comes from extra bores, nozzle geometry, or both.
  */
-export function rawMeltZoneLength(hotend: HotendDefinition, options: HotendOptions | undefined): Millimeter {
-	return (hotend.meltZoneLength + (hasMze(hotend, options) ? MZE_LENGTH : 0)) as Millimeter;
+export function rawMeltZoneLength(
+	hotend: HotendDefinition,
+	options: HotendOptions | undefined,
+	calibration: Calibration
+): Millimeter {
+	return (hotend.meltZoneLength + (hasMze(hotend, options) ? calibration.mzeLength : 0)) as Millimeter;
 }
 
 /**
@@ -238,12 +185,16 @@ export function rawMeltZoneLength(hotend: HotendDefinition, options: HotendOptio
  * bore rather than lengthening it, and the taper deduction. That is why this can exceed the
  * hotend's real length, and why it is called effective everywhere it is shown.
  */
-export function effectiveMeltZoneLength(hotend: HotendDefinition, options: HotendOptions | undefined): Millimeter {
+export function effectiveMeltZoneLength(
+	hotend: HotendDefinition,
+	options: HotendOptions | undefined,
+	calibration: Calibration
+): Millimeter {
 	const length =
 		hotend.effectiveMeltZone +
-		(hasMze(hotend, options) ? MZE_LENGTH : 0) +
-		(hasHfNozzle(hotend, options) ? HF_NOZZLE_EQUIVALENT_LENGTH : 0) -
-		NOZZLE_TAPER_ALLOWANCE;
+		(hasMze(hotend, options) ? calibration.mzeLength : 0) +
+		(hasHfNozzle(hotend, options) ? calibration.hfNozzleEquivalentLength : 0) -
+		calibration.nozzleTaperAllowance;
 
 	return Math.max(length, 0) as Millimeter;
 }

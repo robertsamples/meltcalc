@@ -1,22 +1,22 @@
+import { blockMaterialFactor, type Calibration } from '@/lib/calibration';
 import { performanceLabel, shortPerformanceLabel } from '@/lib/chart-labels';
 import { decodeConfig } from '@/lib/config-sharing';
 import { type CostBandMode, DEFAULT_CONFIGURATION, type ShareableConfiguration } from '@/lib/configuration';
 import { type BandSpec, costBands, valueBands } from '@/lib/cost-bands';
-import { blockMaterialFactor, HOTEND_DB, resolveHotends, shortManufacturer } from '@/lib/hotend';
+import { HOTEND_DB, resolveHotends, shortManufacturer } from '@/lib/hotend';
 import { findMaterial, MATERIAL_DB } from '@/lib/material';
 import { fitAgainstLogX, trendAt } from '@/lib/regression';
 import { type SeriesMarkerSpec, seriesMarker } from '@/lib/series';
 import {
 	energyPerVolume,
 	extrusionCrossSection,
-	HEATER_EFFICIENCY,
 	hotendPerformance,
 	meltZoneLimitedFlow,
 	specificPowerLimit,
 	superheatFactor,
 	volumetricFlow
 } from '@/lib/thermal';
-import type { Celsius, CubicMillimetersPerSecondPerMillimeter, WattsPerMillimeter } from '@/lib/units';
+import type { Celsius, WattsPerMillimeter } from '@/lib/units';
 
 /**
  * Everything the OpenGraph image and the OpenGraph meta tags need, derived from a `?config=`
@@ -236,7 +236,12 @@ function buildFromConfiguration(config: ShareableConfiguration): OgModel | null 
 
 	// The calibration with the chosen setpoint's superheat already folded in, exactly as the app does
 	const availableLimit = (specificPowerLimit(thermalSettings.referenceFlowPerMeltZoneMm) *
-		superheatFactor(material.meltTemperature, material.printTemperature, printTemperature)) as WattsPerMillimeter;
+		superheatFactor(
+			material.meltTemperature,
+			material.printTemperature,
+			printTemperature,
+			thermalSettings
+		)) as WattsPerMillimeter;
 
 	const performanceInput = {
 		meltEnergy: energy.toMelt,
@@ -245,7 +250,8 @@ function buildFromConfiguration(config: ShareableConfiguration): OgModel | null 
 		limit: availableLimit,
 		printTemperature,
 		options: config.hotendOptions,
-		prices: config.hotendPrices
+		prices: config.hotendPrices,
+		calibration: thermalSettings
 	};
 
 	const { hotends } = resolveHotends(selectedHotends);
@@ -255,7 +261,8 @@ function buildFromConfiguration(config: ShareableConfiguration): OgModel | null 
 		materialName: material.name,
 		meltTemperature: material.meltTemperature,
 		flowRate,
-		meltEnergy: energy.toMelt
+		meltEnergy: energy.toMelt,
+		calibration: thermalSettings
 	};
 
 	// Both price cards reach past the comparison: the cost one plots the whole database, and the
@@ -295,7 +302,6 @@ function buildFromConfiguration(config: ShareableConfiguration): OgModel | null 
 		const asSpeed = config.materialFlowAsSpeed && crossSection > 0;
 
 		return buildMaterialFlowModel(pinned ?? performance[0], common, {
-			referenceFlow: thermalSettings.referenceFlowPerMeltZoneMm,
 			perMaterialStart: config.energyPerMaterialStart,
 			configuredStart: startTemperature,
 			scale: asSpeed ? 1 / crossSection : 1,
@@ -313,6 +319,8 @@ type CommonInput = {
 	meltTemperature: number;
 	flowRate: number;
 	meltEnergy: number;
+	/** The empirical numbers the link was rendered through, which a tuned one carries its own of */
+	calibration: Calibration;
 };
 
 type Performance = ReturnType<typeof hotendPerformance>;
@@ -594,7 +602,7 @@ function buildHeaterModel(performance: Performance[], common: CommonInput): OgMo
 	const subtitle = [
 		common.materialName,
 		`${formatNumber(common.meltEnergy, 3)} J/mm³ to melt`,
-		`${formatNumber(HEATER_EFFICIENCY, 1)}% of rated output reaching the plastic`
+		`${formatNumber(common.calibration.heaterEfficiency, 1)}% of rated output reaching the plastic`
 	].join(' · ');
 
 	return {
@@ -623,7 +631,6 @@ function buildMaterialFlowModel(
 	entry: Performance | undefined,
 	common: CommonInput,
 	{
-		referenceFlow,
 		perMaterialStart,
 		configuredStart,
 		scale,
@@ -631,7 +638,6 @@ function buildMaterialFlowModel(
 		decimals,
 		materials
 	}: {
-		referenceFlow: CubicMillimetersPerSecondPerMillimeter;
 		perMaterialStart: boolean;
 		configuredStart: Celsius;
 		scale: number;
@@ -642,8 +648,8 @@ function buildMaterialFlowModel(
 ): OgModel {
 	if (!entry) return GENERIC_CARD;
 
-	const blockLimit = (specificPowerLimit(referenceFlow) *
-		blockMaterialFactor(entry.block.material)) as WattsPerMillimeter;
+	const blockLimit = (specificPowerLimit(common.calibration.referenceFlowPerMeltZoneMm) *
+		blockMaterialFactor(entry.block.material, common.calibration)) as WattsPerMillimeter;
 
 	const rows = materials.map((material) => {
 		const start = perMaterialStart ? material.startTemperature : configuredStart;

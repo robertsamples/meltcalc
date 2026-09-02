@@ -1,4 +1,5 @@
 import { atom, type PrimitiveAtom, type WritableAtom } from 'jotai';
+import { type Calibration, withCalibrationDefaults } from '@/lib/calibration';
 import {
 	type CostBandMode,
 	DEFAULT_COST_BAND_MODE,
@@ -194,7 +195,11 @@ export function storeRates(rates: ExchangeRates): void {
 // (shared-link) configs are respected
 const printSettingsAtom = atomWithLocalStorage<PrintSettings>('printSettings', DEFAULT_PRINT_SETTINGS);
 const materialSettingsAtom = atomWithLocalStorage<MaterialSettings>('materialSettings', DEFAULT_MATERIAL_SETTINGS);
-const thermalSettingsAtom = atomWithLocalStorage<ThermalSettings>('thermalSettings', DEFAULT_THERMAL_SETTINGS);
+const thermalSettingsAtom = atomWithLocalStorage<ThermalSettings>(
+	'thermalSettings',
+	DEFAULT_THERMAL_SETTINGS,
+	withCalibrationDefaults
+);
 /** Hotends this build still has. A stored id that names none of them is dead weight, not a hotend */
 function knownHotends(ids: string[]): string[] {
 	return [...new Set(ids)].filter((id) => findHotend(id) !== undefined);
@@ -255,6 +260,12 @@ const tempDebugAtom = atom<boolean | null>(null);
 export const currentPrintSettingsAtom = overridableAtom(printSettingsAtom, tempPrintSettingsAtom);
 export const currentMaterialSettingsAtom = overridableAtom(materialSettingsAtom, tempMaterialSettingsAtom);
 export const currentThermalSettingsAtom = overridableAtom(thermalSettingsAtom, tempThermalSettingsAtom);
+
+/**
+ * The empirical numbers every calculation is read through, under the name the model uses for
+ * them. The same atom as the thermal settings: what the reader edits *is* the calibration.
+ */
+export const calibrationAtom = atom<Calibration>((get) => get(currentThermalSettingsAtom));
 export const currentSelectedHotendsAtom = overridableAtom(selectedHotendsAtom, tempSelectedHotendsAtom);
 export const currentHotendOptionsAtom = overridableAtom(hotendOptionsAtom, tempHotendOptionsAtom);
 export const currentHotendPricesAtom = overridableAtom(hotendPricesAtom, tempHotendPricesAtom);
@@ -345,7 +356,12 @@ export const specificPowerLimitAtom = atom<WattsPerMillimeter>((get) =>
 export const superheatFactorAtom = atom<number>((get) => {
 	const material = get(materialAtom);
 
-	return superheatFactor(material.meltTemperature, material.printTemperature, get(printTemperatureAtom));
+	return superheatFactor(
+		material.meltTemperature,
+		material.printTemperature,
+		get(printTemperatureAtom),
+		get(calibrationAtom)
+	);
 });
 
 /**
@@ -374,7 +390,8 @@ const performanceInputAtom = atom((get) => {
 		limit: get(availablePowerLimitAtom),
 		printTemperature: get(printTemperatureAtom),
 		options: get(currentHotendOptionsAtom),
-		prices: get(currentHotendPricesAtom)
+		prices: get(currentHotendPricesAtom),
+		calibration: get(calibrationAtom)
 	};
 });
 

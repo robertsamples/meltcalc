@@ -10,14 +10,15 @@ import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { blockMaterialFactor } from '@/lib/calibration';
 import { chartFootnotes, performanceLabel } from '@/lib/chart-labels';
 import { formatNumber } from '@/lib/format';
-import { blockMaterialFactor } from '@/lib/hotend';
 import { familyIndex } from '@/lib/material';
 import { AXIS_LINE, HEADROOM_OPACITY, SEGMENT_GAP, STATUS_COLORS, seriesColor, THRESHOLD_LINE } from '@/lib/series';
 import { energyPerVolume, extrusionCrossSection, meltZoneLimitedFlow } from '@/lib/thermal';
 import type { WattsPerMillimeter } from '@/lib/units';
 import {
+	calibrationAtom,
 	currentEnergyPerMaterialStartAtom,
 	currentMaterialFlowAsSpeedAtom,
 	currentMaterialFlowHotendAtom,
@@ -95,6 +96,7 @@ function MaterialTick({
 export function MaterialFlowChart() {
 	const performance = useAtomValue(performanceAtom);
 	const limit = useAtomValue(specificPowerLimitAtom);
+	const calibration = useAtomValue(calibrationAtom);
 	const flowRate = useAtomValue(flowRateAtom);
 	const perMaterialStart = useAtomValue(currentEnergyPerMaterialStartAtom);
 	const configuredStart = useAtomValue(startTemperatureAtom);
@@ -123,7 +125,7 @@ export function MaterialFlowChart() {
 
 	// The block derate scales what a millimetre coupled into the filament is worth, and neither it
 	// nor the melt zone length depends on the material, so both come straight off the performance row
-	const blockLimit = (limit * blockMaterialFactor(entry.block.material)) as WattsPerMillimeter;
+	const blockLimit = (limit * blockMaterialFactor(entry.block.material, calibration)) as WattsPerMillimeter;
 
 	// mm³/s ÷ mm² of extruded line = mm/s of head movement. A degenerate line width would divide by
 	// zero, so the toggle simply has no effect until the settings make sense

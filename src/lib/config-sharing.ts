@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { BLOCK_MATERIALS, type BlockMaterial as BlockMaterialName } from '@/lib/block-material';
 import {
 	DEFAULT_CONFIGURATION,
 	DEFAULT_COST_BAND_MODE,
@@ -36,6 +37,7 @@ import {
 	CubicMillimetersPerSecondPerMillimeter,
 	Millimeter,
 	MillimetersPerSecond,
+	Percent,
 	Seconds
 } from '@/lib/units';
 
@@ -102,12 +104,22 @@ const LegacyConfigurationSchema = z.object({
 			startTemperature: Celsius.nullable().default(null)
 		})
 		.default(DEFAULT_MATERIAL_SETTINGS),
-	// Links made before heater power and efficiency became fixed constants still carry them; zod
-	// drops unknown keys, so those links keep working and simply lose the two settings
+	// Every field is optional with the shipped default behind it, so a link written by any older
+	// build keeps working and simply carries the calibration this build ships with for whatever
+	// it does not name. Zod drops unknown keys, which is what retires a setting
 	thermalSettings: z
 		.object({
-			referenceFlowPerMeltZoneMm: CubicMillimetersPerSecondPerMillimeter,
-			minimumResidenceTime: Seconds
+			referenceFlowPerMeltZoneMm: CubicMillimetersPerSecondPerMillimeter.default(
+				DEFAULT_THERMAL_SETTINGS.referenceFlowPerMeltZoneMm
+			),
+			minimumResidenceTime: Seconds.default(DEFAULT_THERMAL_SETTINGS.minimumResidenceTime),
+			superheatAtDouble: z.number().positive().default(DEFAULT_THERMAL_SETTINGS.superheatAtDouble),
+			maxSuperheatFactor: z.number().positive().default(DEFAULT_THERMAL_SETTINGS.maxSuperheatFactor),
+			mzeLength: Millimeter.default(DEFAULT_THERMAL_SETTINGS.mzeLength),
+			hfNozzleEquivalentLength: Millimeter.default(DEFAULT_THERMAL_SETTINGS.hfNozzleEquivalentLength),
+			nozzleTaperAllowance: Millimeter.default(DEFAULT_THERMAL_SETTINGS.nozzleTaperAllowance),
+			heaterEfficiency: Percent.default(DEFAULT_THERMAL_SETTINGS.heaterEfficiency),
+			blockDerate: blockDerateSchema()
 		})
 		.default(DEFAULT_THERMAL_SETTINGS),
 	selectedHotends: z.array(z.string()).max(MAX_SELECTED_HOTENDS).default(DEFAULT_CONFIGURATION.selectedHotends),
@@ -170,11 +182,22 @@ const CompactSchema = z.object({
 			s: z.number().nullable().optional()
 		})
 		.optional(),
-	/** thermalSettings */
+	/**
+	 * thermalSettings, one letter per calibration figure. Every one is pruned when it matches the
+	 * shipped default, so an un-tuned link carries none of them and is exactly the length it was
+	 * before the model became adjustable.
+	 */
 	t: z
 		.object({
 			r: z.number().optional(),
-			m: z.number().optional()
+			m: z.number().optional(),
+			d: z.number().optional(),
+			c: z.number().optional(),
+			z: z.number().optional(),
+			n: z.number().optional(),
+			a: z.number().optional(),
+			e: z.number().optional(),
+			b: z.record(z.string(), z.number()).optional()
 		})
 		.optional(),
 	/**
@@ -225,6 +248,40 @@ export type ImportedConfiguration = {
 	/** Things the link referenced that this build could not resolve; surfaced as a warning */
 	warnings: string[];
 };
+
+/** One optional percentage per block material, defaulted from the shipped calibration */
+function blockDerateSchema() {
+	const derate = DEFAULT_THERMAL_SETTINGS.blockDerate;
+
+	return z
+		.object({
+			Cu: Percent.default(derate.Cu),
+			Br: Percent.default(derate.Br),
+			Al: Percent.default(derate.Al),
+			St: Percent.default(derate.St)
+		} satisfies Record<BlockMaterialName, unknown>)
+		.default(derate);
+}
+
+/** Only the materials whose derate has been moved, so an untouched table packs to nothing */
+function packDerate(derate: Record<BlockMaterialName, Percent>): Record<string, number> | undefined {
+	const moved = BLOCK_MATERIALS.filter(
+		(material) => derate[material] !== DEFAULT_THERMAL_SETTINGS.blockDerate[material]
+	);
+
+	return moved.length > 0
+		? Object.fromEntries(moved.map((material) => [material, derate[material]]))
+		: undefined;
+}
+
+function unpackDerate(packed: Record<string, number> | undefined): Record<BlockMaterialName, Percent> {
+	return Object.fromEntries(
+		BLOCK_MATERIALS.map((material) => [
+			material,
+			(packed?.[material] ?? DEFAULT_THERMAL_SETTINGS.blockDerate[material]) as Percent
+		])
+	) as Record<BlockMaterialName, Percent>;
+}
 
 /** Drops keys whose value is `undefined`, and the object itself if nothing is left */
 function pruned<T extends Record<string, unknown>>(value: T): T | undefined {
@@ -298,7 +355,14 @@ function compact(config: ShareableConfiguration): Compact {
 		}),
 		t: pruned({
 			r: changed(thermal.referenceFlowPerMeltZoneMm, DEFAULT_THERMAL_SETTINGS.referenceFlowPerMeltZoneMm),
-			m: changed(thermal.minimumResidenceTime, DEFAULT_THERMAL_SETTINGS.minimumResidenceTime)
+			m: changed(thermal.minimumResidenceTime, DEFAULT_THERMAL_SETTINGS.minimumResidenceTime),
+			d: changed(thermal.superheatAtDouble, DEFAULT_THERMAL_SETTINGS.superheatAtDouble),
+			c: changed(thermal.maxSuperheatFactor, DEFAULT_THERMAL_SETTINGS.maxSuperheatFactor),
+			z: changed(thermal.mzeLength, DEFAULT_THERMAL_SETTINGS.mzeLength),
+			n: changed(thermal.hfNozzleEquivalentLength, DEFAULT_THERMAL_SETTINGS.hfNozzleEquivalentLength),
+			a: changed(thermal.nozzleTaperAllowance, DEFAULT_THERMAL_SETTINGS.nozzleTaperAllowance),
+			e: changed(thermal.heaterEfficiency, DEFAULT_THERMAL_SETTINGS.heaterEfficiency),
+			b: packDerate(thermal.blockDerate)
 		}),
 		s: sameHotends(config.selectedHotends) ? undefined : packSelected(config.selectedHotends),
 		o: options.length > 0 ? (Object.fromEntries(options) as Compact['o']) : undefined,
@@ -357,8 +421,15 @@ function expand(payload: Compact): ShareableConfiguration {
 			...DEFAULT_THERMAL_SETTINGS,
 			...pruned({
 				referenceFlowPerMeltZoneMm: payload.t?.r as CubicMillimetersPerSecondPerMillimeter | undefined,
-				minimumResidenceTime: payload.t?.m as Seconds | undefined
-			})
+				minimumResidenceTime: payload.t?.m as Seconds | undefined,
+				superheatAtDouble: payload.t?.d,
+				maxSuperheatFactor: payload.t?.c,
+				mzeLength: payload.t?.z as Millimeter | undefined,
+				hfNozzleEquivalentLength: payload.t?.n as Millimeter | undefined,
+				nozzleTaperAllowance: payload.t?.a as Millimeter | undefined,
+				heaterEfficiency: payload.t?.e as Percent | undefined
+			}),
+			blockDerate: unpackDerate(payload.t?.b)
 		},
 		selectedHotends: unpackSelected(payload.s),
 		hotendOptions,

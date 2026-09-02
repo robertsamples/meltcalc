@@ -7,7 +7,7 @@ import {
 	CircleHelpIcon,
 	RotateCcwIcon
 } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { HotendSelection } from '@/components/hotend-selection';
 import { SeriesMarker } from '@/components/series-marker';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
@@ -15,24 +15,22 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import type { Calibration } from '@/lib/calibration';
 import type { Money } from '@/lib/currency';
 import { formatNumber } from '@/lib/format';
 import {
-	BLOCK_MATERIAL_DERATE,
 	BLOCK_MATERIAL_LABELS,
 	type BlockMaterial,
-	HF_NOZZLE_EQUIVALENT_LENGTH,
 	type HotendDefinition,
 	type HotendOptions,
 	hotendLabel,
-	MZE_LENGTH,
-	NOZZLE_TAPER_ALLOWANCE,
-	orderedBlockOptions, 
+	orderedBlockOptions,
 	shortHotendLabel
 } from '@/lib/hotend';
 import { headroomStatus, STATUS_COLORS, STATUS_LABELS } from '@/lib/series';
 import { extrusionCrossSection, type HotendPerformance } from '@/lib/thermal';
 import {
+	calibrationAtom,
 	currentHotendOptionsAtom,
 	currentHotendPricesAtom,
 	currentPrintSettingsAtom,
@@ -150,7 +148,8 @@ type Column = {
 	className?: string;
 };
 
-const COLUMNS: Column[] = [
+function columns(calibration: Calibration): Column[] {
+	return [
 	{ key: 'name', label: 'Hotend', first: 'asc' },
 	{ key: 'price', label: 'Price', align: 'center' },
 	{ key: null, label: 'Block', align: 'center' },
@@ -161,7 +160,7 @@ const COLUMNS: Column[] = [
 		align: 'center',
 		help: (
 			<>
-				A melt zone extender: typically an adapter that lengthens the melt zone by {MZE_LENGTH} mm, or a nut
+				A melt zone extender: typically an adapter that lengthens the melt zone by {calibration.mzeLength} mm, or a nut
 				that lets a standard V6 hotend take V6 Volcano nozzles.
 			</>
 		)
@@ -174,7 +173,7 @@ const COLUMNS: Column[] = [
 			<>
 				High-flow internal geometry, such as a Core Heat Technology nozzle: the bore splits into parallel
 				channels, so the filament sees far more hot wall per millimetre. Counted here as +
-				{HF_NOZZLE_EQUIVALENT_LENGTH} mm of effective melt zone.
+				{calibration.hfNozzleEquivalentLength} mm of effective melt zone.
 			</>
 		)
 	},
@@ -200,8 +199,8 @@ const COLUMNS: Column[] = [
 		// A plain title rather than a help icon: the icon costs width this table does not have, and
 		// the full account of what goes into this number is in the "How this works" card anyway
 		title:
-			`The heated length the model runs on. Counts a high-flow nozzle as +${HF_NOZZLE_EQUIVALENT_LENGTH} mm ` +
-			`of equivalent capacity though it adds no real length, and takes off ${NOZZLE_TAPER_ALLOWANCE} mm ` +
+			`The heated length the model runs on. Counts a high-flow nozzle as +${calibration.hfNozzleEquivalentLength} mm ` +
+			`of equivalent capacity though it adds no real length, and takes off ${calibration.nozzleTaperAllowance} mm ` +
 			'for the nozzle taper, where there is too little wall area to melt much.'
 	},
 	{ key: 'flow', label: 'Max flow', align: 'center' },
@@ -210,7 +209,8 @@ const COLUMNS: Column[] = [
 	// Prose, and every hotend's is about something different: there is no order to put it in.
 	// A floor, because a table full of numbers will otherwise give this column whatever is left
 	{ key: null, label: 'Notes', className: 'min-w-32' }
-];
+	];
+}
 
 /**
  * What a column sorts on. Numbers where there is one, so the order matches what the column shows
@@ -492,6 +492,8 @@ export function HotendTable() {
 	const money = useAtomValue(moneyAtom);
 	const [options, setOptions] = useAtom(currentHotendOptionsAtom);
 	const [prices, setPrices] = useAtom(currentHotendPricesAtom);
+	const calibration = useAtomValue(calibrationAtom);
+	const tableColumns = useMemo(() => columns(calibration), [calibration]);
 	// Deliberately not in the configuration: how a table is ordered is how it is being read right
 	// now, not part of the comparison a share link describes
 	const [sort, setSort] = useState<Sort>(null);
@@ -569,7 +571,7 @@ export function HotendTable() {
 					<Table className="text-xs leading-tight [&_th]:px-1.5 [&_th]:h-8 [&_td]:px-1.5 [&_td]:py-1">
 						<TableHeader>
 							<TableRow>
-								{COLUMNS.map((column) => (
+								{tableColumns.map((column) => (
 									<SortableHeader
 										key={column.label}
 										column={column}
@@ -612,8 +614,8 @@ export function HotendTable() {
 								// Off the selection, not the row: sorting the table must not repaint the
 								// markers, or a hotend's colour would stop meaning the same thing as in the charts
 								const colorIndex = selected.indexOf(entry.hotend.id);
-								const blockOptions = orderedBlockOptions(entry.hotend);
-								const derate = BLOCK_MATERIAL_DERATE[entry.block.material];
+								const blockOptions = orderedBlockOptions(entry.hotend, calibration);
+								const derate = calibration.blockDerate[entry.block.material];
 
 								return (
 									<TableRow key={entry.hotend.id}>
@@ -656,8 +658,8 @@ export function HotendTable() {
 															value={option.material}
 															className="h-6 px-1.5 text-[11px]"
 															title={`${BLOCK_MATERIAL_LABELS[option.material]} · ${option.maxTemperature} °C max${
-																BLOCK_MATERIAL_DERATE[option.material] > 0
-																	? ` · −${BLOCK_MATERIAL_DERATE[option.material]}% flow`
+																calibration.blockDerate[option.material] > 0
+																	? ` · −${calibration.blockDerate[option.material]}% flow`
 																	: ''
 															}`}
 														>
@@ -801,7 +803,7 @@ export function HotendTable() {
 							})}
 							{performance.length === 0 ? (
 								<TableRow>
-									<TableCell colSpan={COLUMNS.length} className="text-muted-foreground">
+									<TableCell colSpan={tableColumns.length} className="text-muted-foreground">
 										No hotends selected.
 									</TableCell>
 								</TableRow>

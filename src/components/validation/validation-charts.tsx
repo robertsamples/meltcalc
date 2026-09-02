@@ -20,6 +20,7 @@ import {
 } from 'recharts';
 import { pointTooltip } from '@/components/charts/chart-tooltip';
 import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
+import type { Calibration } from '@/lib/calibration';
 import { formatNumber } from '@/lib/format';
 import { AXIS_LINE, HEADROOM_OPACITY, SEGMENT_GAP, seriesColor, THRESHOLD_LINE } from '@/lib/series';
 import type { WattsPerMillimeter } from '@/lib/units';
@@ -463,8 +464,16 @@ export function ParityChart({ series, basis }: { series: PointSeries[]; basis: B
 }
 
 /** Measured points against the model's own curve, for one temperature sweep */
-export function SweepChart({ sweep, limit }: { sweep: Sweep; limit: WattsPerMillimeter }) {
-	const curve = sweepCurve(sweep, limit).map((entry) => ({
+export function SweepChart({
+	sweep,
+	limit,
+	calibration
+}: {
+	sweep: Sweep;
+	limit: WattsPerMillimeter;
+	calibration: Calibration;
+}) {
+	const curve = sweepCurve(sweep, limit, calibration).map((entry) => ({
 		temperature: entry.temperature,
 		model: entry.flow,
 		practical: entry.practical,

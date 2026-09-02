@@ -1,4 +1,5 @@
 import z from 'zod/v4';
+import type { Calibration } from '@/lib/calibration';
 import {
 	BLOCK_MATERIAL_LABELS,
 	BlockMaterial,
@@ -8,13 +9,7 @@ import {
 	type HotendOptions
 } from '@/lib/hotend';
 import { findMaterial, type MaterialDefinition } from '@/lib/material';
-import {
-	energyPerVolume,
-	hotendPerformance,
-	MAX_SUPERHEAT_FACTOR,
-	SUPERHEAT_AT_DOUBLE,
-	superheatFactor
-} from '@/lib/thermal';
+import { energyPerVolume, hotendPerformance, superheatFactor } from '@/lib/thermal';
 import { Celsius, type CubicMillimetersPerSecond, type Millimeter, type WattsPerMillimeter } from '@/lib/units';
 import { VALIDATION_DB } from '@/lib/validation-db';
 
@@ -106,7 +101,11 @@ export function measurementLabel(measurement: ValidationMeasurement, material: M
  * `limit` is the calibrated W/mm before superheat, which is the calculator's own — so the reader's
  * calibration is what the page checks, and moving it moves these charts with the rest of the site.
  */
-export function evaluate(measurement: ValidationMeasurement, limit: WattsPerMillimeter): ValidationPoint | null {
+export function evaluate(
+	measurement: ValidationMeasurement,
+	limit: WattsPerMillimeter,
+	calibration: Calibration
+): ValidationPoint | null {
 	const hotend = findHotend(measurement.hotendId);
 	const material = findMaterial(measurement.materialId);
 	if (!hotend || !material) return null;
@@ -118,7 +117,12 @@ export function evaluate(measurement: ValidationMeasurement, limit: WattsPerMill
 		hfNozzle: measurement.cht
 	};
 	const energy = energyPerVolume(material, material.startTemperature, measurement.temperature);
-	const superheat = superheatFactor(material.meltTemperature, material.printTemperature, measurement.temperature);
+	const superheat = superheatFactor(
+		material.meltTemperature,
+		material.printTemperature,
+		measurement.temperature,
+		calibration
+	);
 
 	const performance = hotendPerformance(hotend, {
 		meltEnergy: energy.toMelt,
@@ -126,7 +130,8 @@ export function evaluate(measurement: ValidationMeasurement, limit: WattsPerMill
 		flowRate: measurement.flow as CubicMillimetersPerSecond,
 		limit: (limit * superheat) as WattsPerMillimeter,
 		printTemperature: measurement.temperature,
-		options: { [hotend.id]: options }
+		options: { [hotend.id]: options },
+		calibration
 	});
 
 	return {
@@ -170,8 +175,8 @@ export function derated(points: ValidationPoint[]): boolean {
 	return points.some((point) => point.material.practicalFlowFactor < 1);
 }
 
-export function validationPoints(limit: WattsPerMillimeter): ValidationPoint[] {
-	return VALIDATION_DB.map((measurement) => evaluate(measurement, limit)).filter(
+export function validationPoints(limit: WattsPerMillimeter, calibration: Calibration): ValidationPoint[] {
+	return VALIDATION_DB.map((measurement) => evaluate(measurement, limit, calibration)).filter(
 		(point): point is ValidationPoint => point !== null
 	);
 }
@@ -336,10 +341,16 @@ const superheatRatio = (point: ValidationPoint) =>
  * the exponent as its slope. Points at or below the melt temperature are dropped: the model allows
  * no flow there, and log of zero is not a data point.
  */
-export function superheatSweeps(points: ValidationPoint[], minimumPoints = 3): Sweep[] {
+export function superheatSweeps(
+	points: ValidationPoint[],
+	calibration: Calibration,
+	minimumPoints = 3
+): Sweep[] {
 	return [...groupBy(points, (point) => conditions(point, 'temperature'))]
 		.map(([id, group]) => {
-			const usable = group.filter((point) => point.superheat > 0 && point.superheat < MAX_SUPERHEAT_FACTOR);
+			const usable = group.filter(
+				(point) => point.superheat > 0 && point.superheat < calibration.maxSuperheatFactor
+			);
 
 			return {
 				id,
@@ -373,14 +384,19 @@ export function pooledSuperheatFit(sweeps: Sweep[]): Fit {
 /** What the model says across a sweep's temperatures, at the ceiling and after the material derate */
 export type CurveRow = { temperature: number; flow: number; practical: number };
 
-export function sweepCurve(sweep: Sweep, limit: WattsPerMillimeter, margin = 5): CurveRow[] {
+export function sweepCurve(
+	sweep: Sweep,
+	limit: WattsPerMillimeter,
+	calibration: Calibration,
+	margin = 5
+): CurveRow[] {
 	const temperatures = sweep.points.map((point) => point.measurement.temperature);
 	const from = Math.round(Math.min(...temperatures) - margin);
 	const to = Math.round(Math.max(...temperatures) + margin);
 
 	return Array.from({ length: to - from + 1 }, (_, step) => {
 		const temperature = (from + step) as Celsius;
-		const evaluated = evaluate({ ...sweep.first.measurement, temperature }, limit);
+		const evaluated = evaluate({ ...sweep.first.measurement, temperature }, limit, calibration);
 
 		return {
 			temperature,
@@ -506,9 +522,14 @@ export type NormalisedPoint = { point: ValidationPoint; superheat: number; flow:
 export function normalise(
 	point: ValidationPoint,
 	limit: WattsPerMillimeter,
+	calibration: Calibration,
 	basis: Basis = 'ceiling'
 ): NormalisedPoint | null {
-	const atSetpoint = evaluate({ ...point.measurement, temperature: point.material.printTemperature }, limit);
+	const atSetpoint = evaluate(
+		{ ...point.measurement, temperature: point.material.printTemperature },
+		limit,
+		calibration
+	);
 	if (!atSetpoint || !(predictedOn(atSetpoint, basis) > 0)) return null;
 
 	return {
@@ -523,19 +544,28 @@ export function normalise(
 export function normalisedPoints(
 	points: ValidationPoint[],
 	limit: WattsPerMillimeter,
+	calibration: Calibration,
 	basis: Basis = 'ceiling'
 ): NormalisedPoint[] {
 	return points
-		.map((point) => normalise(point, limit, basis))
+		.map((point) => normalise(point, limit, calibration, basis))
 		.filter((entry): entry is NormalisedPoint => entry !== null);
 }
 
 /** The model's own answer on those axes: the superheat factor, which is all that is left of it */
-export function normalisedCurve(from: number, to: number, steps = 60): { superheat: number; flow: number }[] {
+export function normalisedCurve(
+	from: number,
+	to: number,
+	calibration: Calibration,
+	steps = 60
+): { superheat: number; flow: number }[] {
 	return Array.from({ length: steps + 1 }, (_, step) => {
 		const superheat = from + ((to - from) * step) / steps;
 
-		return { superheat, flow: Math.min(superheat ** Math.log2(SUPERHEAT_AT_DOUBLE), MAX_SUPERHEAT_FACTOR) };
+		return {
+			superheat,
+			flow: Math.min(superheat ** Math.log2(calibration.superheatAtDouble), calibration.maxSuperheatFactor)
+		};
 	});
 }
 
@@ -555,6 +585,7 @@ export function compositeSeries(
 	mode: CompositeMode,
 	group: string,
 	limit: WattsPerMillimeter,
+	calibration: Calibration,
 	basis: Basis
 ): NormalisedSeries[] {
 	const comparable = points.filter((point) => point.predicted > 0);
@@ -568,7 +599,7 @@ export function compositeSeries(
 				key,
 				label: label(entry),
 				rows: entry
-					.map((point) => normalise(point, limit, basis))
+					.map((point) => normalise(point, limit, calibration, basis))
 					.filter((row): row is NormalisedPoint => row !== null)
 			}))
 			.filter((series) => series.rows.length > 0)
@@ -616,14 +647,18 @@ export type ChtPair = {
 };
 
 /** Tests that differ in nothing but the nozzle, which is what fixes the credit directly */
-export function chtPairs(points: ValidationPoint[]): ChtPair[] {
+export function chtPairs(points: ValidationPoint[], calibration: Calibration): ChtPair[] {
 	return [...groupBy(points, (point) => conditions(point, 'cht')).values()]
 		.map((group) => {
 			const plain = group.find((point) => !point.measurement.cht);
 			const cht = group.find((point) => point.measurement.cht);
 			if (!plain || !cht || !(plain.predicted > 0)) return null;
 
-			const baseLength = effectiveMeltZoneLength(plain.hotend, { ...plain.options, hfNozzle: false });
+			const baseLength = effectiveMeltZoneLength(
+				plain.hotend,
+				{ ...plain.options, hfNozzle: false },
+				calibration
+			);
 			const gain = cht.measurement.flow / plain.measurement.flow;
 
 			return {

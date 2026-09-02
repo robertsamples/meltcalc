@@ -1,14 +1,8 @@
+import { type Calibration, DEFAULT_CALIBRATION } from '@/lib/calibration';
 import type { HotendOptions } from '@/lib/hotend';
 import { DEFAULT_MATERIAL_ID } from '@/lib/material';
 import { SERIES_CAPACITY } from '@/lib/series';
-import type {
-	Celsius,
-	CubicMillimetersPerSecond,
-	CubicMillimetersPerSecondPerMillimeter,
-	Millimeter,
-	MillimetersPerSecond,
-	Seconds
-} from '@/lib/units';
+import type { Celsius, CubicMillimetersPerSecond, Millimeter, MillimetersPerSecond } from '@/lib/units';
 
 /**
  * The configuration shape and its defaults, kept free of anything browser-only.
@@ -52,20 +46,14 @@ export const DEFAULT_MATERIAL_SETTINGS: MaterialSettings = {
 	startTemperature: null
 };
 
-export type ThermalSettings = {
-	/**
-	 * The rule of thumb the whole flow model is calibrated on: how much flow one millimetre of
-	 * melt zone sustains with the reference material (PLA at its default temperatures).
-	 */
-	referenceFlowPerMeltZoneMm: CubicMillimetersPerSecondPerMillimeter;
-	/** Drawn as a floor on the residence charts; below it the melt is unlikely to be uniform */
-	minimumResidenceTime: Seconds;
-};
+/**
+ * The empirical side of the model. It lives in `@/lib/calibration` because that is the file to
+ * edit to change what the site ships with; the name here is what share links and storage have
+ * always called it.
+ */
+export type ThermalSettings = Calibration;
 
-export const DEFAULT_THERMAL_SETTINGS: ThermalSettings = {
-	referenceFlowPerMeltZoneMm: 1.2 as CubicMillimetersPerSecondPerMillimeter,
-	minimumResidenceTime: 1 as Seconds
-};
+export const DEFAULT_THERMAL_SETTINGS: ThermalSettings = DEFAULT_CALIBRATION;
 
 /** Which analysis is on screen */
 export type ViewMode =

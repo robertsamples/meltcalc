@@ -132,12 +132,10 @@ export function App() {
 					<PrintSettingsCard />
 					{/* The material views compare every material at its own temperatures, so the one
 					    selected here changes nothing they show */}
-					{comparesMaterials(viewMode) ? null : (
-						<>
-							<MaterialSettingsCard />
-							<ModelSettingsCard />
-						</>
-					)}
+					{comparesMaterials(viewMode) ? null : <MaterialSettingsCard />}
+					{/* The calibration stays on every view: it is what the material comparisons are
+					    computed through as much as the hotend ones */}
+					<ModelSettingsCard />
 					<AboutCard className="max-lg:hidden" />
 					<AttributionCard className="max-lg:hidden" />
 				</div>

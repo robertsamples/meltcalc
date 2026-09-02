@@ -6,8 +6,8 @@ import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/
 import { chartFootnotes, performanceLabel } from '@/lib/chart-labels';
 import { formatNumber } from '@/lib/format';
 import { AXIS_LINE, STATUS_COLORS, seriesColor, THRESHOLD_LINE } from '@/lib/series';
-import { HEATER_EFFICIENCY, HEATER_SIZES } from '@/lib/thermal';
-import { materialAtom, performanceAtom } from '@/state/atoms';
+import { HEATER_SIZES } from '@/lib/thermal';
+import { calibrationAtom, materialAtom, performanceAtom } from '@/state/atoms';
 
 /**
  * What cartridge each hotend needs to be fed at its own maximum.
@@ -54,6 +54,7 @@ type Row = {
 export function HeaterChart() {
 	const performance = useAtomValue(performanceAtom);
 	const material = useAtomValue(materialAtom);
+	const { heaterEfficiency } = useAtomValue(calibrationAtom);
 
 	const rows: Row[] = performance
 		.filter((entry) => Number.isFinite(entry.requiredHeaterPower))
@@ -181,7 +182,7 @@ export function HeaterChart() {
 								Reserve up to the cartridge to fit, one size past the minimum
 							</span>
 							<span className="opacity-70">
-								At {formatNumber(HEATER_EFFICIENCY, 1)}% of rated output reaching the plastic
+								At {formatNumber(heaterEfficiency, 1)}% of rated output reaching the plastic
 							</span>
 						</div>
 

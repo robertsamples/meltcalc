@@ -1,4 +1,5 @@
 import { defineEventHandler, setResponseHeader } from 'h3';
+import { DEFAULT_CALIBRATION } from '@/lib/calibration';
 import { hotendSlug, viewSlug } from '@/lib/config-query';
 import { VIEW_GROUPS } from '@/lib/configuration';
 import { effectiveMeltZoneLength, HOTEND_DB, highestTemperature, hotendLabel, stockBlock } from '@/lib/hotend';
@@ -61,7 +62,8 @@ function hotends(): string[] {
 		.map((hotend) => {
 			const slug = hotendSlug(hotend.id);
 			const facts = [
-				`${round(effectiveMeltZoneLength(hotend, undefined))} mm melt zone`,
+				// The shipped calibration, not a reader's: this file describes the site as it is published
+				`${round(effectiveMeltZoneLength(hotend, undefined, DEFAULT_CALIBRATION))} mm melt zone`,
 				`${highestTemperature(hotend)} °C max`,
 				`${stockBlock(hotend).material} block`
 			];

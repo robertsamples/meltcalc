@@ -1,6 +1,6 @@
+import { blockMaterialFactor, type Calibration } from '@/lib/calibration';
 import {
 	type BlockOption,
-	blockMaterialFactor,
 	effectiveMeltZoneLength,
 	effectivePrice,
 	type HotendDefinition,
@@ -23,7 +23,6 @@ import type {
 	Kelvin,
 	Millimeter,
 	MillimetersPerSecond,
-	Percent,
 	Seconds,
 	SquareMillimeter,
 	Watts,
@@ -199,35 +198,6 @@ export function specificPowerLimit(
 }
 
 /**
- * How much of the theoretical gain from a hotter nozzle actually shows up as flow.
- *
- * Conduction into the filament scales with the temperature difference driving it, so running the
- * nozzle further above the melting point should buy proportionally more flow. In practice it buys
- * less than that: the extra heat has to cross the same badly-conducting plastic, the film nearest
- * the wall thins out and carries more of the drop, and viscosity falls faster than the melt front
- * advances. Damping the proportional term is a blunt way to say so, but it is the right direction
- * and the magnitude matches what people report.
- */
-export const SUPERHEAT_AT_DOUBLE = 1.5;
-
-/**
- * The curve is anchored on each material's own setpoint and has no business extrapolating far past
- * it: up here the polymer is degrading and nozzle pressure is the real limit. Reached at about
- * 3.3× a material's normal superheat.
- */
-export const MAX_SUPERHEAT_FACTOR = 2;
-
-/**
- * Exponent that turns "twice the superheat is worth 1.5× the flow" into a curve.
- *
- * A power law rather than a straight line because three things have to hold at once: no flow at the
- * melting point, exactly the calibrated flow at the material's normal setpoint, and less than
- * proportional gain above it. No straight line passes through all three — one through (0, 0) and
- * (1, 1) is forced to give 2× at twice the superheat, undamped.
- */
-const SUPERHEAT_EXPONENT = Math.log2(SUPERHEAT_AT_DOUBLE);
-
-/**
  * What the chosen nozzle setpoint is worth, as a multiplier on what a millimetre of melt zone can
  * couple into the filament.
  *
@@ -242,7 +212,8 @@ const SUPERHEAT_EXPONENT = Math.log2(SUPERHEAT_AT_DOUBLE);
 export function superheatFactor(
 	meltTemperature: Celsius,
 	referenceTemperature: Celsius,
-	printTemperature: Celsius
+	printTemperature: Celsius,
+	calibration: Calibration
 ): number {
 	const reference = referenceTemperature - meltTemperature;
 	// A material with no superheat in its own defaults gives nothing to measure against
@@ -251,7 +222,12 @@ export function superheatFactor(
 	const available = printTemperature - meltTemperature;
 	if (!(available > 0)) return 0;
 
-	return Math.min((available / reference) ** SUPERHEAT_EXPONENT, MAX_SUPERHEAT_FACTOR);
+	// A power law rather than a straight line because three things have to hold at once: no flow
+	// at the melting point, exactly the calibrated flow at the material's normal setpoint, and
+	// less than proportional gain above it. No straight line passes through all three
+	const exponent = Math.log2(calibration.superheatAtDouble);
+
+	return Math.min((available / reference) ** exponent, calibration.maxSuperheatFactor);
 }
 
 /** Flow the melt zone can sustain before the plastic stops being fully molten */
@@ -264,16 +240,6 @@ export function meltZoneLimitedFlow(
 
 	return ((limit * meltZoneLength) / energy) as CubicMillimetersPerSecond;
 }
-
-/**
- * The share of a heater cartridge's rated output that ends up in the plastic.
- *
- * The rest holds the block itself at temperature and leaks into the mount, the nozzle and the air.
- * It is a fixed number rather than a setting because it is not something a user of this app knows
- * about their machine — measured hotends land somewhat under a third, and the figure moves far less
- * between them than the melt zone lengths this app is really about.
- */
-export const HEATER_EFFICIENCY = 32.5 as Percent;
 
 /**
  * Cartridge wattages that are actually easy to buy. A heater is not a continuous choice: the answer
@@ -289,9 +255,10 @@ export const HEATER_SIZES: readonly Watts[] = [30, 40, 60, 70, 80, 100, 120, 200
  */
 export function requiredHeaterPower(
 	energy: JoulesPerCubicMillimeter,
-	flowRate: CubicMillimetersPerSecond
+	flowRate: CubicMillimetersPerSecond,
+	calibration: Calibration
 ): Watts {
-	return ((energy * flowRate) / (HEATER_EFFICIENCY / 100)) as Watts;
+	return ((energy * flowRate) / (calibration.heaterEfficiency / 100)) as Watts;
 }
 
 /**
@@ -384,22 +351,24 @@ export type PerformanceInput = {
 	options?: Record<string, HotendOptions>;
 	/** Reader-corrected bare-hotend prices, keyed by hotend id. Absent means the database's figure */
 	prices?: Record<string, number>;
+	/** The empirical numbers the geometry and the heater sizing are read through */
+	calibration: Calibration;
 };
 
 export function hotendPerformance(
 	hotend: HotendDefinition,
-	{ meltEnergy, printEnergy, flowRate, limit, printTemperature, options, prices }: PerformanceInput
+	{ meltEnergy, printEnergy, flowRate, limit, printTemperature, options, prices, calibration }: PerformanceInput
 ): HotendPerformance {
 	const hotendOptions = options?.[hotend.id];
 	const block = resolveBlock(hotend, hotendOptions);
-	const meltZoneLength = effectiveMeltZoneLength(hotend, hotendOptions);
+	const meltZoneLength = effectiveMeltZoneLength(hotend, hotendOptions, calibration);
 
 	// The block material scales what a millimetre of melt zone can couple into the filament, so it
 	// scales the limit rather than the length: a brass block is not a shorter copper one
-	const blockLimit = (limit * blockMaterialFactor(block.material)) as WattsPerMillimeter;
+	const blockLimit = (limit * blockMaterialFactor(block.material, calibration)) as WattsPerMillimeter;
 
 	const maxFlow = meltZoneLimitedFlow(meltZoneLength, meltEnergy, blockLimit);
-	const heaterPower = requiredHeaterPower(printEnergy, maxFlow);
+	const heaterPower = requiredHeaterPower(printEnergy, maxFlow, calibration);
 	const override = prices?.[hotend.id];
 	const price = effectivePrice(hotend, hotendOptions, override);
 
@@ -407,7 +376,7 @@ export function hotendPerformance(
 		hotend,
 		block,
 		meltZoneLength,
-		rawMeltZoneLength: rawMeltZoneLength(hotend, hotendOptions),
+		rawMeltZoneLength: rawMeltZoneLength(hotend, hotendOptions, calibration),
 		mze: hasMze(hotend, hotendOptions),
 		hfNozzle: hasHfNozzle(hotend, hotendOptions),
 		withinTemperature: printTemperature <= block.maxTemperature,

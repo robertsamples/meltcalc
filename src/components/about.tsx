@@ -2,15 +2,9 @@ import { useAtomValue } from 'jotai';
 import { ChevronRightIcon } from 'lucide-react';
 import { Term } from '@/components/term';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { BLOCK_MATERIAL_LABELS, BLOCK_MATERIALS } from '@/lib/block-material';
 import { formatNumber } from '@/lib/format';
-import { BLOCK_MATERIAL_DERATE, HF_NOZZLE_EQUIVALENT_LENGTH, MZE_LENGTH, NOZZLE_TAPER_ALLOWANCE } from '@/lib/hotend';
-import {
-	FILAMENT_CROSS_SECTION,
-	FILAMENT_DIAMETER,
-	HEATER_EFFICIENCY,
-	MAX_SUPERHEAT_FACTOR,
-	SUPERHEAT_AT_DOUBLE
-} from '@/lib/thermal';
+import { FILAMENT_CROSS_SECTION, FILAMENT_DIAMETER } from '@/lib/thermal';
 import { cn } from '@/lib/utils';
 import { currentThermalSettingsAtom, specificPowerLimitAtom } from '@/state/atoms';
 
@@ -24,12 +18,14 @@ const THEORY = 'https://github.com/robertsamples/meltcalc/blob/main/theory.md';
  * reader who does not know that will over-read the second decimal place. Each subsection gives the
  * governing relation and the approximation it rests on; the last one gives what is left out.
  *
- * Constants are read from the modules that define them rather than written into the prose, so the
- * description cannot drift from the calculation it describes.
+ * Every figure is read from the live calibration rather than written into the prose, so the
+ * description cannot drift from the calculation it describes — including when the reader moves
+ * one of them.
  */
 export function AboutCard({ className }: { className?: string }) {
 	const limit = useAtomValue(specificPowerLimitAtom);
-	const { referenceFlowPerMeltZoneMm } = useAtomValue(currentThermalSettingsAtom);
+	const calibration = useAtomValue(currentThermalSettingsAtom);
+	const { referenceFlowPerMeltZoneMm } = calibration;
 
 	return (
 		<Card className={cn('py-0', className)}>
@@ -75,8 +71,14 @@ export function AboutCard({ className }: { className?: string }) {
 						for <code>q</code> is used: it is fixed by the reference condition of a standard nozzle
 						sustaining {formatNumber(referenceFlowPerMeltZoneMm, 2)} mm³/s per mm in PLA, giving{' '}
 						<code>q</code> = {formatNumber(limit, 2)} W/mm in copper. Block material enters as a
-						multiplicative derate on <code>q</code>: copper {BLOCK_MATERIAL_DERATE.Cu}%, aluminium{' '}
-						{BLOCK_MATERIAL_DERATE.Al}%, brass and steel {BLOCK_MATERIAL_DERATE.Br}%.
+						multiplicative derate on <code>q</code>:{' '}
+						{BLOCK_MATERIALS.map((material, index) => (
+							<span key={material}>
+								{index > 0 ? ', ' : ''}
+								{BLOCK_MATERIAL_LABELS[material].toLowerCase()} {calibration.blockDerate[material]}%
+							</span>
+						))}
+						.
 					</p>
 					<p>
 						<span className="text-foreground">Superheat.</span> Coupling scales with the temperature
@@ -84,8 +86,8 @@ export function AboutCard({ className }: { className?: string }) {
 						<code>(ΔT_set / ΔT_ref)^n</code>, where <code>ΔT_set</code> is the setpoint's excess over
 						the melting point and <code>ΔT_ref</code> the material's own recommended excess.{' '}
 						<code>n</code> is set so that doubling the superheat yields{' '}
-						{formatNumber(SUPERHEAT_AT_DOUBLE, 2)}× flow. The factor is capped at{' '}
-						{formatNumber(MAX_SUPERHEAT_FACTOR, 1)}×, equals unity at the material's default setpoint,
+						{formatNumber(calibration.superheatAtDouble, 2)}× flow. The factor is capped at{' '}
+						{formatNumber(calibration.maxSuperheatFactor, 1)}×, equals unity at the material's default setpoint,
 						and is zero at or below the melting point.
 					</p>
 					<p>
@@ -94,13 +96,13 @@ export function AboutCard({ className }: { className?: string }) {
 						The two diverge where a hotend does not behave like its dimensions: a multi-bore block
 						carries the total across its bores, and one with high-flow geometry built in carries what
 						that geometry is worth. An extender then contributes its physical length (
-						{formatNumber(MZE_LENGTH, 1)} mm) to both. A high-flow (CHT-style) nozzle contributes none,
+						{formatNumber(calibration.mzeLength, 1)} mm) to both. A high-flow (CHT-style) nozzle contributes none,
 						but subdivides the bore and so raises wall area per unit length; it is modelled as an
-						equivalent {formatNumber(HF_NOZZLE_EQUIVALENT_LENGTH, 1)} mm against <code>L</code> alone.
+						equivalent {formatNumber(calibration.hfNozzleEquivalentLength, 1)} mm against <code>L</code> alone.
 					</p>
 					<p>
 						<span className="text-foreground">Taper allowance.</span> A fixed{' '}
-						{formatNumber(NOZZLE_TAPER_ALLOWANCE, 1)} mm is deducted from <code>L</code>. Measured back
+						{formatNumber(calibration.nozzleTaperAllowance, 1)} mm is deducted from <code>L</code>. Measured back
 						from the tip it falls near the middle of a V6 nozzle's hex, approximately where the bore
 						begins converging on the orifice; beyond that point wall area against the filament is small
 						and the pressure gradient no longer assists transfer. It is fixed rather than
@@ -109,7 +111,7 @@ export function AboutCard({ className }: { className?: string }) {
 					</p>
 					<p>
 						<span className="text-foreground">Heater power.</span> Cartridge rating is reported as{' '}
-						<code>P = Q E_set / η</code> at η = {formatNumber(HEATER_EFFICIENCY, 1)}%, where{' '}
+						<code>P = Q E_set / η</code> at η = {formatNumber(calibration.heaterEfficiency, 1)}%, where{' '}
 						<code>E_set</code> is the enthalpy to the setpoint rather than to the melting point. It is
 						not imposed as a constraint on <code>Q</code>: the cartridge is assumed sized to the hotend.
 						The remaining output maintains block temperature and is lost to the mount and surroundings.

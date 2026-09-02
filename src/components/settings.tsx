@@ -1,11 +1,14 @@
 import { useAtom, useAtomValue } from 'jotai';
-import { useMemo } from 'react';
+import { ChevronRightIcon } from 'lucide-react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { NumberField, ReadoutField } from '@/components/field';
 import { Term } from '@/components/term';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { BLOCK_MATERIAL_LABELS, BLOCK_MATERIALS } from '@/lib/block-material';
+import { type Calibration, DEFAULT_CALIBRATION, isDefaultCalibration } from '@/lib/calibration';
 import { formatFlow, formatNumber } from '@/lib/format';
 import { POLYMER_NAMES } from '@/lib/glossary';
 import { MATERIAL_DB } from '@/lib/material';
@@ -16,8 +19,10 @@ import type {
 	CubicMillimetersPerSecondPerMillimeter,
 	Millimeter,
 	MillimetersPerSecond,
+	Percent,
 	Seconds
 } from '@/lib/units';
+import { cn } from '@/lib/utils';
 import {
 	currentMaterialSettingsAtom,
 	currentPrintSettingsAtom,
@@ -266,42 +271,204 @@ export function MaterialSettingsCard() {
 	);
 }
 
+/**
+ * A section of the calibration card: a heading, a sentence saying what the numbers under it decide,
+ * and the fields themselves.
+ */
+function CalibrationGroup({ title, note, children }: { title: string; note: string; children: ReactNode }) {
+	return (
+		<div className="space-y-2 pt-1 first:pt-0 border-t first:border-t-0">
+			<div>
+				<p className="text-xs font-medium">{title}</p>
+				<p className="text-[11px] text-muted-foreground leading-snug">{note}</p>
+			</div>
+			{children}
+		</div>
+	);
+}
+
+/**
+ * Every empirical number in the model, in the order the flow calculation uses them.
+ *
+ * Collapsed on arrival, and the only card that stays on screen in the material views: the
+ * calibration is what those views are computed through as much as the hotend ones, so hiding it
+ * there would hide the reason two materials rank the way they do.
+ *
+ * The defaults come from `@/lib/calibration`, which is the file to edit to change what the site
+ * ships with. What is set here is an override of that, carried in share links only where it
+ * differs, and `/validation` is where the consequences of moving any of it can be read.
+ */
 export function ModelSettingsCard() {
 	const [settings, setSettings] = useAtom(currentThermalSettingsAtom);
 	const limit = useAtomValue(specificPowerLimitAtom);
+	const [open, setOpen] = useState(false);
+	const tuned = !isDefaultCalibration(settings);
+
+	const set = <K extends keyof Calibration>(key: K, value: Calibration[K]) =>
+		setSettings({ ...settings, [key]: value });
 
 	return (
 		<Card>
-			<CardHeader>
-				<CardTitle className="text-base">Model calibration</CardTitle>
+			<CardHeader className="flex-row items-center justify-between gap-2">
+				<button
+					type="button"
+					aria-expanded={open}
+					onClick={() => setOpen(!open)}
+					className="flex items-center gap-1.5 text-left"
+				>
+					<ChevronRightIcon className={cn('size-4 text-muted-foreground transition-transform', open && 'rotate-90')} />
+					<CardTitle className="text-base">Model calibration</CardTitle>
+				</button>
+				{/* Only worth saying once something has actually been moved: on the shipped numbers it
+				    would be a permanent label on a card that is doing nothing unusual */}
+				{tuned ? (
+					<button
+						type="button"
+						className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+						onClick={() => setSettings(DEFAULT_CALIBRATION)}
+					>
+						Reset
+					</button>
+				) : null}
 			</CardHeader>
-			<CardContent className="space-y-3">
-				<NumberField
-					label="Reference flow per mm of melt zone"
-					unit="mm³/s/mm"
-					min={0.1}
-					max={5}
-					step={0.05}
-					value={settings.referenceFlowPerMeltZoneMm}
-					onChange={(value) =>
-						setSettings({
-							...settings,
-							referenceFlowPerMeltZoneMm: value as CubicMillimetersPerSecondPerMillimeter
-						})
-					}
-					hint={`PLA with a standard nozzle. Everything else scales from this: currently ${formatNumber(limit, 2)} W per mm of melt zone.`}
-				/>
-				<NumberField
-					label="Minimum residence time"
-					unit="s"
-					min={0.1}
-					max={10}
-					step={0.1}
-					value={settings.minimumResidenceTime}
-					onChange={(value) => setSettings({ ...settings, minimumResidenceTime: value as Seconds })}
-					hint="Drawn as a floor on the residence charts"
-				/>
-			</CardContent>
+			{open ? (
+				<CardContent className="space-y-3">
+					<CalibrationGroup
+						title="Melt zone"
+						note="What one millimetre of heated channel is worth. Everything else scales off it."
+					>
+						<NumberField
+							label="Reference flow per mm of melt zone"
+							unit="mm³/s/mm"
+							min={0.1}
+							max={5}
+							step={0.05}
+							value={settings.referenceFlowPerMeltZoneMm}
+							onChange={(value) =>
+								set('referenceFlowPerMeltZoneMm', value as CubicMillimetersPerSecondPerMillimeter)
+							}
+							hint={`PLA with a standard nozzle: currently ${formatNumber(limit, 2)} W per mm of melt zone.`}
+						/>
+						<NumberField
+							label="Minimum residence time"
+							unit="s"
+							min={0.1}
+							max={10}
+							step={0.1}
+							value={settings.minimumResidenceTime}
+							onChange={(value) => set('minimumResidenceTime', value as Seconds)}
+							hint="Drawn as a floor on the residence charts"
+						/>
+					</CalibrationGroup>
+
+					<CalibrationGroup
+						title="Geometry"
+						note="What the model counts as heated length, before any hotend's own figure."
+					>
+						<div className="grid grid-cols-2 gap-3">
+							<NumberField
+								label="Nozzle taper deduction"
+								unit="mm"
+								min={0}
+								max={20}
+								step={0.5}
+								value={settings.nozzleTaperAllowance}
+								onChange={(value) => set('nozzleTaperAllowance', value as Millimeter)}
+							/>
+							<NumberField
+								label="Melt zone extender"
+								unit="mm"
+								min={0}
+								max={40}
+								step={0.5}
+								value={settings.mzeLength}
+								onChange={(value) => set('mzeLength', value as Millimeter)}
+							/>
+							<NumberField
+								label="High-flow nozzle credit"
+								unit="mm"
+								min={0}
+								max={40}
+								step={0.5}
+								value={settings.hfNozzleEquivalentLength}
+								onChange={(value) => set('hfNozzleEquivalentLength', value as Millimeter)}
+								className="col-span-2"
+							/>
+						</div>
+						<p className="text-[11px] text-muted-foreground leading-snug">
+							The taper comes off every hotend; the other two are added only where one is fitted. A
+							high-flow nozzle adds no real length — the credit stands in for the wall area its
+							parallel channels expose.
+						</p>
+					</CalibrationGroup>
+
+					<CalibrationGroup
+						title="Temperature"
+						note="How much a hotter nozzle buys, measured against each material's own setpoint."
+					>
+						<div className="grid grid-cols-2 gap-3">
+							<NumberField
+								label="Flow at double superheat"
+								unit="×"
+								min={1}
+								max={2}
+								step={0.05}
+								value={settings.superheatAtDouble}
+								onChange={(value) => set('superheatAtDouble', value)}
+								hint={`Exponent ${formatNumber(Math.log2(settings.superheatAtDouble), 2)}`}
+							/>
+							<NumberField
+								label="Ceiling on that factor"
+								unit="×"
+								min={1}
+								max={5}
+								step={0.1}
+								value={settings.maxSuperheatFactor}
+								onChange={(value) => set('maxSuperheatFactor', value)}
+								hint="Past here the polymer degrades"
+							/>
+						</div>
+					</CalibrationGroup>
+
+					<CalibrationGroup
+						title="Block material"
+						note="Flow given up against copper, which the calibration above is expressed in."
+					>
+						<div className="grid grid-cols-2 gap-3">
+							{BLOCK_MATERIALS.map((material) => (
+								<NumberField
+									key={material}
+									label={BLOCK_MATERIAL_LABELS[material]}
+									unit="% lost"
+									min={0}
+									max={90}
+									step={1}
+									value={settings.blockDerate[material]}
+									onChange={(value) =>
+										set('blockDerate', { ...settings.blockDerate, [material]: value as Percent })
+									}
+								/>
+							))}
+						</div>
+					</CalibrationGroup>
+
+					<CalibrationGroup
+						title="Heater"
+						note="Only the cartridge sizing reads this; it is not one of the flow ceilings."
+					>
+						<NumberField
+							label="Rated output reaching the plastic"
+							unit="%"
+							min={5}
+							max={100}
+							step={0.5}
+							value={settings.heaterEfficiency}
+							onChange={(value) => set('heaterEfficiency', value as Percent)}
+							hint="The rest holds the block at temperature and leaks into the mount, nozzle and air"
+						/>
+					</CalibrationGroup>
+				</CardContent>
+			) : null}
 		</Card>
 	);
 }

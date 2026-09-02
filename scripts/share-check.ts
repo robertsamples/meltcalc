@@ -1,3 +1,4 @@
+import { DEFAULT_CALIBRATION } from '@/lib/calibration';
 import { hotendSlug, parseReadableQuery, viewSlug } from '@/lib/config-query';
 import { decodeConfig, encodeConfig } from '@/lib/config-sharing';
 import {
@@ -9,7 +10,7 @@ import {
 import { CURRENCIES, FALLBACK_RATES, money } from '@/lib/currency';
 import { FLOW_CLASSES, flowClassAt, flowClassOfReferenceFlow } from '@/lib/flow-class';
 import { ABBREVIATED_IDS, findHotend, HOTEND_DB, hotendCode } from '@/lib/hotend';
-import type { Celsius, CubicMillimetersPerSecond } from '@/lib/units';
+import type { Celsius, CubicMillimetersPerSecond, Millimeter, Percent } from '@/lib/units';
 
 /**
  * Round-trips a handful of configurations through the share encoder and prints how long each link
@@ -90,6 +91,19 @@ check('a full comparison', {
 
 // A corrected price has to survive the round trip keyed by short code, or a shared cost comparison
 // shows different money from the one that was shared
+// One figure from each shape the calibration holds: a plain number, a branded length, a
+// percentage, and the nested per-material table that needs its own packing
+check('tuned calibration', {
+	...DEFAULT_CONFIGURATION,
+	thermalSettings: {
+		...DEFAULT_CALIBRATION,
+		superheatAtDouble: 1.35,
+		nozzleTaperAllowance: 2 as Millimeter,
+		heaterEfficiency: 40 as Percent,
+		blockDerate: { ...DEFAULT_CALIBRATION.blockDerate, Al: 15 as Percent }
+	}
+});
+
 check('corrected prices', {
 	...DEFAULT_CONFIGURATION,
 	hotendPrices: { 'E3D|V6': 11.5, 'Phaetus|Rapido UHF': 84 },

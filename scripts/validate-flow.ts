@@ -1,6 +1,6 @@
+import { DEFAULT_CALIBRATION } from '@/lib/calibration';
 import { DEFAULT_THERMAL_SETTINGS } from '@/lib/configuration';
-import { HF_NOZZLE_EQUIVALENT_LENGTH } from '@/lib/hotend';
-import { SUPERHEAT_AT_DOUBLE, specificPowerLimit } from '@/lib/thermal';
+import { specificPowerLimit } from '@/lib/thermal';
 import {
 	AGREEMENT_BAND,
 	byHotend,
@@ -28,7 +28,10 @@ import {
  * Run with `pnpm validate:flow`.
  */
 
-const points = validationPoints(specificPowerLimit(DEFAULT_THERMAL_SETTINGS.referenceFlowPerMeltZoneMm));
+const points = validationPoints(
+	specificPowerLimit(DEFAULT_THERMAL_SETTINGS.referenceFlowPerMeltZoneMm),
+	DEFAULT_CALIBRATION
+);
 if (points.length === 0) throw new Error('no measurements: run `pnpm data:update-db` first');
 
 const number = (value: number, digits = 2) => (Number.isFinite(value) ? value.toFixed(digits) : '—');
@@ -55,10 +58,10 @@ console.log(
 	`practical  against the material's practical flow instead: centre ${times(practical.centre)}  R² ${number(practical.r2)}  within ±${AGREEMENT_BAND * 100}% ${practical.within}/${practical.comparable.length}`
 );
 
-const sweeps = superheatSweeps(points);
+const sweeps = superheatSweeps(points, DEFAULT_CALIBRATION);
 const pooled = pooledSuperheatFit(sweeps);
 console.log(
-	`\nsuperheat  model n ${number(Math.log2(SUPERHEAT_AT_DOUBLE))} (${SUPERHEAT_AT_DOUBLE}× at double superheat)`
+	`\nsuperheat  model n ${number(Math.log2(DEFAULT_CALIBRATION.superheatAtDouble))} (${DEFAULT_CALIBRATION.superheatAtDouble}× at double superheat)`
 );
 console.log(
 	`           pooled n ${number(pooled.slope)} (${number(2 ** pooled.slope)}× at double superheat) over ${sweeps.length} sweeps, ${fitNote(pooled)}`
@@ -70,13 +73,13 @@ for (const sweep of sweeps) {
 	);
 }
 
-const pairs = chtPairs(points);
+const pairs = chtPairs(points, DEFAULT_CALIBRATION);
 if (pairs.length > 0) {
 	console.log(
 		`\ncht        measured ${times(geomean(pairs.map((pair) => pair.gain)))} vs modelled ${times(geomean(pairs.map((pair) => pair.modelGain)))} over ${pairs.length} matched pairs`
 	);
 	console.log(
-		`           implied equivalent length ${number(geomean(pairs.map((pair) => pair.impliedLength)), 1)} mm against the ${HF_NOZZLE_EQUIVALENT_LENGTH} mm credited`
+		`           implied equivalent length ${number(geomean(pairs.map((pair) => pair.impliedLength)), 1)} mm against the ${DEFAULT_CALIBRATION.hfNozzleEquivalentLength} mm credited`
 	);
 }
 

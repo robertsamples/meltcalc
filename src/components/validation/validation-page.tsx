@@ -26,10 +26,8 @@ import {
 	TEST_KEY
 } from '@/components/validation/validation-charts';
 import { ValidationTable } from '@/components/validation/validation-table';
-import { DEFAULT_THERMAL_SETTINGS } from '@/lib/configuration';
+import { isDefaultCalibration } from '@/lib/calibration';
 import { formatNumber } from '@/lib/format';
-import { HF_NOZZLE_EQUIVALENT_LENGTH } from '@/lib/hotend';
-import { SUPERHEAT_AT_DOUBLE } from '@/lib/thermal';
 import {
 	type Basis,
 	byHotend,
@@ -102,7 +100,7 @@ function Note({ children }: { children: React.ReactNode }) {
 
 export function ValidationPage() {
 	const limit = useAtomValue(specificPowerLimitAtom);
-	const { referenceFlowPerMeltZoneMm } = useAtomValue(currentThermalSettingsAtom);
+	const calibration = useAtomValue(currentThermalSettingsAtom);
 	const [tab, setTab] = useState<Tab>(tabFromHash);
 	const practicalId = useId();
 
@@ -112,9 +110,9 @@ export function ValidationPage() {
 	const basis: Basis = practical ? 'practical' : 'ceiling';
 
 	const analysis = useMemo(() => {
-		const points = validationPoints(limit);
-		const sweeps = superheatSweeps(points);
-		const pairs = chtPairs(points);
+		const points = validationPoints(limit, calibration);
+		const sweeps = superheatSweeps(points, calibration);
+		const pairs = chtPairs(points, calibration);
 
 		return {
 			points,
@@ -130,7 +128,7 @@ export function ValidationPage() {
 			materials: byMaterial(points.filter((point) => point.predicted > 0)),
 			hotends: byHotend(points.filter((point) => point.predicted > 0))
 		};
-	}, [limit, basis]);
+	}, [limit, basis, calibration]);
 
 	const [sweepId, setSweepId] = useState<string>('');
 	const sweep = analysis.sweeps.find((entry) => entry.id === sweepId) ?? analysis.sweeps[0];
@@ -140,7 +138,7 @@ export function ValidationPage() {
 	const [group, setGroup] = useState<string>('');
 	const groups = compositeGroups(analysis.points, composite);
 	const selected = groups.find((entry) => entry.value === group)?.value ?? groups[0]?.value ?? '';
-	const series = compositeSeries(analysis.points, composite, selected, limit, basis);
+	const series = compositeSeries(analysis.points, composite, selected, limit, calibration, basis);
 
 	// The measurements set the range, not the model: the curve runs back to no superheat at all and
 	// anchoring the axis there would squash every test into the top corner of the chart
@@ -154,10 +152,11 @@ export function ValidationPage() {
 	// Colour on the parity scatter, which is a split of the same set and not a comparison
 	const [parityColour, setParityColour] = useState<CompositeMode>('nozzle');
 	const parity = splitPoints(summary.comparable, parityColour);
-	const modelExponent = Math.log2(SUPERHEAT_AT_DOUBLE);
+	const modelExponent = Math.log2(calibration.superheatAtDouble);
 	// The calibration is stored per browser, so two people — or one person on two machines — can be
-	// reading different numbers off this page. Whichever one is in force says so at the top
-	const tuned = referenceFlowPerMeltZoneMm !== DEFAULT_THERMAL_SETTINGS.referenceFlowPerMeltZoneMm;
+	// reading different numbers off this page. Any figure moved from the shipped one says so at the
+	// top, since every chart here is drawn through the whole of it
+	const tuned = !isDefaultCalibration(calibration);
 
 	return (
 		<div className="max-w-5xl mx-auto p-2 space-y-2">
@@ -166,7 +165,7 @@ export function ValidationPage() {
 					<h1 className="text-lg font-semibold leading-tight">Model validation</h1>
 					<p className="text-xs text-muted-foreground leading-snug">
 						{summary.points.length} published max-flow tests from {summary.sources} sources, against the
-						model at {formatNumber(referenceFlowPerMeltZoneMm, 2)} mm³/s per mm
+						model at {formatNumber(calibration.referenceFlowPerMeltZoneMm, 2)} mm³/s per mm
 						{tuned ? ' — your own calibration, from Model settings' : ''}. Ratios are measured ÷ model.
 					</p>
 				</div>
@@ -268,8 +267,9 @@ export function ValidationPage() {
 						<ParityChart series={parity} basis={basis} />
 
 						<Note>
-							Implied calibration {formatNumber(referenceFlowPerMeltZoneMm * summary.centre, 2)} mm³/s per
-							mm against the {formatNumber(referenceFlowPerMeltZoneMm, 2)} in use. R² is taken about the
+							Implied calibration{' '}
+							{formatNumber(calibration.referenceFlowPerMeltZoneMm * summary.centre, 2)} mm³/s per mm against
+							the {formatNumber(calibration.referenceFlowPerMeltZoneMm, 2)} in use. R² is taken about the
 							model's own answer rather than a fitted line, so being high or low counts against it;
 							recalibrated is the best a single scale factor can reach, which is the ceiling on what
 							moving the calibration buys. Colour splits the same tests by one variable and controls for
@@ -341,7 +341,7 @@ export function ValidationPage() {
 								<Stat
 									label="Model n"
 									value={formatNumber(modelExponent, 2)}
-									note={`${formatNumber(SUPERHEAT_AT_DOUBLE, 2)}× at double superheat`}
+									note={`${formatNumber(calibration.superheatAtDouble, 2)}× at double superheat`}
 								/>
 								<Stat
 									label="Measured n"
@@ -406,7 +406,7 @@ export function ValidationPage() {
 							<ChartKey entries={seriesKey(series)} dashed="the model" />
 							<NormalisedChart
 								series={series}
-								curve={normalisedCurve(superheatDomain[0], superheatDomain[1])}
+								curve={normalisedCurve(superheatDomain[0], superheatDomain[1], calibration)}
 								domain={superheatDomain}
 							/>
 
@@ -460,7 +460,7 @@ export function ValidationPage() {
 								entries={SWEEP_KEY}
 								dashed={sweep.first.material.practicalFlowFactor < 1 ? 'practical flow' : undefined}
 							/>
-							<SweepChart sweep={sweep} limit={limit} />
+							<SweepChart sweep={sweep} limit={limit} calibration={calibration} />
 
 							<Note>
 								{sweep.fit.n} points, implied n {formatNumber(sweep.fit.slope, 2)} against the model's{' '}
@@ -547,7 +547,7 @@ export function ValidationPage() {
 								<Stat
 									label="Model"
 									value={`${formatNumber(geomean(analysis.pairs.map((pair) => pair.modelGain)), 2)}×`}
-									note={`${formatNumber(HF_NOZZLE_EQUIVALENT_LENGTH, 1)} mm equivalent`}
+									note={`${formatNumber(calibration.hfNozzleEquivalentLength, 1)} mm equivalent`}
 								/>
 								<Stat
 									label="Implied credit"
