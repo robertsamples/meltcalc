@@ -61,7 +61,7 @@ INDX,INDX,Bondtech,INDX,Integrated,N,Y,St,300,N,28,28,,,45,0,Y,Integrated nozzle
 X1C,X1C,Trianglelab,CHC XP1,V6,Y,Y,Cu,300,Y,35,35,,,44,15,Y,
 ,Generic,Plasmics,INo Trident,V6,N,Y,Cu,500,Y,17.5,17.5,,,450,15,N,
 MK8,Dragonfly,Phaetus,Dragonfly BMS,V6,Y,Y,Cu,500,N,35,35,,,37.6,15,N,
-X1C,Qidi,Qidi,Xmax 3,Proprietary,N,N,Cu,300,Y,23.7,23.7,,,35,,Y,Proprietary nozzle
+X1C,Qidi,Qidi,Xplus/Xmax 3,Proprietary,N,N,Cu,350,Y,23.7,23.7,,,35,,Y,Proprietary nozzle
 A1,A1,Bambulab,A1 Hotend,Integrated,N,N,Al,300,Y,27.2,27.2,,,10,,Y,Integrated nozzle
 Dragon,Generic,Trianglelab,CHC XL,V6,Y,Y,Al,330,Y,51.5,51.5,,,67,15,Y,
 Dragon,Generic,Trianglelab,STD6-LC,V6,Y,Y,Al,300,Y,51.5,51.5,,,116.5,15,Y,
